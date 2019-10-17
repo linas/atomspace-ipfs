@@ -69,7 +69,6 @@ class IPFSAtomStorage : public BackingStore
 		};
 		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
 		#define createPseudo std::make_shared<PseudoAtom>
-		PseudoPtr makeAtom(Response&, UUID);
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
@@ -99,13 +98,8 @@ class IPFSAtomStorage : public BackingStore
 
 		// --------------------------
 		// Atom removal
-		void removeAtom(Response&, UUID, bool recursive);
-		void deleteSingleAtom(Response&, UUID);
-
-		// --------------------------
-		// Table management
-		void rename_tables(void);
-		void create_tables(void);
+		// void removeAtom(Response&, UUID, bool recursive);
+		// void deleteSingleAtom(Response&, UUID);
 
 		// --------------------------
 		// Values
@@ -116,7 +110,7 @@ class IPFSAtomStorage : public BackingStore
 
 		typedef unsigned long VUID;
 
-		ValuePtr doUnpackValue(Response&);
+		// ValuePtr doUnpackValue(Response&);
 		ValuePtr doGetValue(const char *);
 
 		VUID storeValue(const ValuePtr&);
@@ -130,8 +124,8 @@ class IPFSAtomStorage : public BackingStore
 		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
 		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
-		void deleteValuation(Response&, UUID, UUID);
-		void deleteAllValuations(Response&, UUID);
+		// void deleteValuation(Response&, UUID, UUID);
+		// void deleteAllValuations(Response&, UUID);
 
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);

@@ -6,6 +6,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <libguile.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -159,26 +161,6 @@ void IPFSPersistSCM::do_clear_stats(void)
     }
 
     _backing->clear_stats();
-}
-
-void IPFSPersistSCM::do_set_hilo(int hi, int lo)
-{
-    if (nullptr == _backing) {
-        printf("ipfs-stats: Database not open\n");
-        return;
-    }
-
-    _backing->set_hilo_watermarks(hi, lo);
-}
-
-void IPFSPersistSCM::do_set_stall(bool stall)
-{
-    if (nullptr == _backing) {
-        printf("ipfs-stats: Database not open\n");
-        return;
-    }
-
-    _backing->set_stall_writers(stall);
 }
 
 void opencog_persist_ipfs_init(void)
