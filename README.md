@@ -29,9 +29,31 @@ implementation to the current Atomspace backend API.
   have context-dependent truth values. This does not seem to be a wise
   design choice.
 
+  Or maybe each atomspace gets it's own directory.
+
+* Should Atoms correspond to files, or objects?  Should Atoms be json?
+
+* Use pubsub to publish value updates.
+
 ## Prereqs
 
 * Clone and build the atomspace.
 * Install IPFS
-  -- https://github.com/vasild/cpp-ipfs-api
-     This needs `sudo apt install nlohmann-json3-dev`
+** Install IPFS
+   ```
+   curl https://get.siderus.io/key.public.asc | sudo apt-key add -
+   echo "deb https://get.siderus.io/ apt/" | sudo tee -a /etc/apt/sources.list.d/siderus.list
+	sudo apt update
+	sudo apt install ipfs
+   ```
+   Some useful commands:
+	```
+	ipfs init
+	ipfs daemon
+	ipfs swarm peers
+	ipfs commands
+	```
+
+** Install the IPFS C++ client library
+   https://github.com/vasild/cpp-ipfs-api
+   This needs `sudo apt install nlohmann-json3-dev`
