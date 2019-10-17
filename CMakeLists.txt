@@ -208,8 +208,9 @@ IF (NOT DEFINED ATOMSPACE_DATA_DIR)
 ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 
 INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
-# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
-# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
+
+DECLARE_GUILE_CONFIG_TARGET(SCM_CONFIG "opencog ipfs-config" "ATOMSPACE_TEST")
 
 # -------------------------------------------------
 # Library configuration

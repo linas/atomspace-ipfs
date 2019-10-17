@@ -11,6 +11,8 @@ TARGET_LINK_LIBRARIES(persist-ipfs
 	curl
 )
 
+ADD_GUILE_EXTENSION(SCM_CONFIG persist-ipfs "opencog-ext-path-persist-ipfs")
+
 INSTALL (TARGETS persist-ipfs EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
