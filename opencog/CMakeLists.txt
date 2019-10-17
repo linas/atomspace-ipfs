@@ -7,4 +7,5 @@ ADD_EXECUTABLE(sniff
 
 TARGET_LINK_LIBRARIES(sniff
 	ipfs-api
+	curl
 )

@@ -33,3 +33,5 @@ implementation to the current Atomspace backend API.
 
 * Clone and build the atomspace.
 * Install IPFS
+  -- https://github.com/vasild/cpp-ipfs-api
+     This needs `sudo apt install nlohmann-json3-dev`
