@@ -1,29 +1,19 @@
 /*
+ * FILE:
+ * opencog/persist/ipfs/IPFSAtomStorage.h
+
  * FUNCTION:
- * SQL-backed persistent storage.
+ * IPFS-backed persistent storage.
  *
  * HISTORY:
- * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2008,2009,2013,2017,2019 Linas Vepstas <linasvepstas@gmail.com>
  *
  * LICENSE:
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#ifndef _OPENCOG_SQL_ATOM_STORAGE_H
-#define _OPENCOG_SQL_ATOM_STORAGE_H
+#ifndef _OPENCOG_IPFS_ATOM_STORAGE_H
+#define _OPENCOG_IPFS_ATOM_STORAGE_H
 
 #include <atomic>
 #include <mutex>
@@ -31,7 +21,6 @@
 #include <thread>
 #include <vector>
 
-// #include <opencog/util/async_method_caller.h>
 #include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
@@ -47,27 +36,15 @@
 #include <opencog/atomspaceutils/TLB.h>
 #include <opencog/atomspace/BackingStore.h>
 
-#include "llapi.h"
-
-// See SQLAtomStorage.cc for extensive explantion of what this
-// is and why it has this particular value.
-#define NUM_OMP_THREADS 8
-
 namespace opencog
 {
 /** \addtogroup grp_persist
  *  @{
  */
 
-class SQLAtomStorage : public BackingStore
+class IPFSAtomStorage : public BackingStore
 {
 	private:
-		// Pool of shared connections
-		concurrent_stack<LLConnection*> conn_pool;
-		int _initial_conn_pool_size;
-
-		// Utility for handling responses (on stack).
-		class Response;
 
 		void init(const char *);
 		std::string _uri;
@@ -177,7 +154,7 @@ class SQLAtomStorage : public BackingStore
 		{
 			const std::string poolname;
 			UUID_manager(const std::string& n) : poolname(n) {}
-			SQLAtomStorage* that;
+			IPFSAtomStorage* that;
 			void reset_uuid_pool(UUID);
 			void refill_uuid_pool(void);
 			int _uuid_pool_increment;
@@ -232,16 +209,16 @@ class SQLAtomStorage : public BackingStore
 		std::mutex _typemap_mutex;
 
 		// Provider of asynchronous store of atoms.
-		// async_caller<SQLAtomStorage, Handle> _write_queue;
-		async_buffer<SQLAtomStorage, Handle> _write_queue;
+		// async_caller<IPFSAtomStorage, Handle> _write_queue;
+		async_buffer<IPFSAtomStorage, Handle> _write_queue;
 		std::exception_ptr _async_write_queue_exception;
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(std::string uri);
-		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
-		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
-		virtual ~SQLAtomStorage();
+		IPFSAtomStorage(std::string uri);
+		IPFSAtomStorage(const IPFSAtomStorage&) = delete; // disable copying
+		IPFSAtomStorage& operator=(const IPFSAtomStorage&) = delete; // disable assignment
+		virtual ~IPFSAtomStorage();
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void); // destroy DB contents
@@ -273,12 +250,10 @@ class SQLAtomStorage : public BackingStore
 		// Debugging and performance monitoring
 		void print_stats(void);
 		void clear_stats(void); // reset stats counters.
-		void set_hilo_watermarks(int, int);
-		void set_stall_writers(bool);
 };
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_SQL_ATOM_STORAGE_H
+#endif // _OPENCOG_IPFS_ATOM_STORAGE_H

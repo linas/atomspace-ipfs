@@ -1,4 +1,20 @@
 
+
+ADD_LIBRARY (persist-ipfs
+	IPFSAtomStorage
+	# IPFSPersistSCM
+)
+
+TARGET_LINK_LIBRARIES(persist-ipfs
+	smob
+	ipfs-api
+	curl
+)
+
+INSTALL (TARGETS persist-ipfs EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
 # yo.
 
 ADD_EXECUTABLE(sniff
