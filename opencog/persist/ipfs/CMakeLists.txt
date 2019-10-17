@@ -1,8 +1,8 @@
 
 
 ADD_LIBRARY (persist-ipfs
-	IPFSAtomStorage
-	# IPFSPersistSCM
+	# IPFSAtomStorage
+	IPFSPersistSCM
 )
 
 TARGET_LINK_LIBRARIES(persist-ipfs
