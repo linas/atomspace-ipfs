@@ -55,6 +55,8 @@ The file directory layout is the same as that of the atomspace.
 * Use `ipfs key` to generate an IPNS name for a given atomspace.
   Or maybe `ipfs urlstore` instead? Or `ipfs name` ?
 
+* How to search incoming set?
+
 * Use pubsub to publish value updates.
 
 ## Prereqs
