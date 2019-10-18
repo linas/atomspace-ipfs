@@ -3,6 +3,15 @@ IPFS backend to the AtomSpace.
 
 The goal is to be able to share AtomSpace contents via the IPFS network.
 
+## The AtomSpace
+The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
+(hyper-)graph database whose nodes and links are called
+["Atoms"](https://wiki.opencog.org/w/Atom). Each (immutable) Atom has
+an associated (mutable)
+[key-value store](https://wiki.opencog.org/w/Value).
+The Atomspace has a variety of advanced features not normally found
+in ordinary graph databases.
+
 ## Pre-alpha version 0.0.1
 
 **Status**: Nothing actually works. Design alternatives are being
