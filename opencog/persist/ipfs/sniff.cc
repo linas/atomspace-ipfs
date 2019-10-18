@@ -7,16 +7,19 @@
 
 #include <ipfs/client.h>
 
-std::string addNode(ipfs::Client& client, const std::string& scm_text)
+std::string addNode(ipfs::Client& client,
+                    const std::string& type,
+                    const std::string& node_text)
 {
+	std::string text = "(" + type + " \"" + node_text + "\")\n";
 	ipfs::Json add_result;
 	client.FilesAdd({
 		{"Node.scm",
 			ipfs::http::FileUpload::Type::kFileContents,
-			scm_text,
+			text,
 		},},
 		&add_result);
-	std::cout << "addNode: " << scm_text
+	std::cout << "addNode: " << type << " " << node_text
 			  << "Result: " << add_result[0] << "\n" << std::endl;
 	return add_result[0]["hash"];
 }
@@ -32,9 +35,29 @@ std::string addLink(ipfs::Client& client,
 			type, // XXX wrong ...
 		},},
 		&add_result);
-	std::cout << "addLink: " << type
-			  << "Result: " << add_result[0] << "\n" << std::endl;
-	return add_result[0]["hash"];
+
+	std::string id = add_result[0]["hash"];
+
+	// Not terribly efficient, but what else?
+	int i=0;
+	for (const std::string& out: outgoing)
+	{
+		// Strange -- using a slash in the label causes a fault.
+		std::string label = "out-" + std::to_string(i);
+		std::string nid;
+		client.ObjectPatchAddLink(id, label, out, &nid);
+		id = nid;
+		i++;
+	}
+
+#define DEBUG 1
+#ifdef DEBUG
+	ipfs::Json object;
+	client.ObjectGet(id, &object);
+	std::cout << "addLink: " << id << std::endl
+	          << object.dump(2) << "\n" << std::endl;
+#endif
+	return id;
 }
 
 int main (int, const char **)
@@ -42,28 +65,23 @@ int main (int, const char **)
 	std::stringstream contents;
 	ipfs::Client client("localhost", 5001);
 
-	std::string cona = addNode(client, "(Concept \"abcd\")\n");
-	std::string conp = addNode(client, "(Concept \"pqrs\")\n");
-	std::string pred = addNode(client, "(Predicate \"p\")\n");
+	std::string cona = addNode(client, "Concept", "abcd");
+	std::string conp = addNode(client, "Concept", "pqrs");
+	std::string pred = addNode(client, "Predicate", "p");
 
 	std::vector<std::string> oset;
 	oset.push_back(cona);
 	oset.push_back(conp);
 	std::string list = addLink(client, "List", oset);
 
-	std::string data;
-	client.ObjectData(cona, &data);
-	std::cout << "Concept A data: " << data << std::endl;
-
-	client.ObjectData(conp, &data);
-	std::cout << "Concept P data: " << data << std::endl;
-
-	client.ObjectData(list, &data);
-	std::cout << "List data: " << data << std::endl;
+	std::vector<std::string> eset;
+	eset.push_back(pred);
+	eset.push_back(list);
+	std::string eval = addLink(client, "Evaluation", eset);
 
 	ipfs::Json object;
-	client.ObjectGet(cona, &object);
-	std::cout << "Concept-A Object: " << std::endl << object.dump(2) << std::endl;
+	client.ObjectGet(eval, &object);
+	std::cout << "Eval Object: " << std::endl << object.dump(2) << std::endl;
 
 	std::string clone_id;
 	client.ObjectPatchSetData(cona,

@@ -44,6 +44,9 @@ The file directory layout is the same as that of the atomspace.
 
   Or maybe each atomspace gets it's own directory.
 
+* Long-term: use IPLD to create some kind of Atomspace-speecific thing.
+  https://ipld.io/ But for now, use files.
+
 * Should Atoms correspond to files, or objects?  Should Atoms be json?
   Objects have a setData method that does not alter the hash.
   oh wait, but it does. Foooooo xxxxx wtf.
