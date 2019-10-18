@@ -81,3 +81,14 @@ The file directory layout is the same as that of the atomspace.
    https://github.com/vasild/cpp-ipfs-api
 
    This needs `sudo apt install nlohmann-json3-dev`
+
+## Building
+After installing the pre-reqs, do this:
+```
+   mkdir build
+   cd build
+   cmake ..
+   make -j
+   sudo make install
+```
+Then go through the [examples(examples) directory.
