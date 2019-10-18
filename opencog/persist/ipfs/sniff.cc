@@ -16,38 +16,55 @@ int main (int, const char **)
 	std::cout << contents.str() << std::endl;
 #endif
 
+std::string cona =
+({
 	ipfs::Json add_result;
 	client.FilesAdd({
-		{"/opencog/atomspace-bogus/Concept-abcd.scm",
+		{"Concept.scm",
 			ipfs::http::FileUpload::Type::kFileContents,
 			"(Concept \"abcd\")\n"},
-		{"/opencog/atomspace-bogus/Concept-pqrs.scm",
+		},
+		&add_result);
+	std::cout << "FilesAdd(abcd) result:" << std::endl
+			  << add_result.dump(2) << std::endl;
+	add_result[0]["hash"];
+});
+	std::string conp =
+({
+	ipfs::Json add_result;
+	client.FilesAdd({
+		{"Concept.scm",
 			ipfs::http::FileUpload::Type::kFileContents,
 			"(Concept \"pqrs\")\n"},
-		{"/opencog/atomspace-bogus/Predicate-p.scm",
+		},
+		&add_result);
+	std::cout << "FilesAdd(pqrs) result:" << std::endl
+			  << add_result.dump(2) << std::endl;
+	add_result[0]["hash"];
+});
+{
+	ipfs::Json add_result;
+	client.FilesAdd({
+		{"Predicate.scm",
 			ipfs::http::FileUpload::Type::kFileContents,
 			"(Predicate \"p\")\n"},
 		},
 		&add_result);
-	std::cout << "FilesAdd() result:" << std::endl
+	std::cout << "FilesAdd(pred) result:" << std::endl
 			  << add_result.dump(2) << std::endl;
+	std::string pred = add_result[0]["hash"];
+}
 
-	std::cout << "size=" << add_result.size() << std::endl;
-	std::cout << "first=" << add_result[0] << std::endl;
-	std::cout << "first path=" << add_result[0]["path"] << std::endl;
-	std::cout << "first hash=" << add_result[0]["hash"] << std::endl;
+	std::string data;
+	client.ObjectData(cona, &data);
+	std::cout << "Concept A data: " << data << std::endl;
 
-	std::string block = add_result[0]["hash"];
+	client.ObjectData(conp, &data);
+	std::cout << "Concept P data: " << data << std::endl;
 
-	ipfs::Json stat_result;
-	client.BlockStat(block, &stat_result);
-	std::cout << "Block stats: "
-		<< stat_result << std::endl;
-
-	std::stringstream block_contents;
-	client.BlockGet(block, &block_contents);
-	std::cout << "Block: "
-		<< block_contents.str() << std::endl;
+	ipfs::Json object;
+	client.ObjectGet(cona, &object);
+	std::cout << "Concep-A Object: " << std::endl << object.dump(2) << std::endl;
 
 	return 0;
 }
