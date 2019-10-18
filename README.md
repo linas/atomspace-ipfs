@@ -52,21 +52,23 @@ The file directory layout is the same as that of the atomspace.
 
 * Clone and build the atomspace.
 * Install IPFS
-** Install IPFS
+ * Install IPFS Core
    ```
    curl https://get.siderus.io/key.public.asc | sudo apt-key add -
    echo "deb https://get.siderus.io/ apt/" | sudo tee -a /etc/apt/sources.list.d/siderus.list
-	sudo apt update
-	sudo apt install ipfs
+   sudo apt update
+   sudo apt install ipfs
    ```
    Some useful commands:
-	```
-	ipfs init
-	ipfs daemon
-	ipfs swarm peers
-	ipfs commands
-	```
+   ```
+   ipfs init
+   ipfs daemon
+   ipfs swarm peers
+   ipfs commands
+   ```
 
-** Install the IPFS C++ client library
+ * Install the IPFS C++ client library
+
    https://github.com/vasild/cpp-ipfs-api
+
    This needs `sudo apt install nlohmann-json3-dev`
