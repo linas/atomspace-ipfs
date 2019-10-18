@@ -16,8 +16,8 @@ std::string addAtom(ipfs::Client& client, const std::string& scm_text)
 			scm_text,
 		},},
 		&add_result);
-	std::cout << "addAtom result:" << std::endl
-			  << add_result.dump(2) << std::endl;
+	std::cout << "addAtom: " << scm_text
+			  << "Result: " << add_result[0] << "\n" << std::endl;
 	return add_result[0]["hash"];
 }
 
@@ -28,6 +28,7 @@ int main (int, const char **)
 
 	std::string cona = addAtom(client, "(Concept \"abcd\")\n");
 	std::string conp = addAtom(client, "(Concept \"pqrs\")\n");
+	std::string list = addAtom(client, "(List {" + cona + ", " + conp + "})\n");
 	std::string pred = addAtom(client, "(Predicate \"p\")\n");
 
 	std::string data;
@@ -37,9 +38,32 @@ int main (int, const char **)
 	client.ObjectData(conp, &data);
 	std::cout << "Concept P data: " << data << std::endl;
 
+	client.ObjectData(list, &data);
+	std::cout << "List data: " << data << std::endl;
+
+	std::string new_id;
+	client.ObjectPatchAddLink(cona, "incoming", list, &new_id);
+	std::cout << "new concept-A: " << new_id << std::endl;
+
 	ipfs::Json object;
 	client.ObjectGet(cona, &object);
-	std::cout << "Concep-A Object: " << std::endl << object.dump(2) << std::endl;
+	std::cout << "Concept-A Object: " << std::endl << object.dump(2) << std::endl;
+
+	client.ObjectGet(new_id, &object);
+	std::cout << "New Concept-A Object: " << std::endl << object.dump(2) << std::endl;
+
+	std::string clone_id;
+	client.ObjectPatchSetData(cona,
+		{"foobar", ipfs::http::FileUpload::Type::kFileContents,
+			"(Concept \"abcd\" (stv 0.5 0.5))\n"},
+		&clone_id);
+
+	client.ObjectGet(cona, &object);
+	std::cout << "Concept-A Object: " << std::endl << object.dump(2) << std::endl;
+
+	std::cout << "concept-A-STV: " << clone_id << std::endl;
+	client.ObjectGet(clone_id, &object);
+	std::cout << "Concept-A-STV Object: " << std::endl << object.dump(2) << std::endl;
 
 	return 0;
 }

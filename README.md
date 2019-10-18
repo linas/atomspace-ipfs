@@ -36,6 +36,12 @@ The file directory layout is the same as that of the atomspace.
   Or maybe each atomspace gets it's own directory.
 
 * Should Atoms correspond to files, or objects?  Should Atoms be json?
+  Objects have a setData method that does not alter the hash.
+  oh wait, but it does. Foooooo xxxxx wtf.
+  where's the mutable side of this thing?
+  So we can store values as data in the object.
+  Objects have links, which we can treat as the outgoing set.
+  But what should a Node be stored as?
 
 * Use `ipfs key` to generate an IPNS name for a given atomspace.
   Or maybe `ipfs urlstore` instead? Or `ipfs name` ?
