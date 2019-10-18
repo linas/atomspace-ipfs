@@ -1,14 +1,18 @@
 # atomspace-ipfs
 IPFS backend to the AtomSpace.
 
+The goal is to be able to share AtomSpace contents via the IPFS network.
+
 ## Pre-alpha version 0.0.1
 
-The goal is to be able to share AtomSpace contents via the IPFS network.
-**Status**: there's isn't any code yet. It does not work.
+**Status**: Nothing actually works. Design alternatives are being
+explored.
 
 ### Architecture:
 This implementation will be just a standard `BackingStore`
 implementation to the current Atomspace backend API.
+
+The file directory layout is the same as that of the atomspace.
 
 
 ### Design issues:
@@ -32,6 +36,9 @@ implementation to the current Atomspace backend API.
   Or maybe each atomspace gets it's own directory.
 
 * Should Atoms correspond to files, or objects?  Should Atoms be json?
+
+* Use `ipfs key` to generate an IPNS name for a given atomspace.
+  Or maybe `ipfs urlstore` instead? Or `ipfs name` ?
 
 * Use pubsub to publish value updates.
 
