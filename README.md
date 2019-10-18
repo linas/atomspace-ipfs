@@ -1,5 +1,6 @@
 # atomspace-ipfs
 IPFS backend to the AtomSpace.
+https://github.com/opencog/atomspace
 
 The goal is to be able to share AtomSpace contents via the IPFS network.
 
@@ -96,4 +97,4 @@ After installing the pre-reqs, do this:
    make -j
    sudo make install
 ```
-Then go through the [examples(examples) directory.
+Then go through the [examples](examples) directory.
