@@ -84,7 +84,11 @@ The file directory layout is the same as that of the atomspace.
 
  * Install the IPFS C++ client library
 
-   https://github.com/vasild/cpp-ipfs-api
+   `https://github.com/vasild/cpp-ipfs-api`
+   Uh, no, you need the enhancements in
+   `https://linas.com/vasild/cpp-ipfs-api`
+   and then
+   `git checkout master-linas`
 
    This needs `sudo apt install nlohmann-json3-dev`
 

@@ -99,21 +99,35 @@ int main (int, const char **)
 	client.ObjectGet(clone_id, &object);
 	std::cout << "Concept-A-STV Object: " << std::endl << object.dump(2) << std::endl;
 
+	std::string stuff;
+#if 0
 	// The "dropped text.txt" file
 	// Data looks like the file contents, but there's no filename...
-	std::string stuff = "QmTRQkD8RKpFzywY5phzPhtWsM7HPsir4uSNGwiWmgwzaU";
+	stuff = "QmTRQkD8RKpFzywY5phzPhtWsM7HPsir4uSNGwiWmgwzaU";
 	client.ObjectGet(stuff, &object);
 	std::cout << "file-thing: " << std::endl << object.dump(2) << std::endl;
+#endif
 
 	// My ipfs resolved peerid (seems to be empty)
 	stuff = "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn";
+	stuff = "QmNzxAxnJYor2G4kXsf4LF9sqsQmMAZkKXAitVqdC1Mp81";
 	client.ObjectGet(stuff, &object);
-	std::cout << "resolved peerid: " << std::endl << object.dump(2) << std::endl;
+	std::cout << "resolved peerid 2file: " << std::endl << object.dump(2) << std::endl;
 
+	stuff = "QmQhqkiysCeD698SVGHvVX2scNSMZnQLrEh3T4txvMqYDU";
+	client.ObjectGet(stuff, &object);
+	std::cout << "resolved peerid 3file: " << std::endl << object.dump(2) << std::endl;
+
+#if 0
 	// My ipns peerid ... this hangs.
 	stuff = "QmbJ5UzreC86qtHrWC2SwWKLsTiLqTuG4cqHHJVdYPK6s9";
 	client.ObjectGet(stuff, &object);
 	std::cout << "ipns peer: " << std::endl << object.dump(2) << std::endl;
+#endif
+
+	stuff = "QmPXahdEAs7nGhTAPmct458LEWtEsWRGaX1xXBURdJu1ir";
+	client.ObjectGet(stuff, &object);
+	std::cout << "ipns keeyed peer: " << std::endl << object.dump(2) << std::endl;
 
 #if 0
 	// given some object id Qmobject...
@@ -137,7 +151,7 @@ int main (int, const char **)
 	// But after the `ipfs name publish Qm..6U` the resolve is now Qm..6U
 	// ... and ipfs mount crashes:
 	//     Error: root can't be a file (unixfs type: File)
-
+	//
 	// My peerid is QmbJ5UzreC86qtHrWC2SwWKLsTiLqTuG4cqHHJVdYPK6s9
 	// and `cd /ipns/QmbJ5UzreC86qtHrWC2SwWKLsTiLqTuG4cqHHJVdYPK6s9`
 	// works and I can create files there.
@@ -145,6 +159,15 @@ int main (int, const char **)
 	// Ahh, OK. So afer every file edit on /ipns/Qm..s9 I then have to
 	// `ipfs name resolve` to get the newest actual CID and then the
 	// `ls -la /ipfs/CID` works and shows the latest.
+	//
+	// `ipfs key gen --type=rsa --size=2048 mykey`
+	// `ipfs key list`
+	// ipfs name publish --key=mykey QmRrVRGx5xAXX52BYuScmJk1KWPny86BtexP8YNJ8jz76U
+	// Published to QmPXahdEAs7nGhTAPmct458LEWtEsWRGaX1xXBURdJu1ir
+	// ipfs name resolve QmPXahdEAs7nGhTAPmct458LEWtEsWRGaX1xXBURdJu1ir
+	// returns the resolved name Qm..6U
+	//
+	// ipfs.name.publish(addr, ...)
 #endif
 
 #if 0
