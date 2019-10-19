@@ -70,15 +70,8 @@ void IPFSAtomStorage::init(const char * uri)
 	bulk_store = false;
 	clear_stats();
 
-	if (!connected()) return;
-
-	// Special-case for TruthValues
-	tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
-	if (nullptr == tvpred)
-	{
-		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
-		do_store_single_atom(tvpred, 0);
-	}
+	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+	kill_data();
 }
 
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
@@ -177,7 +170,11 @@ void IPFSAtomStorage::unregisterWith(AtomSpace* as)
 /* ================================================================ */
 
 /**
- * kill_data -- destroy data in the database!! Dangerous !!
+ * kill_data -- Publish an empty atomspace. Dangerous!
+ * This will forget the IPFS reference to the atomspace containing
+ * all of the atoms, resulting in data loss, unless you've done
+ * something to keep ahold of that CID.
+ *
  * This routine is meant to be used only for running test cases.
  * It is extremely dangerous, as it can lead to total data loss.
  */
@@ -185,10 +182,19 @@ void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
 
+	std::string text = "AtomSpace " + _uri;
+	ipfs::Json result;
+
+	ipfs::Client* client = conn_pool.pop();
+	client->FilesAdd({{"AtomSpace",
+		ipfs::http::FileUpload::Type::kFileContents,
+		text}}, &result);
+	conn_pool.push(client);
+
+	_atomspace_cid = result[0]["hash"];
+
 	// Special case for TruthValues - must always have this atom.
 	do_store_single_atom(tvpred, 0);
-
-	throw RuntimeException(TRACE_INFO, "Not Implemented!\n");
 }
 
 /* ================================================================ */

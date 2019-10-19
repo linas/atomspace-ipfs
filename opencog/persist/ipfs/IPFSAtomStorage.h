@@ -49,6 +49,8 @@ namespace opencog
 class IPFSAtomStorage : public BackingStore
 {
 	private:
+		// The IPFS CID of the current atomspace.
+		std::string _atomspace_cid;
 
 		// Pool of shared connections
 		concurrent_stack<ipfs::Client*> conn_pool;
