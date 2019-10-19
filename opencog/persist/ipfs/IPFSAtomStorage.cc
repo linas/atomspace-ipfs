@@ -137,6 +137,11 @@ void IPFSAtomStorage::publish(void)
 	conn_pool.push(conn);
 }
 
+void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid)
+{
+	std::cout << "duude gonna add the CID! " << cid << std::endl;
+}
+
 /// Rethrow asynchronous exceptions caught during atom storage.
 ///
 /// Atoms are stored asynchronously, from a write queue, from some
@@ -227,10 +232,10 @@ void IPFSAtomStorage::kill_data(void)
 	conn_pool.push(client);
 
 	_atomspace_cid = result[0]["hash"];
-	publish();
 
 	// Special case for TruthValues - must always have this atom.
-	do_store_single_atom(tvpred, 0);
+	do_store_single_atom(tvpred);
+	publish();
 }
 
 /* ================================================================ */

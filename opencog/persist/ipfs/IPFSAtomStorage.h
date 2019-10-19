@@ -61,7 +61,8 @@ class IPFSAtomStorage : public BackingStore
 		std::string _uri;
 
 		// ---------------------------------------------
-		void publish(const std::string&);
+		void add_cid_to_atomspace(const std::string&);
+		void publish(void);
 
 		// ---------------------------------------------
 		// Fetching of atoms.
@@ -76,9 +77,9 @@ class IPFSAtomStorage : public BackingStore
 		// Storing of atoms
 		std::mutex _store_mutex;
 
-		int do_store_atom(const Handle&);
+		void do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
-		void do_store_single_atom(const Handle&, int);
+		void do_store_single_atom(const Handle&);
 
 		bool not_yet_stored(const Handle&);
 		std::string oset_to_string(const HandleSeq&);

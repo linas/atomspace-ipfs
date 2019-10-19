@@ -50,27 +50,19 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
  *
  * Returns the height of the atom.
  */
-int IPFSAtomStorage::do_store_atom(const Handle& h)
+void IPFSAtomStorage::do_store_atom(const Handle& h)
 {
 	if (h->is_node())
 	{
-		do_store_single_atom(h, 0);
-		return 0;
+		do_store_single_atom(h);
+		return;
 	}
 
-	int lheight = 0;
+	// Recurse.
 	for (const Handle& ho: h->getOutgoingSet())
-	{
-		// Recurse.
-		int heig = do_store_atom(ho);
-		if (lheight < heig) lheight = heig;
-	}
+		do_store_atom(ho);
 
-	// Height of this link is, by definition, one more than tallest
-	// atom in outgoing set.
-	lheight ++;
-	do_store_single_atom(h, lheight);
-	return lheight;
+	do_store_single_atom(h);
 }
 
 void IPFSAtomStorage::vdo_store_atom(const Handle& h)
@@ -99,12 +91,29 @@ bool IPFSAtomStorage::not_yet_stored(const Handle& h)
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
-void IPFSAtomStorage::do_store_single_atom(const Handle& h, int aheight)
+void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
+	if (h->is_node())
+	{
+		std::string name = nameserver().getTypeName(h->get_type())
+			+ " \"" + h->get_name() + "\"";
+		std::string text = "(" + name + ")\n";
+		ipfs::Json result;
+		ipfs::Client* conn = conn_pool.pop();
+		conn->FilesAdd({{ name,
+			ipfs::http::FileUpload::Type::kFileContents, text}},
+			&result);
+		conn_pool.push(conn);
+		std::string id = result[0]["hash"];
+		std::cout << "addNode: " << text << " : " << id << std::endl;
+		add_cid_to_atomspace(id);
+		return;
+	}
 	throw SyntaxException(TRACE_INFO, "Not implemented!\n");
+
 	_store_count ++;
 
-	if (bulk_store and _store_count%100000 == 0)
+	if (bulk_store and _store_count%100 == 0)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _store_count) / secs;
