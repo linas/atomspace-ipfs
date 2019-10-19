@@ -25,7 +25,7 @@ implementation to the current Atomspace backend API.
 The file directory layout is the same as that of the atomspace.
 
 
-### Design issues:
+### Design requirements:
 * To get any hope of uniqueness and non-collision of Atoms, this will
   require that each atom will get it's own globally unique hash, viz
   a crypto-secure 256-bit (32-byte) hash. This is considerabley larger
@@ -43,21 +43,28 @@ The file directory layout is the same as that of the atomspace.
   have context-dependent truth values. This does not seem to be a wise
   design choice.
 
-  Or maybe each atomspace gets it's own directory.
+### Design choices and issues:
 
-* Long-term: use IPLD to create some kind of Atomspace-speecific thing.
+* The first two bullets are satisfied by writing the Atom type and
+  it's name (if its a Node) as text into a file. For Links, the
+  outgoing set can be placed in the links[] json member.
+
+* Each read-only AtomSpace corresponds to a directory, so that each
+  Atom appears in the links[] json member of the directory.  Updated
+  AtomSpaces are published on IPNS, so that a read-write AtomSpace
+  corresponds to a unique key (the key used to generate the IPNS name).
+  That is, when an Atom is added to/removed from the Atomspace, the
+  links[] list is modified to add/remove that Atom, thus creating a
+  new IPFS CID. Then IPNS is updated to point at this new AtomSpace
+  CID.  The good news: one knows *exactly* which version of an AtomSpace
+  one is working with (this is very unlike the current AtomSpace!)
+
+* Long-term: use IPLD to create some kind of Atomspace-specific thing.
   https://ipld.io/ But for now, use files.
 
-* Should Atoms correspond to files, or objects?  Should Atoms be json?
-  Objects have a setData method that does not alter the hash.
-  oh wait, but it does. Foooooo xxxxx wtf.
-  where's the mutable side of this thing?
-  So we can store values as data in the object.
-  Objects have links, which we can treat as the outgoing set.
-  But what should a Node be stored as?
-
-* Use `ipfs key` to generate an IPNS name for a given atomspace.
-  Or maybe `ipfs urlstore` instead? Or `ipfs name` ?
+* So we can store values as data in the object. XXX but then oset
+  problems... where does the value go for Links? where is it stored?
+  How is it updated?
 
 * How to search incoming set?
 
