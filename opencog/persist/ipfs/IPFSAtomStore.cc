@@ -105,7 +105,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 			&result);
 		conn_pool.push(conn);
 		std::string id = result[0]["hash"];
-		std::cout << "addNode: " << text << " : " << id << std::endl;
+		std::cout << "addNode: " << text << "   CID: " << id << std::endl;
 		add_cid_to_atomspace(id);
 		return;
 	}

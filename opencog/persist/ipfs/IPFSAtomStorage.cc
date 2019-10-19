@@ -276,27 +276,27 @@ void IPFSAtomStorage::clear_stats(void)
 
 void IPFSAtomStorage::print_stats(void)
 {
-	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
+	printf("ipfs-stats: Currently open URI: %s\n", _uri.c_str());
 	time_t now = time(0);
 	// ctime returns string with newline at end of it.
-	printf("sql-stats: Time since stats reset=%lu secs, at %s",
+	printf("ipfs-stats: Time since stats reset=%lu secs, at %s",
 		now - _stats_time, ctime(&_stats_time));
 
 
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
-	printf("sql-stats: total loads = %zu total stores = %zu ratio=%f\n",
+	printf("ipfs-stats: total loads = %zu total stores = %zu ratio=%f\n",
 	       load_count, store_count, frac);
 
 	size_t valuation_stores = _valuation_stores;
 	size_t value_stores = _value_stores;
-	printf("sql-stats: valuation updates = %zu value updates = %zu\n",
+	printf("ipfs-stats: valuation updates = %zu value updates = %zu\n",
 	       valuation_stores, value_stores);
 
 	size_t num_atom_removes = _num_atom_removes;
 	size_t num_atom_deletes = _num_atom_deletes;
-	printf("sql-stats: atom remove requests = %zu total atom deletes = %zu\n",
+	printf("ipfs-stats: atom remove requests = %zu total atom deletes = %zu\n",
 	       num_atom_removes, num_atom_deletes);
 	printf("\n");
 

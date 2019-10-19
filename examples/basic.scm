@@ -1,6 +1,7 @@
 
 ; Proto-example
 (use-modules (opencog))
+(use-modules (opencog persist))
 (use-modules (opencog persist-ipfs))
 
 ; To view documentation, type
@@ -11,3 +12,9 @@
 ; hostname of IPFS server, and a key name ...
 ; (ipfs-open "ipfs://localhost/demo-atomspace")
 (ipfs-open "ipfs:///demo-atomspace")
+
+; Create an atom
+(define c (Concept "example concept"))
+
+; Publish it to IPFS
+(store-atom c)
