@@ -221,6 +221,8 @@ void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
 
+	_already_in_ipfs().clear();
+
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;
 

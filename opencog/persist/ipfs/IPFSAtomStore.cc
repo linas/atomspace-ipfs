@@ -80,8 +80,7 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 
 bool IPFSAtomStorage::not_yet_stored(const Handle& h)
 {
-	throw SyntaxException(TRACE_INFO, "Not implemented!\n");
-	return true;
+	return _already_in_ipfs.end() == _already_in_ipfs.find(h);
 }
 
 /* ================================================================ */
@@ -95,6 +94,9 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
 	if (h->is_node())
 	{
+		// Build the JSON message, and fire it off.
+		// XXX FIXME If ipfs throws, then this leaks from the pool
+		// We can't just catch here, we need to re-throw too.
 		std::string name = nameserver().getTypeName(h->get_type())
 			+ " \"" + h->get_name() + "\"";
 		std::string text = "(" + name + ")\n";
@@ -104,8 +106,13 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 			ipfs::http::FileUpload::Type::kFileContents, text}},
 			&result);
 		conn_pool.push(conn);
+		_already_in_ipfs.insert(h);
+
 		std::string id = result[0]["hash"];
 		std::cout << "addNode: " << text << "   CID: " << id << std::endl;
+
+		// OK, the atom itself is in IPFS; add it to the atomspace,
+		// too.
 		add_cid_to_atomspace(id);
 		return;
 	}

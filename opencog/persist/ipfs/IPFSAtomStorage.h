@@ -75,7 +75,7 @@ class IPFSAtomStorage : public BackingStore
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
-		std::mutex _store_mutex;
+		std::set<Handle> _already_in_ipfs;
 
 		void do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);

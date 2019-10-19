@@ -82,6 +82,11 @@ void IPFSAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
+
+// XXX FIXME  need to implement this stuff, but for now just
+// return to avoid a throw.
+return;
+
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
