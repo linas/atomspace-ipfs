@@ -90,6 +90,10 @@ void IPFSAtomStorage::init(const char * uri)
 	bulk_store = false;
 	clear_stats();
 
+	// We run IPNS publication in it's own thread, because it's so
+	// horridly slow.  As of this writing, either 60 sec or 90 sec.
+	// This is a well-known problem, see
+	// https://github.com/ipfs/go-ipfs/issues/3860
 	_publish_keep_going = true;
 	std::thread publisher(publish_thread, this);
 	publisher.detach();
@@ -131,6 +135,11 @@ bool IPFSAtomStorage::connected(void)
 
 /**
  * Publish the AtomSpace CID to IPNS.
+ *
+ * We run IPNS publication in it's own thread, because it's so
+ * horridly slow.  As of this writing, either 60 sec or 90 sec.
+ * This is a well-known problem, see
+ * https://github.com/ipfs/go-ipfs/issues/3860
  */
 void IPFSAtomStorage::publish(void)
 {
@@ -209,16 +218,15 @@ void IPFSAtomStorage::rethrow(void)
 /// gone out; only the last element is in doubt). Technically, that's
 /// a bug, but its sufficiently "minor" so we don't fix it.
 ///
-/// The second issue is more serious: there's no fence or barrier in
-/// Postgres (that I can find or think of), and so although we've sent
-/// everything to PG, there's no guarantee that PG will process these
-/// requests in order. How likely this could be, I don't know.
+/// Caution: The IPNS publication is done async, because its so slow,
+/// and so this will return before the IPNS publish has completed.
 ///
 void IPFSAtomStorage::flushStoreQueue()
 {
 	rethrow();
 	_write_queue.barrier();
 	rethrow();
+	publish();
 }
 
 void IPFSAtomStorage::barrier()
