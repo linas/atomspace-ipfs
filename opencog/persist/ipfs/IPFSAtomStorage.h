@@ -46,6 +46,10 @@ class IPFSAtomStorage : public BackingStore
 {
 	private:
 
+		// Pool of shared connections
+		concurrent_stack<int*> conn_pool; // XXX broken, fixme
+		int _initial_conn_pool_size;
+
 		void init(const char *);
 		std::string _uri;
 		int _server_version;
@@ -244,6 +248,8 @@ class IPFSAtomStorage : public BackingStore
 		// Debugging and performance monitoring
 		void print_stats(void);
 		void clear_stats(void); // reset stats counters.
+		void set_hilo_watermarks(int, int);
+		void set_stall_writers(bool);
 };
 
 

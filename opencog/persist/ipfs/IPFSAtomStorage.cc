@@ -67,6 +67,9 @@ void IPFSAtomStorage::init(const char * uri)
 	table_id_cache.insert(1);
 }
 
+// Number of write-back queues
+#define NUM_WB_QUEUES 6
+
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
 	_tlbuf(&_uuid_manager),
 	_uuid_manager("uuid_pool"),
@@ -153,64 +156,6 @@ void IPFSAtomStorage::barrier()
 
 /* ================================================================ */
 
-void IPFSAtomStorage::rename_tables(void)
-{
-	Response rp(conn_pool);
-
-	rp.exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
-	rp.exec("ALTER TABLE Global RENAME TO Global_Backup;");
-	rp.exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
-}
-
-void IPFSAtomStorage::create_tables(void)
-{
-	Response rp(conn_pool);
-
-	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the IPFS tables. The code below is kept in sync,
-	// manually, with the contents of atom.sql.
-	rp.exec("CREATE TABLE Spaces ("
-	              "space     BIGINT PRIMARY KEY,"
-	              "parent    BIGINT);");
-
-	rp.exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.exec("INSERT INTO Spaces VALUES (1,1);");
-
-	rp.exec("CREATE TABLE Atoms ("
-	            "uuid     BIGINT PRIMARY KEY,"
-	            "space    BIGINT REFERENCES spaces(space),"
-	            "type     SMALLINT,"
-	            "height   SMALLINT,"
-	            "name     TEXT,"
-	            "outgoing BIGINT[],"
-	            "UNIQUE (type, name),"
-	            "UNIQUE (type, outgoing));");
-
-	rp.exec("CREATE TABLE Valuations ("
-	            "key BIGINT REFERENCES Atoms(uuid),"
-	            "atom BIGINT REFERENCES Atoms(uuid),"
-	            "type  SMALLINT,"
-	            "floatvalue DOUBLE PRECISION[],"
-	            "stringvalue TEXT[],"
-	            "linkvalue BIGINT[],"
-	            "UNIQUE (key, atom));");
-
-	rp.exec("CREATE INDEX ON Valuations (atom);");
-
-	rp.exec("CREATE TABLE Values ("
-	            "vuid BIGINT PRIMARY KEY,"
-	            "type  SMALLINT,"
-	            "floatvalue DOUBLE PRECISION[],"
-	            "stringvalue TEXT[],"
-	            "linkvalue BIGINT[]);");
-
-	rp.exec("CREATE TABLE TypeCodes ("
-	            "type SMALLINT UNIQUE,"
-	            "typename TEXT UNIQUE);");
-
-	type_map_was_loaded = false;
-}
-
 /**
  * kill_data -- destroy data in the database!! Dangerous !!
  * This routine is meant to be used only for running test cases.
@@ -219,29 +164,11 @@ void IPFSAtomStorage::create_tables(void)
 void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
-	Response rp(conn_pool);
-
-	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the IPFS tables.
-	rp.exec("DELETE from Valuations;");
-	rp.exec("DELETE from Values;");
-	rp.exec("DELETE from Atoms;");
-	rp.exec("DROP SEQUENCE uuid_pool;");
-	rp.exec("DROP SEQUENCE vuid_pool;");
-	rp.exec("CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;");
-	rp.exec("CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;");
-
-	// Delete the atomspaces as well!
-	rp.exec("DELETE from Spaces;");
-
-	rp.exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
 	// Special case for TruthValues - must always have this atom.
-	_uuid_manager.reset_uuid_pool(0);
-	_vuid_manager.reset_uuid_pool(0);
-	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
+
+	throw RuntimeException(TRACE_INFO, "Not Implemented!\n");
 }
 
 /* ================================================================ */
