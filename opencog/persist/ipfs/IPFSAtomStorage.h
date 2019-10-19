@@ -21,6 +21,8 @@
 #include <thread>
 #include <vector>
 
+#include <ipfs/client.h>
+
 #include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
@@ -33,7 +35,6 @@
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/atomspace/BackingStore.h>
 
 namespace opencog
@@ -42,24 +43,19 @@ namespace opencog
  *  @{
  */
 
+// Number of threads do use ofr IPFS I/O.
+#define NUM_OMP_THREADS 8
+
 class IPFSAtomStorage : public BackingStore
 {
 	private:
 
 		// Pool of shared connections
-		concurrent_stack<int*> conn_pool; // XXX broken, fixme
+		concurrent_stack<ipfs::Client*> conn_pool;
 		int _initial_conn_pool_size;
 
 		void init(const char *);
 		std::string _uri;
-		int _server_version;
-		void get_server_version(void);
-
-		// ---------------------------------------------
-		// Handle multiple atomspaces like typecodes: we have to
-		// convert from sql UUID to the actual UUID.
-		std::set<UUID> table_id_cache;
-		void store_atomtable_id(const AtomTable&);
 
 		// ---------------------------------------------
 		// Fetching of atoms.

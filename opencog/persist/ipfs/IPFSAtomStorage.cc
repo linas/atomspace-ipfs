@@ -38,6 +38,9 @@
 
 using namespace opencog;
 
+// Number of write-back queues
+#define NUM_WB_QUEUES 6
+
 /* ================================================================ */
 // Constructors
 
@@ -45,8 +48,22 @@ void IPFSAtomStorage::init(const char * uri)
 {
 	_uri = uri;
 
-	if (1)
+	if (strncmp(uri, "ipfs://", 7))
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
+
+	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
+	for (int i=0; i<_initial_conn_pool_size; i++)
+	{
+		// XXX FIXME, host and port should be obtained from the URI
+		ipfs::Client* conn = new ipfs::Client("localhost", 5001);
+		conn_pool.push(conn);
+	}
+
+	// We expect the URI to be for the form
+	//    ipfs://atomspace-key
+	// where the key will be used to publish the IPNS for the atomspace.
+
+	std::string key_name = &uri[7];
 
 	max_height = 0;
 	bulk_load = false;
@@ -62,13 +79,7 @@ void IPFSAtomStorage::init(const char * uri)
 		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
 		do_store_single_atom(tvpred, 0);
 	}
-
-	// Special case for the pre-defined atomspaces.
-	table_id_cache.insert(1);
 }
-
-// Number of write-back queues
-#define NUM_WB_QUEUES 6
 
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
 	_write_queue(this, &IPFSAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
@@ -79,15 +90,13 @@ IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
 
 IPFSAtomStorage::~IPFSAtomStorage()
 {
-#if 0
 	flushStoreQueue();
 
 	while (not conn_pool.is_empty())
 	{
-		LLConnection* db_conn = conn_pool.pop();
-		delete db_conn;
+		ipfs::Client* conn = conn_pool.pop();
+		delete conn;
 	}
-#endif
 }
 
 /**
