@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <thread>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspaceutils/TLB.h>
 
@@ -42,22 +44,21 @@ void IPFSAtomStorage::init(const char * uri)
 	//    ipfs://hostname/atomspace-key
 	// where the key will be used to publish the IPNS for the atomspace.
 
-	std::string hostname;
-	int port = 5001;
+	_port = 5001;
 	if ('/' == uri[URIX_LEN])
 	{
-		hostname = "localhost";
+		_hostname = "localhost";
 		_keyname = &uri[URIX_LEN+1];
 	}
 	else
 	{
 		const char* start = &uri[URIX_LEN];
-		hostname = start;
+		_hostname = start;
 		char* p = strchr((char *)start, '/');
 		if (nullptr == p)
 			throw IOException(TRACE_INFO, "Bad URI format '%s'\n", uri);
 		size_t len = p - start;
-		hostname.resize(len);
+		_hostname.resize(len);
 		_keyname = &uri[len+URIX_LEN+1];
 	}
 
@@ -65,14 +66,14 @@ void IPFSAtomStorage::init(const char * uri)
 	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
-		ipfs::Client* conn = new ipfs::Client(hostname, port);
+		ipfs::Client* conn = new ipfs::Client(_hostname, _port);
 		conn_pool.push(conn);
 	}
 
 	// Create the IPFS key, if it does not yet exist.
 	try
 	{
-		ipfs::Client clnt(hostname, port);
+		ipfs::Client clnt(_hostname, _port);
 		std::string key_id;
 		clnt.KeyNew(_keyname, &key_id);
 		std::cout << "Generated AtomSpace key: "
@@ -89,6 +90,11 @@ void IPFSAtomStorage::init(const char * uri)
 	bulk_store = false;
 	clear_stats();
 
+	_publish_keep_going = true;
+	std::thread publisher(publish_thread, this);
+	publisher.detach();
+	std::this_thread::yield();
+
 	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
 	kill_data();
 }
@@ -103,6 +109,9 @@ IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
 IPFSAtomStorage::~IPFSAtomStorage()
 {
 	flushStoreQueue();
+
+	_publish_keep_going = false;
+	_publish_cv.notify_one();
 
 	while (not conn_pool.is_empty())
 	{
@@ -125,17 +134,32 @@ bool IPFSAtomStorage::connected(void)
  */
 void IPFSAtomStorage::publish(void)
 {
-	ipfs::Client* conn = conn_pool.pop();
+	_publish_cv.notify_one();
+}
 
-	std::cout << "Publishing AtomSpace CID: " << _atomspace_cid << std::endl;
+void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
+{
+	ipfs::Client clnt(self->_hostname, self->_port);
+	std::mutex mtx;
+	while (self->_publish_keep_going)
+	{
+		std::unique_lock<std::mutex> lock(mtx);
+		self->_publish_cv.wait(lock);
 
-	// XXX hack alert -- lifetime set to 4 hours, it should be
-	// infinity or something.... the TTL is 30 seconds, but should
-	// be shorter or user-configurable .. set both with scheme bindings.
-	std::string name;
-	conn->NamePublish(_atomspace_cid, _keyname, &name, "4h", "30s");
-	std::cout << "Published AtomSpace: " << name << std::endl;
-	conn_pool.push(conn);
+		// Last time out, just quit.
+		if (not self->_publish_keep_going) break;
+
+		std::cout << "Publishing AtomSpace CID: "
+		          << self->_atomspace_cid << std::endl;
+
+		// XXX hack alert -- lifetime set to 4 hours, it should be
+		// infinity or something.... the TTL is 30 seconds, but should
+		// be shorter or user-configurable .. set both with scheme bindings.
+		std::string name;
+		clnt.NamePublish(self->_atomspace_cid,
+		                 self->_keyname, &name, "4h", "30s");
+		std::cout << "Published AtomSpace: " << name << std::endl;
+	}
 }
 
 void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid,

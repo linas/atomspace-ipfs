@@ -16,9 +16,9 @@
 #define _OPENCOG_IPFS_ATOM_STORAGE_H
 
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <set>
-#include <thread>
 #include <vector>
 
 #include <ipfs/client.h>
@@ -49,6 +49,11 @@ namespace opencog
 class IPFSAtomStorage : public BackingStore
 {
 	private:
+		void init(const char *);
+		std::string _uri;
+		std::string _hostname;
+		int _port;
+
 		// The IPFS CID of the current atomspace.
 		std::string _atomspace_cid;
 		std::string _keyname;
@@ -57,11 +62,14 @@ class IPFSAtomStorage : public BackingStore
 		concurrent_stack<ipfs::Client*> conn_pool;
 		int _initial_conn_pool_size;
 
-		void init(const char *);
-		std::string _uri;
-
 		// ---------------------------------------------
 		void add_cid_to_atomspace(const std::string&, const std::string&);
+
+		// Publication happens in it's own thread, because it's slow.
+		// That means it needs a semaphore.
+		std::condition_variable _publish_cv;
+		bool _publish_keep_going;
+		static void publish_thread(IPFSAtomStorage*);
 		void publish(void);
 
 		// ---------------------------------------------
