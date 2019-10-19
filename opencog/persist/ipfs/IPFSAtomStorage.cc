@@ -138,9 +138,19 @@ void IPFSAtomStorage::publish(void)
 	conn_pool.push(conn);
 }
 
-void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid)
+void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid,
+                                           const std::string& label)
 {
-	std::cout << "duude gonna add the CID! " << cid << std::endl;
+	std::cout << "duude gonna add " << label << " with the CID! " << cid <<  std::endl;
+
+	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
+	// We can't just catch, we need to rethrow, too.
+	ipfs::Client* conn = conn_pool.pop();
+	std::string new_as_id;
+	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
+	_atomspace_cid = new_as_id;
+std::cout << "duuude newest atomspace is " << _atomspace_cid << std::endl;
+	conn_pool.push(conn);
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
@@ -221,7 +231,7 @@ void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
 
-	_already_in_ipfs().clear();
+	_already_in_ipfs.clear();
 
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;

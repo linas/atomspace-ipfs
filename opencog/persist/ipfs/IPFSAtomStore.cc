@@ -97,23 +97,23 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		// Build the JSON message, and fire it off.
 		// XXX FIXME If ipfs throws, then this leaks from the pool
 		// We can't just catch here, we need to re-throw too.
-		std::string name = nameserver().getTypeName(h->get_type())
-			+ " \"" + h->get_name() + "\"";
-		std::string text = "(" + name + ")\n";
+		std::string name = "("
+		   + nameserver().getTypeName(h->get_type())
+			+ " \"" + h->get_name() + "\")";
 		ipfs::Json result;
 		ipfs::Client* conn = conn_pool.pop();
 		conn->FilesAdd({{ name,
-			ipfs::http::FileUpload::Type::kFileContents, text}},
+			ipfs::http::FileUpload::Type::kFileContents, name}},
 			&result);
 		conn_pool.push(conn);
 		_already_in_ipfs.insert(h);
 
 		std::string id = result[0]["hash"];
-		std::cout << "addNode: " << text << "   CID: " << id << std::endl;
+		std::cout << "addNode: " << name << "   CID: " << id << std::endl;
 
 		// OK, the atom itself is in IPFS; add it to the atomspace,
 		// too.
-		add_cid_to_atomspace(id);
+		add_cid_to_atomspace(id, name);
 		return;
 	}
 	throw SyntaxException(TRACE_INFO, "Not implemented!\n");

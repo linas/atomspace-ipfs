@@ -61,7 +61,7 @@ class IPFSAtomStorage : public BackingStore
 		std::string _uri;
 
 		// ---------------------------------------------
-		void add_cid_to_atomspace(const std::string&);
+		void add_cid_to_atomspace(const std::string&, const std::string&);
 		void publish(void);
 
 		// ---------------------------------------------
