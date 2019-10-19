@@ -7,19 +7,12 @@
 
 (use-modules (opencog))
 (use-modules (opencog ipfs-config))
-(load-extension (string-append opencog-ext-path-persist-ipfs "libpersist-ipfs") "opencog_persist_ipfs_init")
+(load-extension
+	(string-append opencog-ext-path-persist-ipfs "libpersist-ipfs")
+	"opencog_persist_ipfs_init")
 
-(export ipfs-clear-cache ipfs-clear-stats ipfs-close ipfs-load ipfs-open
+(export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
 	ipfs-store ipfs-stats)
-
-(set-procedure-property! ipfs-clear-cache 'documentation
-"
- ipfs-clear-cache - clear the TLB of cached data
-    This will free up RAM, maybe a lot, dependeing on how many atoms
-    are in the cache. The cost of doing this is that some operations
-    on atoms will no longer be cached, and will need to go to the
-    database to fetch contents, potentially impacting performance.
-")
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -48,29 +41,15 @@
 
 (set-procedure-property! ipfs-open 'documentation
 "
- ipfs-open URL - Open a connection to a database
-    Open a connection to the database encoded in the URL. All
-    appropriate database credentials must be supplied in the URL,
-    including the username and password, if required.
+ ipfs-open URL - Open a connection to an IPFS server.
 
-    The URL must be on one of these formats:
-       odbc://USER:PASSWORD/DBNAME
-       postgres://USER@HOST/DBNAME
-       postgres://USER:PASSWORD@HOST/DBNAME
-       postgres:///DBNAME?user=USER
-       postgres:///DBNAME?user=USER&host=HOST
-       postgres:///DBNAME?user=USER&password=PASS
-
-    Other key-value pairs following the question-mark are interpreted
-    by the postgres driver, according to postgres documentation.
+    The URL must be one of these formats:
+       ipfs:///KEY-NAME
+       ipfs://HOST/KEY-NAME
 
   Examples of use with valid URL's:
-     (ipfs-open \"odbc://opencog_tester:cheese/opencog_test\")
-     (ipfs-open \"postgres://opencog_tester@localhost/opencog_test\")
-     (ipfs-open \"postgres://opencog_tester:cheese@localhost/opencog_test\")
-     (ipfs-open \"postgres:///opencog_test?user=opencog_tester\")
-     (ipfs-open \"postgres:///opencog_test?user=opencog_tester&host=localhost\")
-     (ipfs-open \"postgres:///opencog_test?user=opencog_tester&password=cheese\")
+     (ipfs-open \"ipfs://localhost/atomspace-test\")
+     (ipfs-open \"ipfs:///atomspace-test\")
 ")
 
 (set-procedure-property! ipfs-store 'documentation

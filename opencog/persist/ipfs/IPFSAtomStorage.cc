@@ -51,19 +51,38 @@ void IPFSAtomStorage::init(const char * uri)
 	if (strncmp(uri, "ipfs://", 7))
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
+	// We expect the URI to be for the form
+	//    ipfs:///atomspace-key
+	//    ipfs://hostname/atomspace-key
+	// where the key will be used to publish the IPNS for the atomspace.
+
+	std::string hostname;
+	std::string key_name;
+	int port = 5001;
+	if ('/' == uri[7])
+	{
+		hostname = "localhost";
+		key_name = &uri[8];
+	}
+	else
+	{
+		const char* start = &uri[7];
+		hostname = start;
+		char* p = strchr((char *)start, '/');
+		if (nullptr == p)
+			throw IOException(TRACE_INFO, "Bad URI format '%s'\n", uri);
+		size_t len = p - start;
+		hostname[len] = 0;
+		key_name = &uri[len+7];
+	}
+printf("duuuude yowza %s and %s\n", hostname.c_str(), key_name.c_str());
+
 	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
-		// XXX FIXME, host and port should be obtained from the URI
-		ipfs::Client* conn = new ipfs::Client("localhost", 5001);
+		ipfs::Client* conn = new ipfs::Client(hostname, port);
 		conn_pool.push(conn);
 	}
-
-	// We expect the URI to be for the form
-	//    ipfs://atomspace-key
-	// where the key will be used to publish the IPNS for the atomspace.
-
-	std::string key_name = &uri[7];
 
 	max_height = 0;
 	bulk_load = false;

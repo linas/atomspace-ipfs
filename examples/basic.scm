@@ -8,4 +8,5 @@
 ; at the guile prompt. For a given function, try, for example:
 ;    ,d ipfs-open
 
-(ipfs-open "stuff")
+; Key name ...
+(ipfs-open "ipfs://demo-atomspace")
