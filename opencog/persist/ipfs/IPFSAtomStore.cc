@@ -86,6 +86,12 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 	}
 }
 
+bool IPFSAtomStorage::not_yet_stored(const Handle& h)
+{
+	throw SyntaxException(TRACE_INFO, "Not implemented!\n");
+	return true;
+}
+
 /* ================================================================ */
 
 /**
@@ -95,7 +101,7 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
-	throw SyntaxException(TRACE_INFO,  "Not implemented!\n");
+	throw SyntaxException(TRACE_INFO, "Not implemented!\n");
 	_store_count ++;
 
 	if (bulk_store and _store_count%100000 == 0)

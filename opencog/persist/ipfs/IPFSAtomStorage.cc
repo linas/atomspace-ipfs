@@ -71,9 +71,6 @@ void IPFSAtomStorage::init(const char * uri)
 #define NUM_WB_QUEUES 6
 
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
-	_tlbuf(&_uuid_manager),
-	_uuid_manager("uuid_pool"),
-	_vuid_manager("vuid_pool"),
 	_write_queue(this, &IPFSAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
 	_async_write_queue_exception(nullptr)
 {
@@ -151,6 +148,20 @@ void IPFSAtomStorage::flushStoreQueue()
 
 void IPFSAtomStorage::barrier()
 {
+	flushStoreQueue();
+}
+
+/* ================================================================ */
+
+void IPFSAtomStorage::registerWith(AtomSpace* as)
+{
+	BackingStore::registerWith(as);
+}
+
+void IPFSAtomStorage::unregisterWith(AtomSpace* as)
+{
+	BackingStore::unregisterWith(as);
+
 	flushStoreQueue();
 }
 
@@ -305,39 +316,7 @@ void IPFSAtomStorage::print_stats(void)
 	// size_t noh = 0;
 	// size_t remap = 0;
 
-	UUID mad = getMaxObservedUUID();
-#if DONT_COUNT
-	This loop can lead to an apparent hang, when max UUID gets
-	// above a quarter-billion or so.  So don't do this.
-	for (UUID uuid = 1; uuid < mad; uuid++)
-	{
-		Handle h = _tlbuf.getAtom(uuid);
-		if (nullptr == h) { noh++; continue; }
-
-#if 0
-		Handle hr = as->get_atom(h);
-		if (nullptr == hr) { extra++; continue; }
-		if (hr != h) { remap++; }
-#endif
-	}
-#endif
-
 	printf("\n");
-	printf("sql-stats: tlbuf holds %lu atoms\n", _tlbuf.size());
-#if 0
-	frac = 100.0 * extra / ((double) _tlbuf.size());
-	printf("sql-stats: tlbuf holds %lu atoms not in atomspace (%f pct)\n",
-	        extra, frac);
-
-	frac = 100.0 * remap / ((double) _tlbuf.size());
-	printf("sql-stats: tlbuf holds %lu unremapped atoms (%f pct)\n",
-	       remap, frac);
-#endif
-
-	size_t used = _tlbuf.size();
-	frac = 100.0 * used / ((double) mad);
-	printf("sql-stats: %zu of %lu reserved uuids used (%f pct)\n",
-	       used, mad, frac);
 }
 
 /* ============================= END OF FILE ================= */

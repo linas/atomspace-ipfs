@@ -1,6 +1,7 @@
 
 
 ADD_LIBRARY (persist-ipfs SHARED
+	IPFSAtomDelete
 	IPFSAtomLoad
 	IPFSAtomStorage
 	IPFSAtomStore

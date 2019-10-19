@@ -63,21 +63,6 @@ class IPFSAtomStorage : public BackingStore
 
 		// ---------------------------------------------
 		// Fetching of atoms.
-		struct PseudoAtom
-		    : public std::enable_shared_from_this<PseudoAtom>
-		{
-		    Type type;
-		    UUID uuid;
-		    std::string name;
-		    std::vector<UUID> oset;
-		};
-		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
-		#define createPseudo std::make_shared<PseudoAtom>
-		PseudoPtr getAtom(const char *, int);
-		PseudoPtr petAtom(UUID);
-
-		Handle get_recursive_if_not_exists(PseudoPtr);
-
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
@@ -138,34 +123,6 @@ class IPFSAtomStorage : public BackingStore
 		Handle tvpred; // the key to a very special valuation.
 
 		// --------------------------
-		// UUID management
-		UUID check_uuid(const Handle&);
-		UUID get_uuid(const Handle&);
-
-		UUID getMaxObservedUUID(void);
-		VUID getMaxObservedVUID(void);
-		TLB _tlbuf;
-
-		/// Manage a collection of UUID's
-		/// (shared by multiple atomspaces.)
-		struct UUID_manager : public uuid_pool
-		{
-			const std::string poolname;
-			UUID_manager(const std::string& n) : poolname(n) {}
-			IPFSAtomStorage* that;
-			void reset_uuid_pool(UUID);
-			void refill_uuid_pool(void);
-			int _uuid_pool_increment;
-			std::atomic<UUID> _uuid_pool_top;
-			std::atomic<UUID> _next_unused_uuid;
-
-			// Issue an unused UUID
-			UUID get_uuid(void);
-		};
-		UUID_manager _uuid_manager;
-		UUID_manager _vuid_manager;
-
-		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
@@ -220,7 +177,6 @@ class IPFSAtomStorage : public BackingStore
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void); // destroy DB contents
-		void clear_cache(void); // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);
