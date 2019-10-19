@@ -51,6 +51,7 @@ class IPFSAtomStorage : public BackingStore
 	private:
 		// The IPFS CID of the current atomspace.
 		std::string _atomspace_cid;
+		std::string _keyname;
 
 		// Pool of shared connections
 		concurrent_stack<ipfs::Client*> conn_pool;
@@ -58,6 +59,9 @@ class IPFSAtomStorage : public BackingStore
 
 		void init(const char *);
 		std::string _uri;
+
+		// ---------------------------------------------
+		void publish(const std::string&);
 
 		// ---------------------------------------------
 		// Fetching of atoms.

@@ -11,22 +11,7 @@
  * correlated with specific in-RAM atoms via the TLB.
  *
  * Copyright (c) 2008,2009,2013,2015,2017 Linas Vepstas <linas@linas.org>
- *
- * LICENSE:
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 #include <stdlib.h>
 #include <unistd.h>
@@ -57,12 +42,11 @@ void IPFSAtomStorage::init(const char * uri)
 	// where the key will be used to publish the IPNS for the atomspace.
 
 	std::string hostname;
-	std::string key_name;
 	int port = 5001;
 	if ('/' == uri[7])
 	{
 		hostname = "localhost";
-		key_name = &uri[8];
+		_keyname = &uri[8];
 	}
 	else
 	{
@@ -73,15 +57,30 @@ void IPFSAtomStorage::init(const char * uri)
 			throw IOException(TRACE_INFO, "Bad URI format '%s'\n", uri);
 		size_t len = p - start;
 		hostname[len] = 0;
-		key_name = &uri[len+7];
+		_keyname = &uri[len+7];
 	}
-printf("duuuude yowza %s and %s\n", hostname.c_str(), key_name.c_str());
 
+	// Create pool of IPFS server connections.
 	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		ipfs::Client* conn = new ipfs::Client(hostname, port);
 		conn_pool.push(conn);
+	}
+
+	// Create the IPFS key, if it does not yet exist.
+	try
+	{
+		ipfs::Client clnt(hostname, port);
+		std::string key_id;
+		clnt.KeyNew(_keyname, &key_id);
+		std::cout << "Generated AtomSpace key: "
+		          << key_id << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "AtomSpace key already exists: "
+		          << e.what() << std::endl;
 	}
 
 	max_height = 0;
@@ -112,13 +111,30 @@ IPFSAtomStorage::~IPFSAtomStorage()
 }
 
 /**
- * connected -- return true if a successful connection to the
- * database exists; else return false.  Note that this may block,
- * if all database connections are in use...
+ * connected -- unconditionally true, right now. I guess.
+ * XXX FIXME, return false if IPFS connection cannot be made.
  */
 bool IPFSAtomStorage::connected(void)
 {
-	return false;
+	return true;
+}
+
+/**
+ * Publish the AtomSpace CID to IPNS.
+ */
+void IPFSAtomStorage::publish(void)
+{
+	ipfs::Client* conn = conn_pool.pop();
+
+	std::cout << "Publishing AtomSpace CID: " << _atomspace_cid << std::endl;
+
+	// XXX hack alert -- lifetime set to 4 hours, it should be
+	// infinity or something.... the TTL is 30 seconds, but should
+	// be shorter or user-configurable .. set both with scheme bindings.
+	std::string name;
+	conn->NamePublish(_atomspace_cid, _keyname, &name, "4h", "30s");
+	std::cout << "Published AtomSpace: " << name << std::endl;
+	conn_pool.push(conn);
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
@@ -211,6 +227,7 @@ void IPFSAtomStorage::kill_data(void)
 	conn_pool.push(client);
 
 	_atomspace_cid = result[0]["hash"];
+	publish();
 
 	// Special case for TruthValues - must always have this atom.
 	do_store_single_atom(tvpred, 0);
