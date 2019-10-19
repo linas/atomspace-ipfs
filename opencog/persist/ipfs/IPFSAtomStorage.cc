@@ -33,7 +33,8 @@ void IPFSAtomStorage::init(const char * uri)
 {
 	_uri = uri;
 
-	if (strncmp(uri, "ipfs://", 7))
+#define URIX_LEN (sizeof("ipfs://") - 1)  // Should be 7
+	if (strncmp(uri, "ipfs://", URIX_LEN))
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
 	// We expect the URI to be for the form
@@ -43,21 +44,21 @@ void IPFSAtomStorage::init(const char * uri)
 
 	std::string hostname;
 	int port = 5001;
-	if ('/' == uri[7])
+	if ('/' == uri[URIX_LEN])
 	{
 		hostname = "localhost";
-		_keyname = &uri[8];
+		_keyname = &uri[URIX_LEN+1];
 	}
 	else
 	{
-		const char* start = &uri[7];
+		const char* start = &uri[URIX_LEN];
 		hostname = start;
 		char* p = strchr((char *)start, '/');
 		if (nullptr == p)
 			throw IOException(TRACE_INFO, "Bad URI format '%s'\n", uri);
 		size_t len = p - start;
-		hostname[len] = 0;
-		_keyname = &uri[len+7];
+		hostname.resize(len);
+		_keyname = &uri[len+URIX_LEN+1];
 	}
 
 	// Create pool of IPFS server connections.
@@ -148,19 +149,17 @@ void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid)
 /// other thread. If that thread has an exception, e.g. due to some
 /// IPFS error, and the exception is uncaught, then the process will
 /// die. So we have to catch that exception.  Once caught, what do
-/// we do with it? Well, we culd ignore it, but then the user would
+/// we do with it? Well, we could ignore it, but then the user would
 /// not know that the IPFS backend was damaged. So, instead, we throw
-/// it at the first user, any user that is doing soem other IPFS stuff.
+/// it at the first user, any user that is doing some other IPFS stuff.
 void IPFSAtomStorage::rethrow(void)
 {
-#if 0
 	if (_async_write_queue_exception)
 	{
 		std::exception_ptr exptr = _async_write_queue_exception;
 		_async_write_queue_exception = nullptr;
 		std::rethrow_exception(exptr);
 	}
-#endif
 }
 
 /* ================================================================== */
