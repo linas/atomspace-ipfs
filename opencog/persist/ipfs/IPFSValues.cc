@@ -105,7 +105,9 @@ void IPFSAtomStorage::get_atom_values(Handle& atom)
 {
 	if (nullptr == atom) return;
 
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
+// XXX FIXME  need to implement this stuff, but for now just
+// return to avoid a throw.
+	// throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
 /* ================================================================ */
