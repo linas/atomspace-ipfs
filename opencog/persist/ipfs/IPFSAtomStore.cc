@@ -106,7 +106,6 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		&result);
 
 	std::string id = result[0]["hash"];
-	_ipfs_cid_map.insert({h, id});
 
 	if (h->is_link())
 	{
@@ -126,6 +125,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	}
 	conn_pool.push(conn);
 
+	_ipfs_cid_map.insert({h, id});
 	std::cout << "addAtom: " << name << "   CID: " << id << std::endl;
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
