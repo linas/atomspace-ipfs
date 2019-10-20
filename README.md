@@ -64,7 +64,10 @@ The file directory layout is the same as that of the atomspace.
   one is working with (this is very unlike the current AtomSpace!)
 
 * Long-term: use IPLD to create some kind of Atomspace-specific thing.
-  https://ipld.io/ But for now, use files.
+  https://ipld.io/ For now, we are limited to IPFS, which uses a
+  distinctive file format.  Based on the current IPFS implementation,
+  it seems like the only possibility is to fork the IPFS code, and
+  alter it to avoid including Values as part of the CID hash.
 
 * So we can store values as data in the object. XXX but then oset
   problems... where does the value go for Links? where is it stored?

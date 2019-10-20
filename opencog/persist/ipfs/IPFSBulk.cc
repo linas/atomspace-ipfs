@@ -83,12 +83,6 @@ void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type 
 
 /* ================================================================ */
 
-int IPFSAtomStorage::getMaxObservedHeight(void)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	return 0;
-}
-
 void IPFSAtomStorage::load(AtomTable &table)
 {
 	rethrow();
@@ -96,7 +90,6 @@ void IPFSAtomStorage::load(AtomTable &table)
 
 #if 0
 	size_t start_count = _load_count;
-	max_height = getMaxObservedHeight();
 	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
 		max_nrec, max_height);
 	bulk_load = true;
@@ -146,13 +139,6 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 
 	size_t start_count = _load_count;
-
-	// For links, assume a worst-case height.
-	// For nodes, its easy ... max_height is zero.
-	if (nameserver().isNode(atom_type))
-		max_height = 0;
-	else
-		max_height = getMaxObservedHeight();
 
 #if 0
 

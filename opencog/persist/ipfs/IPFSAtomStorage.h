@@ -54,32 +54,29 @@ class IPFSAtomStorage : public BackingStore
 		std::string _hostname;
 		int _port;
 
-		// The IPFS CID of the current atomspace.
-		std::string _atomspace_cid;
-		std::string _keyname;
-		std::string _key_cid;
-
 		// Pool of shared connections
 		concurrent_stack<ipfs::Client*> conn_pool;
 		int _initial_conn_pool_size;
 
 		// ---------------------------------------------
-		void add_cid_to_atomspace(const std::string&, const std::string&);
-
-		// Publication happens in it's own thread, because it's slow.
-		// That means it needs a semaphore.
+		// IPNS Publication happens in it's own thread, because
+		// it's slow. That means it needs a semaphore.
 		std::condition_variable _publish_cv;
 		bool _publish_keep_going;
 		static void publish_thread(IPFSAtomStorage*);
 		void publish(void);
 
-		// ---------------------------------------------
-		// Fetching of atoms.
-		Handle doGetNode(Type, const char *);
-		Handle doGetLink(Type, const HandleSeq&);
+		// The IPNS keys under which to publish.
+		std::string _keyname;
+		std::string _key_cid;
 
-		int getMaxObservedHeight(void);
-		int max_height;
+		// ---------------------------------------------
+		// The IPFS CID of the current atomspace.
+		std::string _atomspace_cid;
+		void add_cid_to_atomspace(const std::string&, const std::string&);
+
+		// Fetching of atoms.
+		Handle fetchAtom(const std::string&);
 
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
@@ -92,7 +89,6 @@ class IPFSAtomStorage : public BackingStore
 		void do_store_single_atom(const Handle&);
 
 		bool not_yet_stored(const Handle&);
-		std::string oset_to_string(const HandleSeq&);
 
 		bool bulk_load;
 		bool bulk_store;
