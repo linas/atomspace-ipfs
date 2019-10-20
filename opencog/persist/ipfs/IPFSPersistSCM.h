@@ -40,6 +40,7 @@ public:
 	void do_close(void);
 	void do_load(void);
 	void do_store(void);
+	std::string do_ipfs_atomspace(void);
 	std::string do_ipns_atomspace(void);
 
 	void do_stats(void);

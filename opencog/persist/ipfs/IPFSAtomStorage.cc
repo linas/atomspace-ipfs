@@ -140,6 +140,14 @@ bool IPFSAtomStorage::connected(void)
 }
 
 /**
+ * Return the IPFS CID of the current AtomSpace.
+ */
+std::string IPFSAtomStorage::get_ipfs_cid(void)
+{
+	return "/ipfs/" + _atomspace_cid;
+}
+
+/**
  * Return the IPNS CID of the current AtomSpace.
  */
 std::string IPFSAtomStorage::get_ipns_cid(void)

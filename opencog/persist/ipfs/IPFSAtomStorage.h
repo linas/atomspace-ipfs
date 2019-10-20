@@ -187,6 +187,7 @@ class IPFSAtomStorage : public BackingStore
 		IPFSAtomStorage& operator=(const IPFSAtomStorage&) = delete; // disable assignment
 		virtual ~IPFSAtomStorage();
 		bool connected(void); // connection to DB is alive
+		std::string get_ipfs_cid(void);
 		std::string get_ipns_cid(void);
 
 		void kill_data(void); // destroy DB contents

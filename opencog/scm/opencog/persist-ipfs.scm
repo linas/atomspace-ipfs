@@ -12,7 +12,7 @@
 	"opencog_persist_ipfs_init")
 
 (export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
-	ipfs-store ipfs-stats ipns-atomspace-cid)
+	ipfs-store ipfs-stats ipfs-atomspace-cid ipns-atomspace-cid)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -69,13 +69,25 @@
     and are useful primarily to the developers of the database backend.
 ")
 
+(set-procedure-property! ipfs-atomspace-cid 'documentation
+"
+ ipfs-atomspace-cid - Return the string CID of the IPFS entry of the
+     current AtomSpace.  An example of a returned value is
+        \"/ipfs/QmWhDdyKhLJ55ERnbP1i7YsSM7jZFQfESNqZFFquUduLSe\"
+     This can be used to access the AtomSpace and to explore it
+     using an IPFS explorer.
+
+     See also `ipns-atomspace-cid`.
+")
 (set-procedure-property! ipns-atomspace-cid 'documentation
 "
  ipns-atomspace-cid - Return the string CID of the IPNS entry of the
      current AtomSpace.  An example of a returned value is
         \"/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx\"
      This can be used to access the AtomSpace and to explore it
-     using an IPFS explorer.  For example, the actual atomspace can
-     be found by issueing the bash shell command
+     using an IPFS explorer.  For example, the actual current
+     atomspace can be found by issuing the bash shell command
         `ipfs name resolve /ipns/Qm...VHx`
+     The result of this resolution should be equal to what the
+     scheme command `(ipfs-atomspace-cid)` is returning.
 ")

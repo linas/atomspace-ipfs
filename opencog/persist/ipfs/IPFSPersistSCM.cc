@@ -50,6 +50,7 @@ void IPFSPersistSCM::init(void)
     define_scheme_primitive("ipfs-close", &IPFSPersistSCM::do_close, this, "persist-ipfs");
     define_scheme_primitive("ipfs-load", &IPFSPersistSCM::do_load, this, "persist-ipfs");
     define_scheme_primitive("ipfs-store", &IPFSPersistSCM::do_store, this, "persist-ipfs");
+    define_scheme_primitive("ipfs-atomspace-cid", &IPFSPersistSCM::do_ipfs_atomspace, this, "persist-ipfs");
     define_scheme_primitive("ipns-atomspace-cid", &IPFSPersistSCM::do_ipns_atomspace, this, "persist-ipfs");
     define_scheme_primitive("ipfs-stats", &IPFSPersistSCM::do_stats, this, "persist-ipfs");
     define_scheme_primitive("ipfs-clear-stats", &IPFSPersistSCM::do_clear_stats, this, "persist-ipfs");
@@ -129,6 +130,15 @@ void IPFSPersistSCM::do_store(void)
             "ipfs-store: Error: Database not open");
 
     _backing->storeAtomSpace(_as);
+}
+
+std::string IPFSPersistSCM::do_ipfs_atomspace(void)
+{
+    if (nullptr == _backing)
+        throw RuntimeException(TRACE_INFO,
+            "ifns-atomspace: Error: Database not open");
+
+    return _backing->get_ipfs_cid();
 }
 
 std::string IPFSPersistSCM::do_ipns_atomspace(void)
