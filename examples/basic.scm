@@ -41,7 +41,9 @@
 (define c (Concept "example concept"))
 
 ; Publish it to IPFS.  This will create a new IPFS object that encodes
-; an AtomSpace with this atom in it.
+; an AtomSpace with this atom in it. The CID that will be assigned to
+; this Atom should be exactly
+; /ipfs/QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB
 (store-atom c)
 
 ; Publish it to IPNS. The new AtomSpace doesn't become visible until
@@ -56,6 +58,17 @@
 
 (store-atom e)
 (barrier)
+
+; The expected CID's for the above are:
+;
+; QmdhTzU8QJ2ffhLBzfBeT12scY39N4oZ1roGrLGkSKZnMj (Concept "foo")
+; QmP6zBPWfboPQvXU58Tuxq5yBtpybLtJEsdrS4Skr7xZYH (Concept "bar")
+; QmXrooYTtNdx5EJ898WaX6XWMZqPuxGy5c9Uxc6BMRUQag (List (Concept "foo") (Concept "bar"))
+; QmedVhDVkA1WkMpTkqkTiQmBubnVEkJyiJueTPpePErKkK (Predicate "Some relationship")
+; QmdQwLMqC6fyAGa6xztV6y53NqyZwiGW4fvngPtukjBraZ (EvaluationLink ...)
+;
+; Everyone should always get exactly these CID's. If not, then we've
+; changed the code and/or there's a bug somewhere.
 
 ; Review the stats
 (ipfs-stats)
