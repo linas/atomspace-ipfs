@@ -115,7 +115,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		{
 			std::string name = hout->to_short_string();
 			name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-			std::string label = std::to_string(i) + " " + name;
+			std::string label = std::to_string(i) + "." + name;
 			std::string cid = _ipfs_cid_map.find(hout)->second;
 			std::string nid;
 			conn->ObjectPatchAddLink(id, label, cid, &nid);
