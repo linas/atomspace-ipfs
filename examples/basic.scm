@@ -11,6 +11,7 @@
 
 ; hostname of IPFS server, and a key name ...
 ; (ipfs-open "ipfs://localhost/demo-atomspace")
+; (ipfs-open "ipfs://localhost:5001/demo-atomspace")
 (ipfs-open "ipfs:///demo-atomspace")
 
 ; Get the IPFS CID of the current AtomSpace.

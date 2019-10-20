@@ -43,13 +43,18 @@
 "
  ipfs-open URL - Open a connection to an IPFS server.
 
-    The URL must be one of these formats:
-       ipfs:///KEY-NAME
-       ipfs://HOST/KEY-NAME
+  The URL must be one of these formats:
+     ipfs:///KEY-NAME
+     ipfs://HOSTNAME/KEY-NAME
+     ipfs://HOSTNAME:PORT/KEY-NAME
+
+  If no hostname is specified, its assumed to be 'localhost'. If no port
+  is specified, its assumed to be 5001.
 
   Examples of use with valid URL's:
-     (ipfs-open \"ipfs://localhost/atomspace-test\")
      (ipfs-open \"ipfs:///atomspace-test\")
+     (ipfs-open \"ipfs://localhost/atomspace-test\")
+     (ipfs-open \"ipfs://localhost:5001/atomspace-test\")
 ")
 
 (set-procedure-property! ipfs-store 'documentation
@@ -79,6 +84,7 @@
 
      See also `ipns-atomspace-cid`.
 ")
+
 (set-procedure-property! ipns-atomspace-cid 'documentation
 "
  ipns-atomspace-cid - Return the string CID of the IPNS entry of the

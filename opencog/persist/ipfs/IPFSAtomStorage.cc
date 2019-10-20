@@ -43,6 +43,7 @@ void IPFSAtomStorage::init(const char * uri)
 	// We expect the URI to be for the form
 	//    ipfs:///atomspace-key
 	//    ipfs://hostname/atomspace-key
+	//    ipfs://hostname:port/atomspace-key
 	// where the key will be used to publish the IPNS for the atomspace.
 
 	_port = 5001;
@@ -61,6 +62,15 @@ void IPFSAtomStorage::init(const char * uri)
 		size_t len = p - start;
 		_hostname.resize(len);
 		_keyname = &uri[len+URIX_LEN+1];
+
+		// Search for a port, if present.
+		p = strchr((char *)start, ':');
+		if (p)
+		{
+			_port = atoi(p+1);
+			size_t len = p - start;
+			_hostname.resize(len);
+		}
 	}
 
 	// Create pool of IPFS server connections.
