@@ -41,9 +41,10 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 	const std::string& data = object["Data"];
 	const char * str = data.c_str();
 
-#define DEMARC "\b\u0002\u0012\u001f("
+#define DEMARC "\b\u0002\u0012q("
+#define FEMARC "\b\u0002\u0012\u001f("
 #define DEMLEN (sizeof(DEMARC) - 1)
-	if (strncmp(str, DEMARC, DEMLEN))
+	if (strncmp(str, DEMARC, DEMLEN) and strncmp(str, FEMARC, DEMLEN))
 		throw RuntimeException(TRACE_INFO, "Not an Atom! %s\n", str);
 
 	return decodeAtom(&str[DEMLEN-1]);
@@ -69,14 +70,34 @@ printf("duude typer=%d %s\n", t, nameserver().getTypeName(t).c_str());
 		if (name_end == std::string::npos)
 			throw RuntimeException(TRACE_INFO, "Bad Atom string! %s\n", scm.c_str());
 		scm[name_end] = 0;
-		Handle h(createNode(t, &scm[name_start+1]));
-printf("duuude made it %s\n", h->to_string().c_str());
-		return h;
+		return createNode(t, &scm[name_start+1]);
 	}
-printf("duude not a node!\n");
 
-	Handle h;
-	return h;
+	if (not nameserver().isLink(t))
+		throw RuntimeException(TRACE_INFO, "Bad Atom string! %s\n", scm.c_str());
+
+	// If we are here, its a Link.
+	HandleSeq oset;
+	size_t oset_start = scm.find('(', pos+1);
+	while (oset_start != std::string::npos)
+	{
+		oset.push_back(decodeAtom(&scm[oset_start]));
+
+		// Find the next balanced paren, and restart there.
+		// This is not very efficient, but it works.
+		size_t pos = oset_start;
+		int pcnt = 1;
+		while (0 < pcnt and pos != std::string::npos)
+		{
+			char c = scm[++pos];
+			if ('(' == c) pcnt ++;
+			else if (')' == c) pcnt--;
+		}
+		if (pos == std::string::npos) break;
+		oset_start = scm.find('(', pos+1);
+	}
+
+	return createLink(oset, t);
 }
 
 /* ================================================================ */
