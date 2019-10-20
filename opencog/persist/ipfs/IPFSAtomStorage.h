@@ -134,12 +134,9 @@ class IPFSAtomStorage : public BackingStore
 
 		// --------------------------
 		// Performance statistics
-		std::atomic<size_t> _num_get_nodes;
+		std::atomic<size_t> _num_get_atoms;
 		std::atomic<size_t> _num_got_nodes;
-		std::atomic<size_t> _num_rec_nodes;
-		std::atomic<size_t> _num_get_links;
 		std::atomic<size_t> _num_got_links;
-		std::atomic<size_t> _num_rec_links;
 		std::atomic<size_t> _num_get_insets;
 		std::atomic<size_t> _num_get_inlinks;
 		std::atomic<size_t> _num_node_inserts;

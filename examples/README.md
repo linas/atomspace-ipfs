@@ -2,5 +2,6 @@
 AtomSpace-IPFS Examples
 -----------------------
 
-* basic.scm - A simple example of creating, saving and viewing Atoms.
-* bulk.scm  - Bulk save and restore of entire AtomSpaces.
+* basic.scm      - Creating, saving and viewing Atoms.
+* bulk-save.scm  - Bulk save of an entire AtomSpaces.
+* restore.scm    - Fetch of individual Atoms and entire AtomSpaces.

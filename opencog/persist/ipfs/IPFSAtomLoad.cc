@@ -47,6 +47,7 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 	if (strncmp(str, DEMARC, DEMLEN) and strncmp(str, FEMARC, DEMLEN))
 		throw RuntimeException(TRACE_INFO, "Not an Atom! %s\n", str);
 
+	_num_get_atoms++;
 	return decodeAtom(&str[DEMLEN-1]);
 }
 
@@ -60,7 +61,6 @@ Handle IPFSAtomStorage::decodeAtom(std::string scm)
 	scm[pos] = 0;
 
 	Type t = nameserver().getType(&scm[1]);
-printf("duude typer=%d %s\n", t, nameserver().getTypeName(t).c_str());
 	if (nameserver().isNode(t))
 	{
 		size_t name_start = scm.find('"', pos+1);
@@ -70,6 +70,7 @@ printf("duude typer=%d %s\n", t, nameserver().getTypeName(t).c_str());
 		if (name_end == std::string::npos)
 			throw RuntimeException(TRACE_INFO, "Bad Atom string! %s\n", scm.c_str());
 		scm[name_end] = 0;
+		_num_got_nodes ++;
 		return createNode(t, &scm[name_start+1]);
 	}
 
@@ -97,6 +98,7 @@ printf("duude typer=%d %s\n", t, nameserver().getTypeName(t).c_str());
 		oset_start = scm.find('(', pos+1);
 	}
 
+	_num_got_links ++;
 	return createLink(oset, t);
 }
 

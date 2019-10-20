@@ -1,8 +1,7 @@
 ;
-; bulk.scm
+; bulk-save.scm
 ;
-; Simple example of bulk save ad restore: saving and restoring entire
-; AtomSpaces.
+; Simple example of the bulk save of an entire AtomSpace.
 ;
 (use-modules (opencog))
 (use-modules (opencog persist))

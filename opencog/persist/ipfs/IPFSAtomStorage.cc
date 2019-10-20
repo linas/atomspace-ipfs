@@ -354,12 +354,9 @@ void IPFSAtomStorage::clear_stats(void)
 
 	_write_queue.clear_stats();
 
-	_num_get_nodes = 0;
+	_num_get_atoms = 0;
 	_num_got_nodes = 0;
-	_num_rec_nodes = 0;
-	_num_get_links = 0;
 	_num_got_links = 0;
-	_num_rec_links = 0;
 	_num_get_insets = 0;
 	_num_get_inlinks = 0;
 	_num_node_inserts = 0;
@@ -396,24 +393,16 @@ void IPFSAtomStorage::print_stats(void)
 	       num_atom_removes, num_atom_deletes);
 	printf("\n");
 
-	size_t num_get_nodes = _num_get_nodes;
+	size_t num_get_atoms = _num_get_atoms;
 	size_t num_got_nodes = _num_got_nodes;
-	size_t num_rec_nodes = _num_rec_nodes;
-	size_t num_get_links = _num_get_links;
 	size_t num_got_links = _num_got_links;
-	size_t num_rec_links = _num_rec_links;
 	size_t num_get_insets = _num_get_insets;
 	size_t num_get_inlinks = _num_get_inlinks;
 	size_t num_node_inserts = _num_node_inserts;
 	size_t num_link_inserts = _num_link_inserts;
 
-	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
-	printf("num_get_nodes=%zu num_got_nodes=%zu (%f pct) recursive=%zu\n",
-	       num_get_nodes, num_got_nodes, frac, num_rec_nodes);
-
-	frac = 100.0 * num_got_links / ((double) num_get_links);
-	printf("num_get_links=%zu num_got_links=%zu (%f pct) recursive=%zu\n",
-	       num_get_links, num_got_links, frac, num_rec_links);
+	printf("num_get_atoms=%zu num_got_nodes=%zu num_got_links=%zu\n",
+	       num_get_atoms, num_got_nodes, num_got_links);
 
 	frac = num_get_inlinks / ((double) num_get_insets);
 	printf("num_get_incoming_sets=%zu set total=%zu avg set size=%f\n",
