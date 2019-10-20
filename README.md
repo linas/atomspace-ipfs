@@ -70,6 +70,8 @@ The file directory layout is the same as that of the atomspace.
 
 * Use pubsub to publish value updates.
 
+* The current encoding is gonna do alpha-equivalnce all wrong.
+
 ## Prereqs
 
 * Clone and build the atomspace.

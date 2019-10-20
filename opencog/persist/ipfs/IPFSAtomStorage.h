@@ -57,6 +57,7 @@ class IPFSAtomStorage : public BackingStore
 		// The IPFS CID of the current atomspace.
 		std::string _atomspace_cid;
 		std::string _keyname;
+		std::string _key_cid;
 
 		// Pool of shared connections
 		concurrent_stack<ipfs::Client*> conn_pool;
@@ -186,6 +187,7 @@ class IPFSAtomStorage : public BackingStore
 		IPFSAtomStorage& operator=(const IPFSAtomStorage&) = delete; // disable assignment
 		virtual ~IPFSAtomStorage();
 		bool connected(void); // connection to DB is alive
+		std::string get_ipns_cid(void);
 
 		void kill_data(void); // destroy DB contents
 

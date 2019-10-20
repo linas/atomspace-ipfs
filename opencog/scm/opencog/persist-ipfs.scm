@@ -12,7 +12,7 @@
 	"opencog_persist_ipfs_init")
 
 (export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
-	ipfs-store ipfs-stats)
+	ipfs-store ipfs-stats ipns-atomspace-cid)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -67,4 +67,15 @@
     This will cause some database performance statistics to be printed
     to the stdout of the server. These statistics can be quite arcane
     and are useful primarily to the developers of the database backend.
+")
+
+(set-procedure-property! ipns-atomspace-cid 'documentation
+"
+ ipns-atomspace-cid - Return the string CID of the IPNS entry of the
+     current AtomSpace.  An example of a returned value is
+        \"/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx\"
+     This can be used to access the AtomSpace and to explore it
+     using an IPFS explorer.  For example, the actual atomspace can
+     be found by issueing the bash shell command
+        `ipfs name resolve /ipns/Qm...VHx`
 ")
