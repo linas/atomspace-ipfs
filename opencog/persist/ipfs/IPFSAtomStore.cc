@@ -57,7 +57,10 @@ void IPFSAtomStorage::do_store_atom(const Handle& h)
 	if (not not_yet_stored(h)) return;
 
 	if (h->is_node())
+	{
 		do_store_single_atom(h);
+		return;
+	}
 
 	// Recurse.
 	for (const Handle& ho: h->getOutgoingSet())
