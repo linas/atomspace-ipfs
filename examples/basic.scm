@@ -29,3 +29,12 @@
 ; Publish it to IPNS. The new AtomSpace doesn't become visible until
 ; it is published via IPNS.
 (barrier)
+
+; Try again, with something more complex
+(define e
+	(Evaluation
+		(Predicate "Some relationship")
+		(List (Concept "foo") (Concept "bar"))))
+
+(store-atom e)
+(barrier)

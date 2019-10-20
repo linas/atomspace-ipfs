@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <chrono>
 #include <thread>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -100,7 +101,9 @@ void IPFSAtomStorage::init(const char * uri)
 	_publish_keep_going = true;
 	std::thread publisher(publish_thread, this);
 	publisher.detach();
-	std::this_thread::yield();
+	// std::this_thread::yield();
+	// std::this_thread::sleep_for(50ms);
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
 	kill_data();
@@ -185,15 +188,12 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid,
                                            const std::string& label)
 {
-	std::cout << "duude gonna add " << label << " with the CID! " << cid <<  std::endl;
-
 	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
 	// We can't just catch, we need to rethrow, too.
 	ipfs::Client* conn = conn_pool.pop();
 	std::string new_as_id;
 	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
 	_atomspace_cid = new_as_id;
-std::cout << "duuude newest atomspace is " << _atomspace_cid << std::endl;
 	conn_pool.push(conn);
 }
 

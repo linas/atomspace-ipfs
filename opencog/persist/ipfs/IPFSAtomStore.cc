@@ -92,31 +92,36 @@ bool IPFSAtomStorage::not_yet_stored(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
-	if (h->is_node())
+	// Build the JSON message, and fire it off.
+	// XXX FIXME If ipfs throws, then this leaks from the pool
+	// We can't just catch here, we need to re-throw too.
+	ipfs::Json result;
+	ipfs::Client* conn = conn_pool.pop();
+	std::string name = h->to_short_string();
+	conn->FilesAdd({{ name,
+		ipfs::http::FileUpload::Type::kFileContents, name}},
+		&result);
+	_already_in_ipfs.insert(h);
+
+	std::string id = result[0]["hash"];
+
+	if (h->is_link())
 	{
-		// Build the JSON message, and fire it off.
-		// XXX FIXME If ipfs throws, then this leaks from the pool
-		// We can't just catch here, we need to re-throw too.
-		std::string name = "("
-		   + nameserver().getTypeName(h->get_type())
-			+ " \"" + h->get_name() + "\")";
-		ipfs::Json result;
-		ipfs::Client* conn = conn_pool.pop();
-		conn->FilesAdd({{ name,
-			ipfs::http::FileUpload::Type::kFileContents, name}},
-			&result);
-		conn_pool.push(conn);
-		_already_in_ipfs.insert(h);
-
-		std::string id = result[0]["hash"];
-		std::cout << "addNode: " << name << "   CID: " << id << std::endl;
-
-		// OK, the atom itself is in IPFS; add it to the atomspace,
-		// too.
-		add_cid_to_atomspace(id, name);
-		return;
+		// Not terribly efficient, but what else?
+		for (const Handle& hout: h->getOutgoingSet())
+		{
+			std::string label = hout->to_short_string();
+			std::string nid;
+			conn->ObjectPatchAddLink(id, label, label, &nid);
+			id = nid;
+		}
 	}
-	throw SyntaxException(TRACE_INFO, "Not implemented!\n");
+	conn_pool.push(conn);
+
+	std::cout << "addAtom: " << name << "   CID: " << id << std::endl;
+
+	// OK, the atom itself is in IPFS; add it to the atomspace, too.
+	add_cid_to_atomspace(id, name);
 
 	_store_count ++;
 

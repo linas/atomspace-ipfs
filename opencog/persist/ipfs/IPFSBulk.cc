@@ -9,9 +9,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <chrono>
-#include <memory>
-
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/oc_omp.h>
 
