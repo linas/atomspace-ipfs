@@ -83,7 +83,7 @@ void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type 
 
 /* ================================================================ */
 
-void IPFSAtomStorage::load(AtomTable &table)
+void IPFSAtomStorage::load_atomspace(AtomSpace* as, const std::string& cid)
 {
 	rethrow();
 	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
@@ -127,10 +127,10 @@ void IPFSAtomStorage::load(AtomTable &table)
 	printf("Finished loading %zu atoms in total in %d seconds (%d per second)\n",
 		(_load_count - start_count), (int) secs, (int) rate);
 	bulk_load = false;
-#endif
 
 	// synchrnonize!
 	table.barrier();
+#endif
 }
 
 void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
@@ -138,9 +138,8 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 	rethrow();
 	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 
-	size_t start_count = _load_count;
-
 #if 0
+	size_t start_count = _load_count;
 
 #define NCHUNKS 300
 #define MINSTEP 10123
@@ -178,13 +177,13 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 		               "Loaded %lu atoms of type %d at height %d\n",
 			_load_count - cur, db_atom_type, hei);
 	}
-#endif
 
 	logger().debug("IPFSAtomStorage::loadType: Finished loading %zu atoms in total\n",
 		_load_count- start_count);
 
 	// Synchronize!
 	table.barrier();
+#endif
 }
 
 /// Store all of the atoms in the atom table.
@@ -224,7 +223,10 @@ void IPFSAtomStorage::storeAtomSpace(AtomSpace* atomspace)
 
 void IPFSAtomStorage::loadAtomSpace(AtomSpace* atomspace)
 {
-	load(atomspace->get_atomtable());
+	// XXX This is wrong, it should instead do an IPNS resolve
+	// and load that!
+	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
+	load_atomspace(atomspace, _atomspace_cid);
 }
 
 /* ============================= END OF FILE ================= */

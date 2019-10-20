@@ -42,6 +42,7 @@ public:
 	void do_store(void);
 	std::string do_atom_cid(const Handle&);
 	Handle do_fetch_atom(const std::string&);
+	void do_load_atomspace(const std::string&);
 	std::string do_ipfs_atomspace(void);
 	std::string do_ipns_atomspace(void);
 

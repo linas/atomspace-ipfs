@@ -167,6 +167,7 @@ class IPFSAtomStorage : public BackingStore
 
 		std::string get_atom_cid(const Handle&);
 		Handle fetch_atom(const std::string&);
+		void load_atomspace(AtomSpace*, const std::string&);
 
 		void kill_data(void); // destroy DB contents
 
@@ -190,7 +191,6 @@ class IPFSAtomStorage : public BackingStore
 		// Large-scale loads and saves
 		void loadAtomSpace(AtomSpace*);
 		void storeAtomSpace(AtomSpace*);
-		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
 
 		// Debugging and performance monitoring

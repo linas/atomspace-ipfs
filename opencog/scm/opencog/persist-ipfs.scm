@@ -102,6 +102,17 @@
      See also `ipfs-atom-cid` for the inverse operation.
 ")
 
+(set-procedure-property! ipfs-load-atomspace 'documentation
+"
+ ipfs-load-atomspace CID - Load all Atoms from the CID into the AtomSpace.
+
+   For example:
+      `(ipfs-load-atomspace \"QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU\")`
+   should load the atomspace from `basic.scm` example.
+
+   See also `ipfs-fetch-atom` for loading individual atoms.
+")
+
 (set-procedure-property! ipfs-atomspace-cid 'documentation
 "
  ipfs-atomspace-cid - Return the string CID of the IPFS entry of the
