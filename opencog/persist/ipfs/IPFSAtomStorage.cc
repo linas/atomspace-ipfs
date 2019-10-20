@@ -237,12 +237,12 @@ void IPFSAtomStorage::flushStoreQueue()
 	rethrow();
 	_write_queue.barrier();
 	rethrow();
-	publish();
 }
 
 void IPFSAtomStorage::barrier()
 {
 	flushStoreQueue();
+	publish();
 }
 
 /* ================================================================ */
