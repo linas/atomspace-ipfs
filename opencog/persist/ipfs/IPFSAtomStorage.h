@@ -76,7 +76,7 @@ class IPFSAtomStorage : public BackingStore
 		void add_cid_to_atomspace(const std::string&, const std::string&);
 
 		// Fetching of atoms.
-		Handle fetchAtom(const std::string&);
+		Handle doFetchAtom(const std::string&);
 
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
@@ -168,6 +168,7 @@ class IPFSAtomStorage : public BackingStore
 		std::string get_ipns_cid(void);
 
 		std::string get_atom_cid(const Handle&);
+		Handle fetch_atom(const std::string&);
 
 		void kill_data(void); // destroy DB contents
 

@@ -13,7 +13,7 @@
 
 (export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
 	ipfs-store ipfs-stats
-	ipfs-atom-cid
+	ipfs-atom-cid ipfs-fetch-atom
 	ipfs-atomspace-cid ipns-atomspace-cid)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
@@ -87,7 +87,19 @@
      This can be used to examine that Atom and to explore it
      using an IPFS explorer.
 
-     See also `ipns-atomspace-cid`.
+     See also `ipfs-fetch-atom` and `ipfs-atomspace-cid`.
+")
+
+(set-procedure-property! ipfs-fetch-atom 'documentation
+"
+ ipfs-fetch-atom CID - Return the Atom associated to the CID.
+
+     For example:
+        `(ipfs-fetch-atom \"QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB\")`
+     should always return
+        `(Concept \"example concept\")`
+
+     See also `ipfs-atom-cid` for the inverse operation.
 ")
 
 (set-procedure-property! ipfs-atomspace-cid 'documentation

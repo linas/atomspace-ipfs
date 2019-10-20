@@ -99,7 +99,6 @@ void IPFSAtomStorage::init(const char * uri)
 		          << _key_cid << std::endl;
 	}
 
-	max_height = 0;
 	bulk_load = false;
 	bulk_store = false;
 	clear_stats();

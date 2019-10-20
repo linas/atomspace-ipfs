@@ -23,6 +23,27 @@ using namespace opencog;
 
 /* ================================================================ */
 
+Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
+{
+	rethrow();
+	Handle h(doFetchAtom(cid));
+	if (h) get_atom_values(h);
+	return h;
+}
+
+Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
+{
+	ipfs::Json object;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->ObjectGet(cid, &object);
+	conn_pool.push(conn);
+	std::cout << "duuude the object" << object.dump(2) << std::endl;
+	Handle h;
+	return h;
+}
+
+/* ================================================================ */
+
 Handle IPFSAtomStorage::getNode(Type t, const char * str)
 {
 	rethrow();
