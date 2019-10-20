@@ -64,6 +64,9 @@
 (store-atom e)
 (barrier)
 
+; Likewise, view the CID for the EvaluationLink:
+(ipfs-atom-cid e)
+
 ; The expected CID's for the above are:
 ;
 ; QmdhTzU8QJ2ffhLBzfBeT12scY39N4oZ1roGrLGkSKZnMj (Concept "foo")

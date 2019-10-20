@@ -206,24 +206,11 @@ void IPFSAtomStorage::store(const AtomTable &table)
 {
 	rethrow();
 
-	max_height = 0;
+	logger().info("Bulk store of AtomSpace\n");
+
 	_store_count = 0;
-
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-
-#if 0
-	logger().info("Bulk store to database with max UUID=%lu\n",
-		 max_uuid);
-
-	// If we are storing to an absolutely empty database, then
-	// skip all UUID lookups completely!  This is not a safe
-	// operation for non-empty databases, but has a big performance
-	// impact for clean stores.
-	// uuid==1 is PredicateNode TruthValueKey
-	// uuid==2 is unissued.
-	if (2 >= max_uuid) bulk_store = true;
-
 	bulk_start = time(0);
+	bulk_store = true;
 
 	// Try to knock out the nodes first, then the links.
 	table.foreachHandleByType(
@@ -235,25 +222,23 @@ void IPFSAtomStorage::store(const AtomTable &table)
 		LINK, true);
 
 	flushStoreQueue();
-#endif
 	bulk_store = false;
 
 	time_t secs = time(0) - bulk_start;
 	double rate = ((double) _store_count) / secs;
 	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
 		(unsigned long) _store_count, (int) secs, (int) rate);
+	printf("\tAtomSpace CID: %s\n", _atomspace_cid.c_str());
 }
 
 void IPFSAtomStorage::storeAtomSpace(AtomSpace* atomspace)
 {
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	// store(atomspace->get_atomtable());
+	store(atomspace->get_atomtable());
 }
 
 void IPFSAtomStorage::loadAtomSpace(AtomSpace* atomspace)
 {
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	// load(atomspace->get_atomtable());
+	load(atomspace->get_atomtable());
 }
 
 /* ============================= END OF FILE ================= */

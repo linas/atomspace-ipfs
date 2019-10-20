@@ -40,6 +40,7 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 		store_atom_values(h);
 		return;
 	}
+
 	// _write_queue.enqueue(h);
 	_write_queue.insert(h);
 }
@@ -53,11 +54,10 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
  */
 void IPFSAtomStorage::do_store_atom(const Handle& h)
 {
+	if (not not_yet_stored(h)) return;
+
 	if (h->is_node())
-	{
 		do_store_single_atom(h);
-		return;
-	}
 
 	// Recurse.
 	for (const Handle& ho: h->getOutgoingSet())
@@ -70,7 +70,7 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 {
 	try
 	{
-		if (not_yet_stored(h)) do_store_atom(h);
+		do_store_atom(h);
 		store_atom_values(h);
 	}
 	catch (...)
