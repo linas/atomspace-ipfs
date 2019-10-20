@@ -37,7 +37,8 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 	ipfs::Client* conn = conn_pool.pop();
 	conn->ObjectGet(cid, &object);
 	conn_pool.push(conn);
-std::cout << "duuude the object" << object.dump(2) << std::endl;
+
+	// std::cout << "The object is:" << object.dump(2) << std::endl;
 	const std::string& data = object["Data"];
 	const char * str = data.c_str();
 

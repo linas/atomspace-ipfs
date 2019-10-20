@@ -20,7 +20,7 @@
 ;     (ConceptNode "example concept")
 (ipfs-fetch-atom "QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB")
 
-; Restore an EvaluationLink. This too should be in IPFGS already.
+; Restore an EvaluationLink. This too should be in IPFS already.
 ; This should return
 ; (EvaluationLink
 ;    (PredicateNode "Some relationship")
@@ -30,6 +30,17 @@
 ;    )
 ; )
 (ipfs-fetch-atom "QmdQwLMqC6fyAGa6xztV6y53NqyZwiGW4fvngPtukjBraZ")
+
+; Review the stats
+(ipfs-stats)
+
+; Or one can fetch the entire contents of the AtomSpace. The CID
+; below should already be in the AtomSpace, as it was created by
+; the earlier examples (specifically, the basic.scm example).
+(ipfs-load-atomspace "QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU")
+
+; Verify the AtomSpace contents
+(cog-prt-atomspace)
 
 ; Review the stats
 (ipfs-stats)

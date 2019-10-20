@@ -86,40 +86,27 @@ void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type 
 void IPFSAtomStorage::load_atomspace(AtomSpace* as, const std::string& cid)
 {
 	rethrow();
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 
-#if 0
 	size_t start_count = _load_count;
-	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
-		max_nrec, max_height);
+	printf("Loading all atoms from %s\n", cid.c_str());
 	bulk_load = true;
 	bulk_start = time(0);
 
+	ipfs::Json object;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->ObjectGet(cid, &object);
+	conn_pool.push(conn);
+	// std::cout << "The object is:" << object.dump(2) << std::endl;
 
-#define NCHUNKS 300
-#define MINSTEP 10123
-	std::vector<unsigned long> steps;
-	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
-	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
-		steps.push_back(rec);
-
-	printf("Loading all atoms: "
-		"Max Height is %d stepsize=%lu chunks=%zu\n",
-		 max_height, stepsize, steps.size());
-
-	// Parallelize always.
-	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
-
-	for (int hei=0; hei<=max_height; hei++)
+	auto atom_list = object["Links"];
+	for (auto acid: atom_list)
 	{
-		unsigned long cur = _load_count;
+		// std::cout << "Atom CID is: " << acid["Hash"] << std::endl;
 
-		OMP_ALGO::for_each(steps.begin(), steps.end(),
-			[&](unsigned long rec)
-		{
-			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		});
-		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
+		// Rather than fetching objects, we just part the raw string.
+		// That seems faster, simpler, easier.
+		as->add_atom(decodeAtom(acid["Name"]));
+		_load_count++;
 	}
 
 	time_t secs = time(0) - bulk_start;
@@ -129,28 +116,15 @@ void IPFSAtomStorage::load_atomspace(AtomSpace* as, const std::string& cid)
 	bulk_load = false;
 
 	// synchrnonize!
-	table.barrier();
-#endif
+	as->barrier();
 }
 
 void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
 	rethrow();
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 
 #if 0
 	size_t start_count = _load_count;
-
-#define NCHUNKS 300
-#define MINSTEP 10123
-	std::vector<unsigned long> steps;
-	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
-	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
-		steps.push_back(rec);
-
-	logger().debug("IPFSAtomStorage::loadType: "
-		"Max Height is %d stepsize=%lu chunks=%lu\n",
-		 max_height, stepsize, steps.size());
 
 	// Parallelize always.
 	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
@@ -182,7 +156,7 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 		_load_count- start_count);
 
 	// Synchronize!
-	table.barrier();
+	as->barrier();
 #endif
 }
 
