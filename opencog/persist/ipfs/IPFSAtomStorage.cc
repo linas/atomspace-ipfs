@@ -339,6 +339,8 @@ void IPFSAtomStorage::clear_stats(void)
 void IPFSAtomStorage::print_stats(void)
 {
 	printf("ipfs-stats: Currently open URI: %s\n", _uri.c_str());
+	printf("ipfs-stats: IPNS name: /ipns/%s\n", _key_cid.c_str());
+	printf("ipfs-stats: curr  CID: /ipfs/%s\n", _atomspace_cid.c_str());
 	time_t now = time(0);
 	// ctime returns string with newline at end of it.
 	printf("ipfs-stats: Time since stats reset=%lu secs, at %s",
