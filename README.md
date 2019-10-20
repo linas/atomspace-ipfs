@@ -13,12 +13,13 @@ an associated (mutable)
 The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases.
 
-## Pre-alpha version 0.0.2
+## Alpha version 0.0.3
 
-**Status**: Design alternatives are being explored.
-It is possible to save Atoms to IPFS, but not values.  It is not yet
-possible to restore an AtomSpace from IPFS.  You can explore by building
-this code, and then running the `examples/basic.scm` demo.
+**Status**: Design alternatives are being explored. In the current
+implementation:
+ * It is possible to save Atoms to IPFS, but not values.
+ * AtomSpaces can be saved and restored in bulk. See the
+   [examples](examples).
 
 The design for Values is unknown and likely to be challenging.
 
@@ -27,7 +28,6 @@ This implementation will be just a standard `BackingStore`
 implementation to the current Atomspace backend API.
 
 The file directory layout is the same as that of the atomspace.
-
 
 ### Design requirements:
 * To get any hope of uniqueness and non-collision of Atoms, this will
