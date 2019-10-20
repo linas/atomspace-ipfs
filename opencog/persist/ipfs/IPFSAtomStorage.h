@@ -84,7 +84,7 @@ class IPFSAtomStorage : public BackingStore
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
-		std::set<Handle> _already_in_ipfs;
+		std::map<Handle, std::string> _ipfs_cid_map;
 
 		void do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);

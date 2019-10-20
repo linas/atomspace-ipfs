@@ -81,7 +81,7 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 
 bool IPFSAtomStorage::not_yet_stored(const Handle& h)
 {
-	return _already_in_ipfs.end() == _already_in_ipfs.find(h);
+	return _ipfs_cid_map.end() == _ipfs_cid_map.find(h);
 }
 
 /* ================================================================ */
@@ -93,30 +93,33 @@ bool IPFSAtomStorage::not_yet_stored(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
+	std::string name = h->to_short_string();
+	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+
 	// Build the JSON message, and fire it off.
 	// XXX FIXME If ipfs throws, then this leaks from the pool
 	// We can't just catch here, we need to re-throw too.
 	ipfs::Json result;
 	ipfs::Client* conn = conn_pool.pop();
-	std::string name = h->to_short_string();
-	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
 	conn->FilesAdd({{ name,
 		ipfs::http::FileUpload::Type::kFileContents, name}},
 		&result);
-	_already_in_ipfs.insert(h);
 
 	std::string id = result[0]["hash"];
+	_ipfs_cid_map.insert({h, id});
 
 	if (h->is_link())
 	{
 		// Not terribly efficient, but what else?
+		int i=0;
 		for (const Handle& hout: h->getOutgoingSet())
 		{
-			std::string label = hout->to_short_string();
-			label.erase(std::remove(label.begin(), label.end(), '\n'), label.end());
+			std::string label = "outgoing-" + std::to_string(i);
+			std::string name = _ipfs_cid_map.find(hout)->second;
 			std::string nid;
-			conn->ObjectPatchAddLink(id, label, label, &nid);
+			conn->ObjectPatchAddLink(id, label, name, &nid);
 			id = nid;
+			i++;
 		}
 	}
 	conn_pool.push(conn);
