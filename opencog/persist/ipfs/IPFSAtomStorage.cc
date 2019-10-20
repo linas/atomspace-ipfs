@@ -81,38 +81,43 @@ void IPFSAtomStorage::init(const char * uri)
 		conn_pool.push(conn);
 	}
 
-	// Create the IPFS key, if it does not yet exist.
-	try
-	{
-		ipfs::Client clnt(_hostname, _port);
-		clnt.KeyNew(_keyname, &_key_cid);
-		std::cout << "Generated AtomSpace key: /ipns/"
-		          << _key_cid << std::endl;
-	}
-	catch (const std::exception& e)
-	{
-		// If we are here, the key already exists. We just
-		// want to get git it's CID.
-		ipfs::Client clnt(_hostname, _port);
-		clnt.KeyFind(_keyname, &_key_cid);
-		std::cout << "Found existing AtomSpace key: /ipns/"
-		          << _key_cid << std::endl;
-	}
-
 	bulk_load = false;
 	bulk_store = false;
 	clear_stats();
 
-	// We run IPNS publication in it's own thread, because it's so
-	// horridly slow.  As of this writing, either 60 sec or 90 sec.
-	// This is a well-known problem, see
-	// https://github.com/ipfs/go-ipfs/issues/3860
-	_publish_keep_going = true;
-	std::thread publisher(publish_thread, this);
-	publisher.detach();
-	// std::this_thread::yield();
-	// std::this_thread::sleep_for(50ms);
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	// Create the IPNS key under which we will publish,
+	// if it does not yet exist.
+	_publish_keep_going = false;
+	if (0 < _keyname.size())
+	{
+		try
+		{
+			ipfs::Client clnt(_hostname, _port);
+			clnt.KeyNew(_keyname, &_key_cid);
+			std::cout << "Generated AtomSpace key: /ipns/"
+			          << _key_cid << std::endl;
+		}
+		catch (const std::exception& e)
+		{
+			// If we are here, the key already exists. We just
+			// want to get git it's CID.
+			ipfs::Client clnt(_hostname, _port);
+			clnt.KeyFind(_keyname, &_key_cid);
+			std::cout << "Found existing AtomSpace key: /ipns/"
+			          << _key_cid << std::endl;
+		}
+
+		// We run IPNS publication in it's own thread, because it's so
+		// horridly slow.  As of this writing, either 60 sec or 90 sec.
+		// This is a well-known problem, see
+		// https://github.com/ipfs/go-ipfs/issues/3860
+		_publish_keep_going = true;
+		std::thread publisher(publish_thread, this);
+		publisher.detach();
+		// std::this_thread::yield();
+		// std::this_thread::sleep_for(50ms);
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
 
 	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
 	kill_data();

@@ -9,6 +9,8 @@
 (use-modules (opencog persist-ipfs))
 
 ; Open connection to the IPFS server.
+; Note that we don't need any keys, if we are not publishing
+; to IPNS.
 ; (ipfs-open "ipfs://localhost/")
 ; (ipfs-open "ipfs://localhost:5001/")
 (ipfs-open "ipfs:///")
