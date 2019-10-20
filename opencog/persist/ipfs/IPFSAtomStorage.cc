@@ -206,10 +206,22 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 		// XXX hack alert -- lifetime set to 4 hours, it should be
 		// infinity or something.... the TTL is 30 seconds, but should
 		// be shorter or user-configurable .. set both with scheme bindings.
-		std::string name;
-		clnt.NamePublish(self->_atomspace_cid,
-		                 self->_keyname, &name, "4h", "30s");
-		std::cout << "Published AtomSpace: " << name << std::endl;
+		try
+		{
+			std::string name;
+			clnt.NamePublish(self->_atomspace_cid,
+			                 self->_keyname, &name, "4h", "30s");
+			std::cout << "Published AtomSpace: " << name << std::endl;
+		}
+		catch (const std::exception& ex)
+		{
+			// Arghh. IPNS keeps throwing this error:
+			// "can't replace a newer value with an older value"
+			// which is insane, because maybe I *do* want to do exactly
+			// that!  So WTF ... another IPNS bug.
+			std::cerr << "Failed to publish AtomSpace IPNS entry: "
+			          << ex.what() << std::endl;
+		}
 	}
 }
 
