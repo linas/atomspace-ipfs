@@ -12,7 +12,9 @@
 	"opencog_persist_ipfs_init")
 
 (export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
-	ipfs-store ipfs-stats ipfs-atomspace-cid ipns-atomspace-cid)
+	ipfs-store ipfs-stats
+	ipfs-atom-cid
+	ipfs-atomspace-cid ipns-atomspace-cid)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -74,13 +76,28 @@
     and are useful primarily to the developers of the database backend.
 ")
 
+(set-procedure-property! ipfs-atom-cid 'documentation
+"
+ ipfs-atom-cid ATOM - Return the string CID of the IPFS entry of ATOM.
+
+     For example:
+         `(ipfs-atom-cid (Concept \"example concept\"))`
+     should always return
+        \"/ipfs/QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB\"
+     This can be used to examine that Atom and to explore it
+     using an IPFS explorer.
+
+     See also `ipns-atomspace-cid`.
+")
+
 (set-procedure-property! ipfs-atomspace-cid 'documentation
 "
  ipfs-atomspace-cid - Return the string CID of the IPFS entry of the
      current AtomSpace.  An example of a returned value is
-        \"/ipfs/QmWhDdyKhLJ55ERnbP1i7YsSM7jZFQfESNqZFFquUduLSe\"
+        \"/ipfs/QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU\"
      This can be used to access the AtomSpace and to explore it
-     using an IPFS explorer.
+     using an IPFS explorer. One public explorer is
+        `https://explore.ipld.io/#/explore/`
 
      See also `ipns-atomspace-cid`.
 ")

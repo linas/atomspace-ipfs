@@ -42,10 +42,14 @@
 (define c (Concept "example concept"))
 
 ; Publish it to IPFS.  This will create a new IPFS object that encodes
-; an AtomSpace with this atom in it. The CID that will be assigned to
-; this Atom should be exactly
-; /ipfs/QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB
+; an AtomSpace with this atom in it.
 (store-atom c)
+
+; Examine the CID of the Atom.  This should return exactly
+;     /ipfs/QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB
+; It can now be viewed with a network explorer, for example,
+; at https://explore.ipld.io/#/explore/
+(ipfs-atom-cid c)
 
 ; Publish it to IPNS. The new AtomSpace doesn't become visible until
 ; it is published via IPNS.

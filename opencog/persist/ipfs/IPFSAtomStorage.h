@@ -190,6 +190,8 @@ class IPFSAtomStorage : public BackingStore
 		std::string get_ipfs_cid(void);
 		std::string get_ipns_cid(void);
 
+		std::string get_atom_cid(const Handle&);
+
 		void kill_data(void); // destroy DB contents
 
 		void registerWith(AtomSpace*);

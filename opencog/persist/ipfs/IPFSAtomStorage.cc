@@ -166,6 +166,16 @@ std::string IPFSAtomStorage::get_ipns_cid(void)
 }
 
 /**
+ * Return the IPFS CID of the given Atom.
+ */
+std::string IPFSAtomStorage::get_atom_cid(const Handle& h)
+{
+	if (not_yet_stored(h)) do_store_atom(h);
+	const std::string& cid = _ipfs_cid_map.find(h)->second;
+	return "/ipfs/" + cid;
+}
+
+/**
  * Publish the AtomSpace CID to IPNS.
  *
  * We run IPNS publication in it's own thread, because it's so
