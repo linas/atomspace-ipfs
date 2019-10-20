@@ -1,5 +1,10 @@
-
-; Proto-example
+;
+; basic.scm
+;
+; This provides the most basic example of using IPFS to store Atoms.
+; This includes connecting to IPFS, and viewing the resulting Content
+; ID's (CID's) of the Atoms placed into it.
+;
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog persist-ipfs))
