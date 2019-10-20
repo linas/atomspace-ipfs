@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -98,6 +99,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	ipfs::Json result;
 	ipfs::Client* conn = conn_pool.pop();
 	std::string name = h->to_short_string();
+	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
 	conn->FilesAdd({{ name,
 		ipfs::http::FileUpload::Type::kFileContents, name}},
 		&result);
@@ -111,6 +113,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		for (const Handle& hout: h->getOutgoingSet())
 		{
 			std::string label = hout->to_short_string();
+			label.erase(std::remove(label.begin(), label.end(), '\n'), label.end());
 			std::string nid;
 			conn->ObjectPatchAddLink(id, label, label, &nid);
 			id = nid;
