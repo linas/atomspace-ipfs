@@ -84,6 +84,7 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 
 bool IPFSAtomStorage::not_yet_stored(const Handle& h)
 {
+	std::lock_guard<std::mutex> lck(_cid_mutex);
 	return _ipfs_cid_map.end() == _ipfs_cid_map.find(h);
 }
 
@@ -128,7 +129,11 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	}
 	conn_pool.push(conn);
 
-	_ipfs_cid_map.insert({h, id});
+	{
+		// This is multi-threaded; update the tale under a lock.
+		std::lock_guard<std::mutex> lck(_cid_mutex);
+		_ipfs_cid_map.insert({h, id});
+	}
 	std::cout << "addAtom: " << name << "   CID: " << id << std::endl;
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.

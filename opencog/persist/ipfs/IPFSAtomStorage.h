@@ -84,6 +84,7 @@ class IPFSAtomStorage : public BackingStore
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
+		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;
 
 		void do_store_atom(const Handle&);
@@ -154,27 +155,7 @@ class IPFSAtomStorage : public BackingStore
 		std::atomic<size_t> _value_stores;
 		time_t _stats_time;
 
-		// -------------------------------
-		// Type management
-		// The typemap translates between opencog type numbers and
-		// the database type numbers.  Initially, they match up, but
-		// might get askew if new types are added or deleted.
-
-		// TYPEMAP_SZ is defined as the maximum number of possible
-		// OpenCog Types (65536 as Type is currently a short int)
-		static_assert(2 == sizeof(Type),
-		     "*** Typemap needs to be redesigned to handle larger types! ***");
-		#define TYPEMAP_SZ (1 << (8 * sizeof(Type)))
-		int storing_typemap[TYPEMAP_SZ];
-		Type loading_typemap[TYPEMAP_SZ];
-		char * db_typename[TYPEMAP_SZ];
-
-		bool type_map_was_loaded;
-		void load_typemap(void);
-		void setup_typemap(void);
-		void set_typemap(int, const char *);
-		std::mutex _typemap_mutex;
-
+		// --------------------------
 		// Provider of asynchronous store of atoms.
 		// async_caller<IPFSAtomStorage, Handle> _write_queue;
 		async_buffer<IPFSAtomStorage, Handle> _write_queue;
