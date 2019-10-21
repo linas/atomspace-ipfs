@@ -63,6 +63,10 @@ void IPFSAtomStorage::init(const char * uri)
 		_hostname.resize(len);
 		_keyname = &uri[len+URIX_LEN+1];
 
+		// Keys are not allowed to have trailing slashes.
+		size_t pos = _keyname.find('/');
+		if (pos != std::string::npos) _keyname.resize(pos);
+
 		// Search for a port, if present.
 		p = strchr((char *)start, ':');
 		if (p)
