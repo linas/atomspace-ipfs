@@ -90,20 +90,18 @@ void IPFSAtomStorage::init(const char * uri)
 	_publish_keep_going = false;
 	if (0 < _keyname.size())
 	{
-		try
+		ipfs::Client clnt(_hostname, _port);
+		clnt.KeyFind(_keyname, &_key_cid);
+		if (0 < _key_cid.size())
 		{
-			ipfs::Client clnt(_hostname, _port);
-			clnt.KeyNew(_keyname, &_key_cid);
-			std::cout << "Generated AtomSpace key: /ipns/"
+			std::cout << "Found existing AtomSpace key: /ipns/"
 			          << _key_cid << std::endl;
 		}
-		catch (const std::exception& e)
+		else
 		{
-			// If we are here, the key already exists. We just
-			// want to get git it's CID.
-			ipfs::Client clnt(_hostname, _port);
-			clnt.KeyFind(_keyname, &_key_cid);
-			std::cout << "Found existing AtomSpace key: /ipns/"
+			// Not found; make a new one, by default.
+			clnt.KeyNew(_keyname, &_key_cid);
+			std::cout << "Generated AtomSpace key: /ipns/"
 			          << _key_cid << std::endl;
 		}
 
