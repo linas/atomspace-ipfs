@@ -5,6 +5,10 @@
 ; This includes connecting to IPFS, and viewing the resulting Content
 ; ID's (CID's) of the Atoms placed into it.
 ;
+; Before diving into this example, be sure that the IPFS daemon is
+; running. Start it by entering `ipfs daemon` at the bash prompt.
+; Verify that it is running by opening http://localhost:5001/webui
+;
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog persist-ipfs))
@@ -23,7 +27,9 @@
 ; Ths should return something like `/ipfs/Qm...` which can then
 ; be explored using an IPFS data explorer.  Note that this CID
 ; will change every time that an Atom is added to or removed from the
-; AtomSpace.
+; AtomSpace.  The current AtomSpace contents can be viewed with the
+; IPFS explorer at `http://localhost:5001/webui` (by copying the CID
+; into the "explore" entry in the web panel.)
 ;
 (ipfs-atomspace-cid)
 
