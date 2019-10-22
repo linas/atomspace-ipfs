@@ -215,6 +215,11 @@ updates, file-size issues. etc.
 
    This needs `sudo apt install nlohmann-json3-dev`
 
+   API documentation is here:
+   `https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`
+   and here:
+   `https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`
+
 ## Building
 After installing the pre-reqs, do this:
 ```
