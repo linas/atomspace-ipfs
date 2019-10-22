@@ -94,11 +94,9 @@ install mechanisms are the same.
   CID.  The good news: one knows *exactly* which version of an AtomSpace
   one is working with (this is very unlike the current AtomSpace!)
 
-* Long-term: use IPLD to create some kind of Atomspace-specific thing.
-  https://ipld.io/ For now, we are limited to IPFS, which uses a
-  distinctive file format.  Based on the current IPFS implementation,
-  it seems like the only possibility is to fork the IPFS code, and
-  alter it to avoid including Values as part of the CID hash.
+* Change the code to use the new IPFS DAG API instead of the Object API.
+  The DAG API should allow the json contents to more closely mirror
+  actual Atom structures.
 
 * Currently, IPNS is slow. A core assumption in the design is that
   someday, this will be fixed, and IPNS will be fast.  Or that, at
