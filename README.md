@@ -69,11 +69,22 @@ The file directory layout is the same as that of the atomspace.
   it seems like the only possibility is to fork the IPFS code, and
   alter it to avoid including Values as part of the CID hash.
 
-* So we can store values as data in the object. XXX but then oset
-  problems... where does the value go for Links? where is it stored?
-  How is it updated?
+* Each AtomSpace Atom is an IPFS object. The data in each object
+  is an IPNS key. To find the current AtomSpace Value, one looks
+  up the IPNS key.
 
-* How to search incoming set?
+* Can we do more? For a given IPNS key, we could also store the
+  incoming set there... (in addition to the current values).
+
+* But that assumes a single, global AtomSpace.  Want to have different
+  AtomSpaces, each having it's own semi-private, controlled access.
+  So that means a double IPNS indirection.  First indirection: a file
+  that lists all atomspaces that contain thais Atom, and the
+  corresponding IPNS for that Atom in that AtomSpace. The second
+  indirection is that second lookup.  Q: But who has write access to
+  that first file?  How is that managed?
+
+* Q: How to search incoming set? A: See above.
 
 * Use pubsub to publish value updates.
 
