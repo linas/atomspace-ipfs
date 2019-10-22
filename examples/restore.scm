@@ -42,6 +42,15 @@
 ; Verify the AtomSpace contents
 (cog-prt-atomspace)
 
+; Other formats are supported.  The above can also be written as
+(ipfs-load-atomspace "/ipfs/QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU")
+
+; Also, IPNS lookups of atomspaces are supported. For example:
+(ipfs-load-atomspace "/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx")
+; Caution: the above IPNS entry is in active use for develpment, and
+; might resolve into any kind of crazy test atomspace. Or it might not
+; resolve at all...
+
 ; Review the stats
 (ipfs-stats)
 
