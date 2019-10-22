@@ -11,7 +11,7 @@ The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
 an associated (mutable)
 [key-value store](https://wiki.opencog.org/w/Value).
 The Atomspace has a variety of advanced features not normally found
-in ordinary graph databases, including an advanced queryl language
+in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
 ## Alpha version 0.0.3
@@ -33,7 +33,7 @@ being a bottleneck for multiple simultaneous updates.  Therefore,
 implementation is on hold until a design is obtained that could avoid
 this.
 
-A suitable decentralized design *would* be posible, if IPNS was
+A suitable decentralized design *would* be possible, if IPNS was
 extended with one additional feature (or if some other system was
 used, taking the place of IPNS).  Currently, IPNS does this:
 ```
@@ -55,7 +55,7 @@ install mechanisms are the same.
 ### Design requirements:
 * To get any hope of uniqueness and non-collision of Atoms, this will
   require that each atom will get it's own globally unique hash, viz
-  a crypto-secure 256-bit (32-byte) hash. This is considerabley larger
+  a crypto-secure 256-bit (32-byte) hash. This is considerably larger
   than the current non-crypt-secure 64-bit hash used in the current
   AtomSpace implementation.
 
@@ -64,7 +64,7 @@ install mechanisms are the same.
   int's in the AtomSpace) cannot be made global safely.
 
 * The hashes have to include an AtomSpace ID as well. Different
-  Atomspaces might contain atoms that have the same type, name, etc.
+  AtomSpaces might contain atoms that have the same type, name, etc.
   but should not be confused with one-another. (The alternative
   representation would be to take all Atoms as globally unique, but
   then have context-dependent truth values.)
