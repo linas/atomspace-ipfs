@@ -77,6 +77,11 @@ The file directory layout is the same as that of the atomspace.
   it seems like the only possibility is to fork the IPFS code, and
   alter it to avoid including Values as part of the CID hash.
 
+* Currently, IPNS is slow. A core assumption in the design is that
+  someday, this will be fixed, and IPNS will be fast.  Or that, at
+  least, the IPNS latency will be immaterial, and that we'll work with
+  the most-recently-resolved values.
+
 * Each AtomSpace Atom is an IPFS object. Nothing more nor less.
   That means all Atoms are globally unique: all atoms have a single
   persistent hash. (This is what is currently implemented; a design
@@ -84,7 +89,42 @@ The file directory layout is the same as that of the atomspace.
   makes the Atom "effectively private", since the CID is not publicly
   guessable.)
 
-* Q: How to search incoming set? A: See above.
+* Design alternative A:
+  -- Every Atom has a corresponding key. So, millions of keys.
+     The key name is globally unique: it is just the scheme string
+     of the Atom.
+  -- The private part of the key is held by the key-creator.  It
+     stays private, unless shared.
+  -- Every IPFS Atom object has the public key in the Data field
+     of that object. That means that IPFS Atom objects are effectively
+     "secret", because the public key is not generally known/shared.
+  -- The AtomSpace is a single file, listing all of the Atoms in it,
+     together with all of the public keys.
+  -- If a user wants to find the current Valuation of an Atom,
+     they must:
+     ++ obtain the AtomSpace file somehow.
+     ++ Look up the Atom in that file, if present.
+     ++ Examine the public key of that Atom.
+     ++ Perform the IPNS lookup for that key.
+     ++ Fetch the file corresponding to the CID that IPNS returned.
+     ++ Parse the file, extract the desired Value.
+  -- Incoming sets are stored along with the Valuation file.
+  -- If a user wants to change (update) the Valuation of a Atom,
+     they must:
+     ++ Obtain the private key for that Atom/Atomspace combination,
+        by asking someone for it.
+     ++ Update the Valuation file.
+     ++ IPNS publish the new file.
+     Note that the updates are conflict-prone. So a CRDT format for
+     the Valuation file is required.
+
+  Issues:
+  -- Publishing a single large AtomSpace file is ugly; it prevents
+     simultaneous, high-speed updates. It's centralized and not
+     scalable. There's conflict resolution issues if there are multiple
+     updaters.
+
+* Q: How to search incoming set?
 
 * Q: is pin needed to prevent a published atomspace from disappearing?
 
