@@ -83,7 +83,49 @@ void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type 
 
 /* ================================================================ */
 
-void IPFSAtomStorage::load_atomspace(AtomSpace* as, const std::string& cid)
+/// load_atomspace -- load AtomSpace from path.
+/// The path could be a CID, or it could be /ipfs/CID or it could
+/// be /ipns/CID. In the later case, the IPNS lookup is performed.
+void IPFSAtomStorage::load_atomspace(AtomSpace* as, const std::string& path)
+{
+	rethrow();
+
+	if ('/' != path[0])
+	{
+		load_as_from_cid(as, path);
+		return;
+	}
+
+	if (std::string::npos != path.find("/ipfs/"))
+	{
+		load_as_from_cid(as, &path[sizeof("/ipfs/") - 1]);
+		return;
+	}
+
+	if (std::string::npos != path.find("/ipns/"))
+	{
+		// Caution: as of this writing, name resolution takes
+		// exactly 60 seconds.
+		std::string ipfs_path;
+		ipfs::Client* conn = conn_pool.pop();
+		conn->NameResolve(path, &ipfs_path);
+		conn_pool.push(conn);
+
+		// We are expecting the name to resolve into a string
+		// of the form "/ipfs/Qm..."
+		load_as_from_cid(as, &ipfs_path[sizeof("/ipfs/") - 1]);
+		return;
+	}
+
+	throw RuntimeException(TRACE_INFO, "Unsupported URI %s\n", path.c_str());
+}
+
+/* ================================================================ */
+
+/// load_as_from_cid -- load all atoms listed at the indicated CID.
+/// The CID is presumed to be an IPFS CID (and not an IPNS CID or
+/// something else).
+void IPFSAtomStorage::load_as_from_cid(AtomSpace* as, const std::string& cid)
 {
 	rethrow();
 

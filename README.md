@@ -86,6 +86,8 @@ The file directory layout is the same as that of the atomspace.
 
 * Q: How to search incoming set? A: See above.
 
+* Q: is pin needed to prevent a published atomspace from disappearing?
+
 * Use pubsub to publish value updates.
 
 * The current encoding is gonna do alpha-equivalnce all wrong.

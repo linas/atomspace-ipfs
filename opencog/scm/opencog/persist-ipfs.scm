@@ -104,11 +104,17 @@
 
 (set-procedure-property! ipfs-load-atomspace 'documentation
 "
- ipfs-load-atomspace CID - Load all Atoms from the CID into the AtomSpace.
+ ipfs-load-atomspace PATH - Load all Atoms from the PATH into the AtomSpace.
 
    For example:
       `(ipfs-load-atomspace \"QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU\")`
-   should load the atomspace from `basic.scm` example.
+   should load the atomspace from `basic.scm` example.  In addition,
+   IPNS and IPFS paths are allowed: e.g.
+      `(ipfs-load-atomspace \"/ipfs/QmT9tZt...\")`
+   and
+      `(ipns-load-atomspace \"/ipns/QmVkzxh...\")`
+   with the last form performing an IPNS resolution to obtain the actual
+   IPFS CID to be loaded.
 
    See also `ipfs-fetch-atom` for loading individual atoms.
 ")

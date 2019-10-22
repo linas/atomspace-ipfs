@@ -95,6 +95,8 @@ class IPFSAtomStorage : public BackingStore
 		bool bulk_store;
 		time_t bulk_start;
 
+		void load_as_from_cid(AtomSpace*, const std::string&);
+
 		// --------------------------
 		// Atom removal
 		// void removeAtom(Response&, UUID, bool recursive);
