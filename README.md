@@ -43,9 +43,17 @@ The file directory layout is the same as that of the atomspace.
 * The hashes have to include an AtomSpace ID as well. Different
   Atomspaces might contain atoms that have the same type, name, etc.
   but should not be confused with one-another. (The alternative
-  representation would be to take all Atoms as globally unique, but then
-  have context-dependent truth values. This does not seem to be a wise
-  design choice.
+  representation would be to take all Atoms as globally unique, but
+  then have context-dependent truth values.)
+
+* How do we associate mutable data to an Atom? Specifically:
+  -- the values on the Atom.
+  -- the various AtomSpaces the atom belongs to.
+  -- the slowly changing incoming set.
+  To summarize: Values and incoming sets are aspects of the AtomSpace,
+  and not of the Atom itself.  Different AtomSpaces will typically
+  see different Values and different incoming sets for any given Atom.
+  (and any given Atom might not even belong to a given AtomSpace).
 
 ### Design choices and issues:
 
@@ -69,20 +77,12 @@ The file directory layout is the same as that of the atomspace.
   it seems like the only possibility is to fork the IPFS code, and
   alter it to avoid including Values as part of the CID hash.
 
-* Each AtomSpace Atom is an IPFS object. The data in each object
-  is an IPNS key. To find the current AtomSpace Value, one looks
-  up the IPNS key.
-
-* Can we do more? For a given IPNS key, we could also store the
-  incoming set there... (in addition to the current values).
-
-* But that assumes a single, global AtomSpace.  Want to have different
-  AtomSpaces, each having it's own semi-private, controlled access.
-  So that means a double IPNS indirection.  First indirection: a file
-  that lists all atomspaces that contain thais Atom, and the
-  corresponding IPNS for that Atom in that AtomSpace. The second
-  indirection is that second lookup.  Q: But who has write access to
-  that first file?  How is that managed?
+* Each AtomSpace Atom is an IPFS object. Nothing more nor less.
+  That means all Atoms are globally unique: all atoms have a single
+  persistent hash. (This is what is currently implemented; a design
+  alternative is to add the AtomSpace IPNS CID to the Atom, which
+  makes the Atom "effectively private", since the CID is not publicly
+  guessable.)
 
 * Q: How to search incoming set? A: See above.
 
