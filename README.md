@@ -11,7 +11,8 @@ The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
 an associated (mutable)
 [key-value store](https://wiki.opencog.org/w/Value).
 The Atomspace has a variety of advanced features not normally found
-in ordinary graph databases.
+in ordinary graph databases, including an advanced queryl language
+and "active" Atoms.
 
 ## Alpha version 0.0.3
 
@@ -23,11 +24,33 @@ implementation:
 
 The design for Values is unknown and likely to be challenging.
 
-### Architecture:
-This implementation will be just a standard `BackingStore`
-implementation to the current Atomspace backend API.
+After much thought: there does not seem to be any way of mapping the
+AtomSpace into the current design of IPFS+IPNS without resorting to
+a single, centralized file listing all of the Atoms in an AtomSpace.
+Implementing a single, centralized file seems like a "really bad idea"
+for all of the usual reasons: resolution of update conflicts, and it
+being a bottleneck for multiple simultaneous updates.  Therefore,
+implementation is on hold until a design is obtained that could avoid
+this.
 
-The file directory layout is the same as that of the atomspace.
+A suitable decentralized design *would* be posible, if IPNS was
+extended with one additional feature (or if some other system was
+used, taking the place of IPNS).  Currently, IPNS does this:
+```
+    PKI public-key ==> resolved CID
+```
+The ideal enhanced-IPNS lookup would be this:
+```
+    (PKI public-key, hash) ==> resolved CID
+```
+Details are described below.
+
+### Architecture:
+This implementation provides the a standard `BackingStore` API
+as defined by the Atomspace.
+
+The git repo layout is the same as that of the atomspace. Build and
+install mechanisms are the same.
 
 ### Design requirements:
 * To get any hope of uniqueness and non-collision of Atoms, this will
@@ -130,7 +153,38 @@ The file directory layout is the same as that of the atomspace.
 
 * Use pubsub to publish value updates.
 
-* The current encoding is gonna do alpha-equivalnce all wrong.
+* The current encoding is gonna do alpha-equivalence all wrong.
+
+## IPNS++
+It currently appears to be impossible to map the AtomSpace into IPFS
+without resorting to a single, centralized file that contains the
+AtomSpace contents.  Clearly, this would be a bad design, for all of
+the usual reasons associated with centralization.
+
+However, a good high-quality, truly decentralized design would be
+possible if IPNS was modified slightly. Currently, IPNS does this:
+```
+    PKI public-key ==> resolved CID
+```
+The ideal IPNS lookup would be this:
+```
+    (PKI public-key, hash) ==> resolved CID
+```
+If the above were possible, the AtomSpace mapping would become
+straightforward: The `hash` would be the hash of an Atom, and the
+resolved CID would contain the Values associated with that Atom.
+This works, because the hash of an Atom is globally unique: anyone
+can know what it is. Anyone having access to the public-key would
+then have read-access to that particular AtomSpace.  Anyone having
+the private key would have write access. All operations are
+distributed, decentralized, assuming that the lookup itself can be
+made decentralized.
+
+Of course, its easy to create a centralized hash lookup: a single
+large file containing a list of `hash ==> CID` mappings. But that
+suffers from all the typical problems of centralization: the
+multiple-writers problem, problems with being a bottleneck for
+updates, file-size issues. etc.
 
 ## Prereqs
 
