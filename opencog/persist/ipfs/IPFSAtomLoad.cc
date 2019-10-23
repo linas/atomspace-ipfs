@@ -91,7 +91,7 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 /// `(Evaluation (Predicate "blort") (List (Concept "foo") (Concept "bar")))`
 /// will return the corresponding atoms.
 ///
-Handle IPFSAtomStorage::decodeSCMAtom(const std::string& satom)
+Handle IPFSAtomStorage::decodeStrAtom(const std::string& satom)
 {
 	std::string scm = satom;
 	if ('(' != scm[0])
@@ -123,7 +123,7 @@ Handle IPFSAtomStorage::decodeSCMAtom(const std::string& satom)
 	size_t oset_start = scm.find('(', pos+1);
 	while (oset_start != std::string::npos)
 	{
-		oset.push_back(decodeSCMAtom(&scm[oset_start]));
+		oset.push_back(decodeStrAtom(&scm[oset_start]));
 
 		// Find the next balanced paren, and restart there.
 		// This is not very efficient, but it works.
