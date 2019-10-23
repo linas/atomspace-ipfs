@@ -100,6 +100,24 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	std::string name = h->to_short_string();
 	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
 
+	// Build the same structure, but this time as json.
+	ipfs::Json atom;
+	if (h->is_node())
+	{
+		atom = {
+			"type" , nameserver().getTypeName(h->get_type()),
+			"name" , h->get_name()
+		};
+	}
+
+	ipfs::Json result;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagPut(atom, &result);
+
+	std::string id = result["Cid"]["/"];
+
+
+#if 0
 	// Build the JSON message, and fire it off.
 	// XXX FIXME If ipfs throws, then this leaks from the pool
 	// We can't just catch here, we need to re-throw too.
@@ -128,6 +146,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		}
 	}
 	conn_pool.push(conn);
+#endif
 
 	{
 		// This is multi-threaded; update the tale under a lock.
