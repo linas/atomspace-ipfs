@@ -30,33 +30,6 @@ void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
-/**
- * Store a valuation. Return an integer ID for that valuation.
- * Thread-safe.
- */
-void IPFSAtomStorage::storeValuation(const ValuationPtr& valn)
-{
-	storeValuation(valn->key(), valn->atom(), valn->value());
-}
-
-void IPFSAtomStorage::storeValuation(const Handle& key,
-                                    const Handle& atom,
-                                    const ValuePtr& pap)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-
-	_valuation_stores++;
-}
-
-// Almost a cut-n-paste of the above, but different.
-IPFSAtomStorage::VUID IPFSAtomStorage::storeValue(const ValuePtr& pap)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-
-	_value_stores++;
-	return 0;
-}
-
 /// Return a value, given by the VUID identifier, taken from the
 /// Values table. If the value type is a link, then the full recursive
 /// fetch is performed.
@@ -82,22 +55,21 @@ void IPFSAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
-
-// XXX FIXME  need to implement this stuff, but for now just
-// return to avoid a throw.
-return;
+	ipfs::Json jvals;
 
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
+		// Special-case for TruthValues.  Avoid storing default TV's
+		// so ast to not clog things up.
+		if (key == tvpred)
+		{
+			TruthValuePtr tv(atom->getTruthValue());
+			if (tv->isDefaultTV()) continue;
+		}
 		ValuePtr pap = atom->getValue(key);
-		storeValuation(key, atom, pap);
+		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
 	}
-
-	// Special-case for TruthValues. Can we get rid of this someday?
-	// Delete default TV's, else storage will get clogged with them.
-	TruthValuePtr tv(atom->getTruthValue());
-	if (tv->isDefaultTV()) deleteValuation(tvpred, atom);
 }
 
 /// Get ALL of the values associated with an atom.

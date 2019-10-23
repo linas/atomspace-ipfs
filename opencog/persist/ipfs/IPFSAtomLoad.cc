@@ -143,6 +143,14 @@ Handle IPFSAtomStorage::decodeSCMAtom(const std::string& satom)
 	return createLink(oset, t);
 }
 
+/// Convert value (or Atom) into a string.
+std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
+{
+	std::string name = v->to_short_string();
+	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+	return name;
+}
+
 /* ================================================================ */
 
 Handle IPFSAtomStorage::getNode(Type t, const char * str)

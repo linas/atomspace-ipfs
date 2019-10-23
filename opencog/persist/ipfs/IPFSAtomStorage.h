@@ -83,6 +83,9 @@ class IPFSAtomStorage : public BackingStore
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
+
+		std::string encodeValueToStr(const ValuePtr&);
+
 		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;
 
@@ -119,15 +122,12 @@ class IPFSAtomStorage : public BackingStore
 		// ValuePtr doUnpackValue(Response&);
 		ValuePtr doGetValue(const char *);
 
-		VUID storeValue(const ValuePtr&);
 		ValuePtr getValue(VUID);
 		void deleteValue(VUID);
 
 		// --------------------------
 		// Valuations
 		std::mutex _valuation_mutex;
-		void storeValuation(const ValuationPtr&);
-		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
 		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		// void deleteValuation(Response&, UUID, UUID);
