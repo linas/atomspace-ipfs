@@ -29,7 +29,7 @@
 ;       (ConceptNode "bar")
 ;    )
 ; )
-(ipfs-fetch-atom "QmdQwLMqC6fyAGa6xztV6y53NqyZwiGW4fvngPtukjBraZ")
+(ipfs-fetch-atom "bafyreigll67ssepbqfhtooqobirodyyhsq3ptmxseuwxwnxs5aci75hpoq")
 
 ; Review the stats
 (ipfs-stats)

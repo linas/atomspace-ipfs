@@ -38,7 +38,7 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 	conn->DagGet(cid, &dag);
 	conn_pool.push(conn);
 
-	std::cout << "The DAG is:" << dag.dump(2) << std::endl;
+	std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
 
 	_num_get_atoms++;
 	return decodeJSONAtom(dag);
@@ -57,7 +57,18 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 	Type t = nameserver().getType(atom["type"]);
 	if (nameserver().isNode(t))
 	{
+		return createNode(t, atom["name"]);
 	}
+
+	if (not nameserver().isLink(t))
+		throw RuntimeException(TRACE_INFO, "Bad Atom JSON! %s\n", atom.dump(2));
+
+	HandleSeq oset;
+	for (const std::string& cid: atom["outgoing"])
+	{
+printf("huuuude %s\n", cid.c_str());
+	}
+
 	Handle h;
 	return h;
 }
