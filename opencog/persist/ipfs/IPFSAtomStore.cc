@@ -101,10 +101,8 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	ipfs::Json atom;
 	if (h->is_node())
 	{
-		atom = {
-			"type" , nameserver().getTypeName(h->get_type()),
-			"name" , h->get_name()
-		};
+		atom["type"] = nameserver().getTypeName(h->get_type());
+		atom["name"] = h->get_name();
 	}
 	else
 	if (h->is_link())
@@ -116,10 +114,8 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 			oset[i] = _ipfs_cid_map.find(hout)->second;
 			i++;
 		}
-		atom = {
-			"type" , nameserver().getTypeName(h->get_type()),
-			"outgoing", oset
-		};
+		atom["type"] = nameserver().getTypeName(h->get_type());
+		atom["outgoing"] = oset;
 	}
 
 	// XXX FIXME If ipfs throws, then this leaks from the pool

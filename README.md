@@ -211,7 +211,8 @@ updates, file-size issues. etc.
    and then
    `git checkout master-linas`
 
-   This needs `sudo apt install nlohmann-json3-dev`
+   This needs the package "JSON for Modern C++" 
+   `sudo apt install nlohmann-json3-dev`
 
    API documentation is here:
    `https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`
