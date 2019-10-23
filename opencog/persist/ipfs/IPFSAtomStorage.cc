@@ -232,14 +232,14 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 	}
 }
 
-void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid,
-                                           const std::string& label)
+void IPFSAtomStorage::add_atom_key_to_atomspace(const std::string& label,
+                                                const std::string& key)
 {
 	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
 	// We can't just catch, we need to rethrow, too.
 	ipfs::Client* conn = conn_pool.pop();
 	std::string new_as_id;
-	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
+	conn->ObjectPatchAddLink(_atomspace_cid, label, key, &new_as_id);
 	_atomspace_cid = new_as_id;
 	conn_pool.push(conn);
 }

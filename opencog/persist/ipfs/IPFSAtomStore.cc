@@ -140,7 +140,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 #endif
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	add_cid_to_atomspace(id, name);
+	add_atom_key_to_atomspace(name, "");
 
 	_store_count ++;
 

@@ -14,7 +14,7 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Alpha version 0.0.3
+## Alpha version 0.0.4
 
 **Status**: Design alternatives are being explored. In the current
 implementation:
@@ -28,10 +28,15 @@ After much thought: there does not seem to be any way of mapping the
 AtomSpace into the current design of IPFS+IPNS without resorting to
 a single, centralized file listing all of the Atoms in an AtomSpace.
 Implementing a single, centralized file seems like a "really bad idea"
-for all of the usual reasons: resolution of update conflicts, and it
-being a bottleneck for multiple simultaneous updates.  Therefore,
-implementation is on hold until a design is obtained that could avoid
-this.
+for all of the usual reasons:
+ * When it gets large, it does not scale.
+ * Impossible to optimze fetch of atoms-by-type.
+ * Update conflicts when there are multiple writers.
+ * Performance bottlenecks when there are multiple writers.
+Despite this, a bad, hacky implementation, with the above obvious
+failures, is created anyway.  But we need a better design, and that
+better design seems to be blocked without core changes to the IPFS
+core system.
 
 A suitable decentralized design *would* be possible, if IPNS was
 extended with one additional feature (or if some other system was

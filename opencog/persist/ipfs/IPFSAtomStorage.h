@@ -73,7 +73,7 @@ class IPFSAtomStorage : public BackingStore
 		// ---------------------------------------------
 		// The IPFS CID of the current atomspace.
 		std::string _atomspace_cid;
-		void add_cid_to_atomspace(const std::string&, const std::string&);
+		void add_atom_key_to_atomspace(const std::string&, const std::string&);
 
 		// Fetching of atoms.
 		Handle doFetchAtom(const std::string&);
