@@ -37,13 +37,13 @@
 ; Or one can fetch the entire contents of the AtomSpace. The CID
 ; below should already be in the AtomSpace, as it was created by
 ; the earlier examples (specifically, the basic.scm example).
-(ipfs-load-atomspace "QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU")
+(ipfs-load-atomspace "QmVz6C1F1xYYYZM3L8a3BpGd41pY35SbkAL4P4pGGbgK4w")
 
 ; Verify the AtomSpace contents
 (cog-prt-atomspace)
 
 ; Other formats are supported.  The above can also be written as
-(ipfs-load-atomspace "/ipfs/QmT9tZttJ4gVZQwVFHWTmJYqYGAAiKEcvW9k98T5syYeYU")
+(ipfs-load-atomspace "/ipfs/QmVz6C1F1xYYYZM3L8a3BpGd41pY35SbkAL4P4pGGbgK4w")
 
 ; Also, IPNS lookups of atomspaces are supported. For example:
 (ipfs-load-atomspace "/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx")
