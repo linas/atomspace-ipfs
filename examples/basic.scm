@@ -57,9 +57,11 @@
 (store-atom c)
 
 ; Examine the CID of the Atom.  This should return exactly
-;     /ipfs/QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB
-; It can now be viewed with a network explorer, for example,
-; at https://explore.ipld.io/#/explore/
+;     /ipfs/bafyreigx524ryjvcjvph4eyihduqspxctgjx5gvyxhpgjbwmrifgpctmoa
+; It can now be viewed with a network explorer. Locally, try
+;     http://localhost:5001/webui
+; or remotely, at
+;     https://explore.ipld.io/#/explore/
 (ipfs-atom-cid c)
 
 ; Publish it to IPNS. The new AtomSpace doesn't become visible until
@@ -78,13 +80,9 @@
 ; Likewise, view the CID for the EvaluationLink:
 (ipfs-atom-cid e)
 
-; The expected CID's for the above are:
+; The expected CID for the EvaluationLink is:
 ;
-; QmdhTzU8QJ2ffhLBzfBeT12scY39N4oZ1roGrLGkSKZnMj (Concept "foo")
-; QmP6zBPWfboPQvXU58Tuxq5yBtpybLtJEsdrS4Skr7xZYH (Concept "bar")
-; QmXrooYTtNdx5EJ898WaX6XWMZqPuxGy5c9Uxc6BMRUQag (List (Concept "foo") (Concept "bar"))
-; QmedVhDVkA1WkMpTkqkTiQmBubnVEkJyiJueTPpePErKkK (Predicate "Some relationship")
-; QmdQwLMqC6fyAGa6xztV6y53NqyZwiGW4fvngPtukjBraZ (EvaluationLink ...)
+; /ipfs/bafyreigll67ssepbqfhtooqobirodyyhsq3ptmxseuwxwnxs5aci75hpoq
 ;
 ; Everyone should always get exactly these CID's. If not, then we've
 ; changed the code and/or there's a bug somewhere.

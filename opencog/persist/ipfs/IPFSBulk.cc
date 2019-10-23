@@ -134,20 +134,20 @@ void IPFSAtomStorage::load_as_from_cid(AtomSpace* as, const std::string& cid)
 	bulk_load = true;
 	bulk_start = time(0);
 
-	ipfs::Json object;
+	ipfs::Json dag;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->ObjectGet(cid, &object);
+	conn->DagGet(cid, &dag);
 	conn_pool.push(conn);
-	// std::cout << "The object is:" << object.dump(2) << std::endl;
+	// std::cout << "The atomspace dag is:" << dag.dump(2) << std::endl;
 
-	auto atom_list = object["Links"];
+	auto atom_list = dag["links"];
 	for (auto acid: atom_list)
 	{
-		// std::cout << "Atom CID is: " << acid["Hash"] << std::endl;
+		// std::cout << "Atom CID is: " << acid["Cid"] << std::endl;
 
 		// Rather than fetching objects, we just part the raw string.
 		// That seems faster, simpler, easier.
-		as->add_atom(decodeAtom(acid["Name"]));
+		as->add_atom(decodeSCMAtom(acid["Name"]));
 		_load_count++;
 	}
 

@@ -97,44 +97,47 @@ bool IPFSAtomStorage::not_yet_stored(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
-	std::string name = h->to_short_string();
-	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+	// Build the same structure, but this time as json.
+	ipfs::Json atom;
+	if (h->is_node())
+	{
+		atom["type"] = nameserver().getTypeName(h->get_type());
+		atom["name"] = h->get_name();
+	}
+	else
+	if (h->is_link())
+	{
+		ipfs::Json oset;
+		int i=0;
+		for (const Handle& hout: h->getOutgoingSet())
+		{
+			oset[i] = _ipfs_cid_map.find(hout)->second;
+			i++;
+		}
+		atom["type"] = nameserver().getTypeName(h->get_type());
+		atom["outgoing"] = oset;
+	}
 
-	// Build the JSON message, and fire it off.
 	// XXX FIXME If ipfs throws, then this leaks from the pool
 	// We can't just catch here, we need to re-throw too.
 	ipfs::Json result;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->FilesAdd({{ name,
-		ipfs::http::FileUpload::Type::kFileContents, name}},
-		&result);
+	conn->DagPut(atom, &result);
 
-	std::string id = result[0]["hash"];
-
-	if (h->is_link())
-	{
-		// Not terribly efficient, but what else?
-		int i=0;
-		for (const Handle& hout: h->getOutgoingSet())
-		{
-			std::string name = hout->to_short_string();
-			name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-			std::string label = std::to_string(i) + "." + name;
-			std::string cid = _ipfs_cid_map.find(hout)->second;
-			std::string nid;
-			conn->ObjectPatchAddLink(id, label, cid, &nid);
-			id = nid;
-			i++;
-		}
-	}
-	conn_pool.push(conn);
+	std::string id = result["Cid"]["/"];
 
 	{
-		// This is multi-threaded; update the tale under a lock.
+		// This is multi-threaded; update the table under a lock.
 		std::lock_guard<std::mutex> lck(_cid_mutex);
 		_ipfs_cid_map.insert({h, id});
 	}
-	std::cout << "addAtom: " << name << "   CID: " << id << std::endl;
+
+#define DEBUG
+#ifdef DEBUG
+	std::string name = h->to_short_string();
+	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+	std::cout << "addAtom: " << name << " id: " << id << std::endl;
+#endif
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
 	add_cid_to_atomspace(id, name);

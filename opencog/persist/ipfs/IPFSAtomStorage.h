@@ -77,13 +77,18 @@ class IPFSAtomStorage : public BackingStore
 
 		// Fetching of atoms.
 		Handle doFetchAtom(const std::string&);
-		Handle decodeAtom(std::string);
+		Handle decodeSCMAtom(const std::string&);
+		Handle decodeJSONAtom(const ipfs::Json&);
 
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
 		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;
+
+		// The inverted map.
+		std::mutex _inv_mutex;
+		std::map<std::string, Handle> _ipfs_inv_map;
 
 		void do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
