@@ -86,6 +86,10 @@ class IPFSAtomStorage : public BackingStore
 		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;
 
+		// The inverted map.
+		std::mutex _inv_mutex;
+		std::map<std::string, Handle> _ipfs_inv_map;
+
 		void do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&);

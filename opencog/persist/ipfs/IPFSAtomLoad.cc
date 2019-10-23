@@ -41,7 +41,12 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 	std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
 
 	_num_get_atoms++;
-	return decodeJSONAtom(dag);
+	Handle h(decodeJSONAtom(dag));
+	{
+		std::lock_guard<std::mutex> lck(_inv_mutex);
+		_ipfs_inv_map.insert({cid, h});
+	}
+	return h;
 }
 
 /// Convert a JSON message into a C++ Atom
@@ -57,6 +62,7 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 	Type t = nameserver().getType(atom["type"]);
 	if (nameserver().isNode(t))
 	{
+		_num_got_nodes ++;
 		return createNode(t, atom["name"]);
 	}
 
@@ -66,11 +72,18 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 	HandleSeq oset;
 	for (const std::string& cid: atom["outgoing"])
 	{
-printf("huuuude %s\n", cid.c_str());
+		// This is multi-threaded; access under a lock
+		std::unique_lock<std::mutex> lck(_inv_mutex);
+		auto hiter = _ipfs_inv_map.find(cid);
+		lck.unlock();
+		if (_ipfs_inv_map.end() == hiter)
+			oset.push_back(doFetchAtom(cid));
+		else
+			oset.push_back(hiter->second);
 	}
 
-	Handle h;
-	return h;
+	_num_got_links ++;
+	return createLink(oset, t);
 }
 
 /// Convert a scheme expression into a C++ Atom.
