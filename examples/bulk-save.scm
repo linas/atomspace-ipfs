@@ -16,7 +16,7 @@
 (Concept "example concept")
 (Evaluation
 	(Predicate "Some relationship")
-	(List (Concept "foo") (Concept "bar"))))
+	(List (Concept "foo") (Concept "bar")))
 
 ; Bulk-save of the entire AtomSpace
 (ipfs-store)

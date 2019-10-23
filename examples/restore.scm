@@ -18,7 +18,7 @@
 ; Restore a single ConceptNode.  This should be in IPFS, if you've
 ; run the earlier examples. This should return
 ;     (ConceptNode "example concept")
-(ipfs-fetch-atom "QmTBUxX48jRZPwAU3dEgPQm4bShxW2ED3gXTHM78gvqugB")
+(ipfs-fetch-atom "bafyreigx524ryjvcjvph4eyihduqspxctgjx5gvyxhpgjbwmrifgpctmoa")
 
 ; Restore an EvaluationLink. This too should be in IPFS already.
 ; This should return
