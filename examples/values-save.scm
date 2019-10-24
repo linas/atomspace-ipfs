@@ -1,9 +1,8 @@
 ;
-; values.scm
+; values-save.scm
 ;
-; This provides examples of saving and restoring Atoms with Values
-; attache to them.  Be sure to review the earlier example `basic.scm`
-; first.
+; This provides examples of saving Atoms with Values attached to them.
+; A second part of this example can be found in `values-restore.scm`.
 ;
 (use-modules (opencog))
 (use-modules (opencog persist))
@@ -29,6 +28,14 @@
 ;     http://localhost:5001/webui
 (ipfs-atom-cid c)
 
+; A more complex examle...
+(cog-set-value! c (Predicate "position") (FloatValue 1.1 2.2 3.3))
+(cog-set-value! c (Predicate "velocity") (FloatValue 4.4 5.5 6.6))
+(store-atom c)
+
+; The CID of the above whould be
+;    bafyreifhaduwgp46ho6odbjcdjgd6v3r2hxztonufgtzqgaebowrnhia5a
+
 ; Try again, with something more complex
 (define e
 	(Evaluation
@@ -45,8 +52,6 @@
 ;
 ; /ipfs/bafyreigll67ssepbqfhtooqobirodyyhsq3ptmxseuwxwnxs5aci75hpoq
 ;
-; Everyone should always get exactly these CID's. If not, then we've
-; changed the code and/or there's a bug somewhere.
 
 ; Review the stats
 (ipfs-stats)
@@ -54,4 +59,4 @@
 ; Close the connection.
 (ipfs-close)
 
-; The End.  That's all for now.
+; The End.  For part two of this example, see `values-restore.scm`.

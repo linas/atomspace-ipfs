@@ -10,7 +10,8 @@ at the `bash` prompt. Verify that it is working by connecting to it at
 `http://localhost:5001/webui` which should bring up the IPFS explorer.
 The explorer will be useful for verifying AtomSpace contents.
 
-* basic.scm      - Creating, saving and viewing Atoms.
-* bulk-save.scm  - Bulk save of an entire AtomSpaces.
-* restore.scm    - Fetch of individual Atoms and entire AtomSpaces.
-* values.scm     - Save and restore of Values
+* basic.scm       - Creating, saving and viewing Atoms.
+* bulk-save.scm   - Bulk save of an entire AtomSpaces.
+* restore.scm     - Fetch of individual Atoms and entire AtomSpaces.
+* values-save.scm    - Save of Values
+* values-restore.scm - Restore of Values, to be run after the above.
