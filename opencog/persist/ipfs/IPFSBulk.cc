@@ -147,7 +147,7 @@ void IPFSAtomStorage::load_as_from_cid(AtomSpace* as, const std::string& cid)
 
 		// Rather than fetching objects, we just part the raw string.
 		// That seems faster, simpler, easier.
-		as->add_atom(decodeSCMAtom(acid["Name"]));
+		as->add_atom(decodeStrAtom(acid["Name"]));
 		_load_count++;
 	}
 

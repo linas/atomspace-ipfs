@@ -19,6 +19,20 @@
 ;    ,d ipfs-open
 
 ; hostname of IPFS server, and a key name ...
+; Any working IPFS server can be used.
+;
+; In order to publish AtomSpaces (and Atoms with Values) in IPNS,
+; a PKI public key is required. This (public) key is used to associate
+; the Content ID (CID) of the AtomSpace to that key, so that others can
+; easily find it (using IPNS). Otherwise, the CID of the AtomSpace is
+; continually changing in unpredictable ways, as Atoms are added and
+; removed. The IPNS mechanism provides a way of publishing to peers the
+; most current CID of the AtomSpace.
+;
+; The key-pair (public+private) is held in the local IPFS server.
+; If it does not yet exist, it is created (the default 2048-bit
+; RSA key is used.)
+;
 ; (ipfs-open "ipfs://localhost/demo-atomspace")
 ; (ipfs-open "ipfs://localhost:5001/demo-atomspace")
 (ipfs-open "ipfs:///demo-atomspace")

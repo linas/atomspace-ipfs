@@ -86,8 +86,9 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	#
 	# 2) -fopenmp for multithreading support
 	#
-	# 3) -std=gnu++11 for C++11 and GNU extensions support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++11")
+	# 3) -std=gnu++17 for C++17 and GNU extensions support
+	#    Needed for "c++17 structured bindings"
+	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++17")
 
 	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})

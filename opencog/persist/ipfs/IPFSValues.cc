@@ -14,6 +14,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "IPFSAtomStorage.h"
@@ -30,41 +31,6 @@ void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
-/**
- * Store a valuation. Return an integer ID for that valuation.
- * Thread-safe.
- */
-void IPFSAtomStorage::storeValuation(const ValuationPtr& valn)
-{
-	storeValuation(valn->key(), valn->atom(), valn->value());
-}
-
-void IPFSAtomStorage::storeValuation(const Handle& key,
-                                    const Handle& atom,
-                                    const ValuePtr& pap)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-
-	_valuation_stores++;
-}
-
-// Almost a cut-n-paste of the above, but different.
-IPFSAtomStorage::VUID IPFSAtomStorage::storeValue(const ValuePtr& pap)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-
-	_value_stores++;
-	return 0;
-}
-
-/// Return a value, given by the VUID identifier, taken from the
-/// Values table. If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr IPFSAtomStorage::getValue(VUID vuid)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
 /// Return a value, given by the key-atom pair.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
@@ -74,40 +40,141 @@ ValuePtr IPFSAtomStorage::getValuation(const Handle& key,
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
-void IPFSAtomStorage::deleteValue(VUID vuid)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
+	// No publication of Values, if there's no AtomSpace key.
+	if (0 == _keyname.size()) return;
 
-// XXX FIXME  need to implement this stuff, but for now just
-// return to avoid a throw.
-return;
-
+	// First, build some json that encodes the key-value pairs
+	ipfs::Json jvals;
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
+		// Special-case for TruthValues.  Avoid storing default TV's
+		// so ast to not clog things up.
+		if (key == tvpred)
+		{
+			TruthValuePtr tv(atom->getTruthValue());
+			if (tv->isDefaultTV()) continue;
+		}
 		ValuePtr pap = atom->getValue(key);
-		storeValuation(key, atom, pap);
+		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
 	}
 
-	// Special-case for TruthValues. Can we get rid of this someday?
-	// Delete default TV's, else storage will get clogged with them.
-	TruthValuePtr tv(atom->getTruthValue());
-	if (tv->isDefaultTV()) deleteValuation(tvpred, atom);
+	// Next, park that json with the atom.
+	ipfs::Json jatom = encodeAtomToJSON(atom);
+	jatom["values"] = jvals;
+
+	// Store the thing in IPFS
+	ipfs::Json result;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagPut(jatom, &result);
+	conn_pool.push(conn);
+
+	std::string atoid = result["Cid"]["/"];
+	std::cout << "Valued Atom: " << encodeValueToStr(atom)
+	          << " CID: " << atoid << std::endl;
+
+	// The code below is ifdefed out. In a better world, we would
+	// publish just the IPNS name of where to find the atom values,
+	// and, to get those values, we'd simply look them up in IPNS.
+	// Doing it this way would avoid a need to update the master
+	// AtomSpace file. However, we're not quite ready for that, yet.
+	// So this is stubbed out, for now.
+#if LATER_WHEN_IPNS_WORKS
+	// Find the key for this atom.
+	// XXX TODO this can be speeded up by caching the keys in C++
+	std::string atonam = _keyname + encodeValueToStr(atom);
+	std::string atokey;
+	conn = conn_pool.pop();
+	conn->KeyFind(atonam, &atokey);
+	if (0 == atokey.size())
+	{
+		// Not found; make a new one, by default.
+		conn->KeyNew(atonam, &atokey);
+		std::cout << "Generated Atom IPNS: " << atonam
+		          << " key: " << atokey << std::endl;
+	}
+
+	// Publish... XXX FIXME needs to be in a queue.
+	std::cout << "Publishing Atom Values: " << atokey << std::endl;
+
+	// XXX hack alert -- lifetime set to 4 hours, it should be
+	// infinity or something.... the TTL is 30 seconds, but should
+	// be shorter or user-configurable .. set both with scheme bindings.
+	try
+	{
+		// The `ipns_name` should be identical to the `atokey` above.
+		std::string ipns_name;
+		conn->NamePublish(atoid, atonam, &ipns_name, "4h", "30s");
+		std::cout << "Published Atom Values: " << ipns_name << std::endl;
+	}
+	catch (const std::exception& ex)
+	{
+		// Arghh. IPNS keeps throwing this error:
+		// "can't replace a newer value with an older value"
+		// which is insane, because maybe I *do* want to do exactly
+		// that!  So WTF ... another IPNS bug.
+		std::cerr << "Failed to publish Atom Values: "
+		          << ex.what() << std::endl;
+	}
+#else // LATER_WHEN_IPNS_WORKS
+
+   // Update the atomspace, so that it holds the new value.
+   std::string atostr = encodeValueToStr(atom);
+   add_atom_key_to_atomspace(atostr, atoid);
+
+#endif // LATER_WHEN_IPNS_WORKS
+	conn_pool.push(conn);
 }
 
 /// Get ALL of the values associated with an atom.
-void IPFSAtomStorage::get_atom_values(Handle& atom)
+void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 {
-	if (nullptr == atom) return;
+	// If no values, then nothing to do.
+	auto pvals = jatom.find("values");
+	if (pvals == jatom.end()) return;
 
-// XXX FIXME  need to implement this stuff, but for now just
-// return to avoid a throw.
-	// throw SyntaxException(TRACE_INFO, "Not Implemented!");
+	ipfs::Json jvals = *pvals;
+	// std::cout << "Jatom vals: " << jvals.dump(2) << std::endl;
+
+	for (const auto& [jkey, jvalue]: jvals.items())
+	{
+		// std::cout << "KV Pair: " << jkey << " "<<jvalue<< std::endl;
+		atom->setValue(decodeStrAtom(jkey), decodeStrValue(jvalue));
+	}
+}
+
+/* ================================================================ */
+
+ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
+{
+	size_t pos = stv.find("(FloatValue ");
+	if (std::string::npos != pos)
+	{
+		pos += strlen("(FloatValue ");
+		std::vector<double> fv;
+		while (pos != std::string::npos and stv[pos] != ')')
+		{
+			size_t epos;
+			fv.push_back(stod(stv.substr(pos), &epos));
+			pos += epos;
+		}
+		return createFloatValue(fv);
+	}
+
+	pos = stv.find("(stv ");
+	if (std::string::npos != pos)
+	{
+		size_t epos;
+		pos += strlen("(stv ");
+		double strength = stod(stv.substr(pos), &epos);
+		pos += epos;
+		double confidence = stod(stv.substr(pos), &epos);
+		return ValueCast(createSimpleTruthValue(strength, confidence));
+	}
+	throw SyntaxException(TRACE_INFO, "Unknown Value %s", stv.c_str());
 }
 
 /* ================================================================ */

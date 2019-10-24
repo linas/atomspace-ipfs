@@ -66,23 +66,26 @@ class IPFSAtomStorage : public BackingStore
 		static void publish_thread(IPFSAtomStorage*);
 		void publish(void);
 
-		// The IPNS keys under which to publish.
+		// The Main IPNS key under which to publish the AtomSpace.
 		std::string _keyname;
 		std::string _key_cid;
 
 		// ---------------------------------------------
 		// The IPFS CID of the current atomspace.
 		std::string _atomspace_cid;
-		void add_cid_to_atomspace(const std::string&, const std::string&);
+		void add_atom_key_to_atomspace(const std::string&, const std::string&);
 
 		// Fetching of atoms.
-		Handle doFetchAtom(const std::string&);
-		Handle decodeSCMAtom(const std::string&);
+		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
+
+		std::string encodeValueToStr(const ValuePtr&);
+		ipfs::Json encodeAtomToJSON(const Handle&);
+
 		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;
 
@@ -109,25 +112,15 @@ class IPFSAtomStorage : public BackingStore
 
 		// --------------------------
 		// Values
-#define NUMVMUT 16
-		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
-		void get_atom_values(Handle &);
+		void get_atom_values(Handle &, const ipfs::Json&);
 
-		typedef unsigned long VUID;
-
-		// ValuePtr doUnpackValue(Response&);
-		ValuePtr doGetValue(const char *);
-
-		VUID storeValue(const ValuePtr&);
-		ValuePtr getValue(VUID);
-		void deleteValue(VUID);
+		// void deleteValue(VUID);
+		ValuePtr decodeStrValue(const std::string&);
 
 		// --------------------------
 		// Valuations
 		std::mutex _valuation_mutex;
-		void storeValuation(const ValuationPtr&);
-		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
 		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		// void deleteValuation(Response&, UUID, UUID);

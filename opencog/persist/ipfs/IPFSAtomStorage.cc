@@ -232,14 +232,14 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 	}
 }
 
-void IPFSAtomStorage::add_cid_to_atomspace(const std::string& cid,
-                                           const std::string& label)
+void IPFSAtomStorage::add_atom_key_to_atomspace(const std::string& label,
+                                                const std::string& key)
 {
 	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
 	// We can't just catch, we need to rethrow, too.
 	ipfs::Client* conn = conn_pool.pop();
 	std::string new_as_id;
-	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
+	conn->ObjectPatchAddLink(_atomspace_cid, label, key, &new_as_id);
 	_atomspace_cid = new_as_id;
 	conn_pool.push(conn);
 }
@@ -326,11 +326,11 @@ void IPFSAtomStorage::kill_data(void)
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;
 
-	ipfs::Client* client = conn_pool.pop();
-	client->FilesAdd({{"AtomSpace",
+	ipfs::Client* conn = conn_pool.pop();
+	conn->FilesAdd({{"AtomSpace",
 		ipfs::http::FileUpload::Type::kFileContents,
 		text}}, &result);
-	conn_pool.push(client);
+	conn_pool.push(conn);
 
 	_atomspace_cid = result[0]["hash"];
 
