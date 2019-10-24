@@ -12,6 +12,7 @@ The explorer will be useful for verifying AtomSpace contents.
 
 * basic.scm       - Creating, saving and viewing Atoms.
 * bulk-save.scm   - Bulk save of an entire AtomSpaces.
-* restore.scm     - Fetch of individual Atoms and entire AtomSpaces.
-* values-save.scm    - Save of Values
-* values-restore.scm - Restore of Values, to be run after the above.
+* restore-keyless.scm - Fetch of individual Atoms and entire AtomSpaces.
+* restore-ro.scm      - Read-only fetch of individual Atoms and AtomSpaces.
+* values-save.scm     - Save of Values
+* values-restore.scm  - Restore of Values, to be run after the above.

@@ -1,16 +1,20 @@
 ;
-; restore.scm
+; restore-keyless.scm
 ;
 ; Simple example of restoring individual atoms, and the bulk restore of
-; entire AtomSpaces.
+; entire AtomSpaces, assuming that the CID's of the Atoms and AtomSpace
+; is known by some other means.
 ;
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog persist-ipfs))
 
 ; Open connection to the IPFS server.
-; Note that we don't need any keys, if we are not publishing
-; to IPNS.
+; Note that we don't need any keys, if we are not publishing to IPNS.
+; This does, however, require explicit knowledge of the CID's of
+; individual Atoms, or of the AtomSpaces, which are obtained by some
+; other mechanism.
+;
 ; (ipfs-open "ipfs://localhost/")
 ; (ipfs-open "ipfs://localhost:5001/")
 (ipfs-open "ipfs:///")
@@ -49,7 +53,8 @@
 (ipfs-load-atomspace "/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx")
 ; Caution: the above IPNS entry is in active use for develpment, and
 ; might resolve into any kind of crazy test atomspace. Or it might not
-; resolve at all...
+; resolve at all... Note also: at this time, IPNS resolution can take
+; a minute or longer, due to a well-known and still unfixed IPFS bug.
 
 ; Review the stats
 (ipfs-stats)
