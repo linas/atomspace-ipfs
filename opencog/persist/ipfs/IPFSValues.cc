@@ -124,8 +124,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 #else // LATER_WHEN_IPNS_WORKS
 
    // Update the atomspace, so that it holds the new value.
-   std::string atostr = encodeAtomToStr(atom);
-   add_atom_key_to_atomspace(atostr, atoid);
+   update_atom_in_atomspace(atom, atoid, jatom);
 #endif // LATER_WHEN_IPNS_WORKS
 }
 /* ================================================================== */

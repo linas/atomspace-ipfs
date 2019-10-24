@@ -162,8 +162,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	std::string name = encodeAtomToStr(h);
-	add_atom_key_to_atomspace(name, id);
+	update_atom_in_atomspace(h, id, jatom);
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
 
