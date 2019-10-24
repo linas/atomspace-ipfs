@@ -107,7 +107,7 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 		int i=0;
 		for (const Handle& hout: h->getOutgoingSet())
 		{
-			oset[i] = _ipfs_cid_map.find(hout)->second;
+			oset[i] = get_atom_cid(hout);
 			i++;
 		}
 		jatom["outgoing"] = oset;
@@ -128,7 +128,8 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
-	// Convert C++ Atom to json.
+	// Convert C++ Atom to json. But only the core, unique
+	// Atom, and NOT the values! Nor the incoming set...
 	ipfs::Json jatom = encodeAtomToJSON(h);
 
 	// XXX FIXME If ipfs throws, then this leaks from the pool

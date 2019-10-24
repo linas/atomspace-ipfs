@@ -142,7 +142,7 @@ std::string IPFSPersistSCM::do_atom_cid(const Handle& h)
         throw RuntimeException(TRACE_INFO,
             "ipfs-atom-cid: Error: Database not open");
 
-    return _backing->get_atom_cid(h);
+    return "/ipfs/" + _backing->get_atom_cid(h);
 }
 
 Handle IPFSPersistSCM::do_fetch_atom(const std::string& cid)

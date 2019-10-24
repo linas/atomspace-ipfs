@@ -178,8 +178,7 @@ std::string IPFSAtomStorage::get_atom_cid(const Handle& h)
 {
 	if (not_yet_stored(h)) do_store_atom(h);
 	std::lock_guard<std::mutex> lck(_cid_mutex);
-	const std::string& cid = _ipfs_cid_map.find(h)->second;
-	return "/ipfs/" + cid;
+	return _ipfs_cid_map.find(h)->second;
 }
 
 /**
