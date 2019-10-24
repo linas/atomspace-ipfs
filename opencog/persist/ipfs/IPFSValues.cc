@@ -57,25 +57,6 @@ ipfs::Json IPFSAtomStorage::encodeValuesToJSON(const Handle& atom)
 
 /* ================================================================== */
 
-/// Get the IncomingSet of the Atom, and return the corresponding
-/// JSON representation for it.  This object will have CID's to
-/// the Atoms in that incoming set, those CID's will identify the
-/// globally-unique atoms, and NOT the Atoms w/ values, etc.
-ipfs::Json IPFSAtomStorage::encodeIncomingToJSON(const Handle& atom)
-{
-	ipfs::Json jinco;
-
-	IncomingSet iset(atom->getIncomingSet());
-
-	for (const LinkPtr& lnk: iset)
-	{
-		jinco.push_back(get_atom_cid(HandleCast(lnk)));
-	}
-	return jinco;
-}
-
-/* ================================================================== */
-
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
@@ -140,15 +121,15 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		std::cerr << "Failed to publish Atom Values: "
 		          << ex.what() << std::endl;
 	}
+	conn_pool.push(conn);
 #else // LATER_WHEN_IPNS_WORKS
 
    // Update the atomspace, so that it holds the new value.
    std::string atostr = encodeValueToStr(atom);
    add_atom_key_to_atomspace(atostr, atoid);
-
 #endif // LATER_WHEN_IPNS_WORKS
-	conn_pool.push(conn);
 }
+/* ================================================================== */
 
 /// Get ALL of the values associated with an atom.
 void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)

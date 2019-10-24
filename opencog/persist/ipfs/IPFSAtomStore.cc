@@ -75,6 +75,13 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 	{
 		do_store_atom(h);
 		store_atom_values(h);
+		if (h->is_link())
+		{
+			for (const Handle& hout: h->getOutgoingSet())
+			{
+				store_atom_incoming(hout);
+			}
+		}
 	}
 	catch (...)
 	{

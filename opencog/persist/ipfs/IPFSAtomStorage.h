@@ -79,6 +79,7 @@ class IPFSAtomStorage : public BackingStore
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 
+		void store_atom_incoming(const Handle &);
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
