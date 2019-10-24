@@ -67,17 +67,15 @@ install mechanisms are the same.
   string, as numeric Atom Type assignments (currently 16-bit short
   int's in the AtomSpace) cannot be made global safely.
 
-* The hashes have to include an AtomSpace ID as well. Different
-  AtomSpaces might contain atoms that have the same type, name, etc.
-  but should not be confused with one-another. (The alternative
-  representation would be to take all Atoms as globally unique, but
-  then have context-dependent truth values.)
+* Although Atoms are globally unique and immutable, the associated
+  values are mutable, and also vary depending on which AtomSpace they
+  belong to.
 
 * How do we associate mutable data to an Atom? Specifically:
-  -- the values on the Atom.
+  -- the Values on the Atom.
   -- the various AtomSpaces the atom belongs to.
-  -- the slowly changing incoming set.
-  To summarize: Values and incoming sets are aspects of the AtomSpace,
+  -- the slowly changing Incoming Set.
+  To summarize: Values and Incoming Sets are aspects of the AtomSpace,
   and not of the Atom itself.  Different AtomSpaces will typically
   see different Values and different incoming sets for any given Atom.
   (and any given Atom might not even belong to a given AtomSpace).
@@ -86,7 +84,9 @@ install mechanisms are the same.
 
 * The first two bullets are satisfied by writing the Atom type and
   it's name (if its a Node) as text into a file. For Links, the
-  outgoing set can be placed in the links[] json member.
+  outgoing set can be placed in the links[] json member. These will
+  be automatically hashed by the IPFS subsystem, deliviering a true
+  globally unique ID (the CID) for the Atom.
 
 * Each read-only AtomSpace corresponds to a directory, so that each
   Atom appears in the links[] json member of the directory.  Updated
@@ -98,33 +98,20 @@ install mechanisms are the same.
   CID.  The good news: one knows *exactly* which version of an AtomSpace
   one is working with (this is very unlike the current AtomSpace!)
 
-* Change the code to use the new IPFS DAG API instead of the Object API.
-  The DAG API should allow the json contents to more closely mirror
-  actual Atom structures.
-
 * Currently, IPNS is slow. A core assumption in the design is that
   someday, this will be fixed, and IPNS will be fast.  Or that, at
   least, the IPNS latency will be immaterial, and that we'll work with
   the most-recently-resolved values.
 
-* Each AtomSpace Atom is an IPFS object. Nothing more nor less.
-  That means all Atoms are globally unique: all atoms have a single
-  persistent hash. (This is what is currently implemented; a design
-  alternative is to add the AtomSpace IPNS CID to the Atom, which
-  makes the Atom "effectively private", since the CID is not publicly
-  guessable.)
-
 * Design alternative A:
-  -- Every Atom has a corresponding key. So, millions of keys.
-     The key name is globally unique: it is just the scheme string
-     of the Atom.
-  -- The private part of the key is held by the key-creator.  It
-     stays private, unless shared.
-  -- Every IPFS Atom object has the public key in the Data field
-     of that object. That means that IPFS Atom objects are effectively
-     "secret", because the public key is not generally known/shared.
+  -- Every Atom has a corresponding PKI key. So, millions of keys.
+     The key name is globally unique: it is just the name of the
+     AtomSpace, followed by the scheme string of the Atom.
+  -- The private part of the PKI key is held by the key-creator.
+     It stays private, unless shared.
   -- The AtomSpace is a single file, listing all of the Atoms in it,
-     together with all of the public keys.
+     together with all of the public keys for each Atom. This means
+     that the AtomSpace is centralized.
   -- If a user wants to find the current Valuation of an Atom,
      they must:
      ++ obtain the AtomSpace file somehow.
@@ -140,8 +127,8 @@ install mechanisms are the same.
         by asking someone for it.
      ++ Update the Valuation file.
      ++ IPNS publish the new file.
-     Note that the updates are conflict-prone. So a CRDT format for
-     the Valuation file is required.
+     Note that the updates to the IncomingSet are conflict-prone. So
+     a CRDT format for IncomingSets is required.
 
   Issues:
   -- Publishing a single large AtomSpace file is ugly; it prevents
@@ -215,7 +202,7 @@ updates, file-size issues. etc.
    and then
    `git checkout master-linas`
 
-   This needs the package "JSON for Modern C++" 
+   This needs the package "JSON for Modern C++"
    `sudo apt install nlohmann-json3-dev`
 
    API documentation is here:
