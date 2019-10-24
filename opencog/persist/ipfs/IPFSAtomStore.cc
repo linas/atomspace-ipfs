@@ -36,7 +36,7 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
-		if (not_yet_stored(h)) do_store_atom(h);
+		if (guid_not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 		return;
 	}
@@ -49,13 +49,9 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
  * stored.
- *
- * Returns the height of the atom.
  */
 void IPFSAtomStorage::do_store_atom(const Handle& h)
 {
-	if (not not_yet_stored(h)) return;
-
 	if (h->is_node())
 	{
 		do_store_single_atom(h);
@@ -89,10 +85,10 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 	}
 }
 
-bool IPFSAtomStorage::not_yet_stored(const Handle& h)
+bool IPFSAtomStorage::guid_not_yet_stored(const Handle& h)
 {
-	std::lock_guard<std::mutex> lck(_cid_mutex);
-	return _ipfs_cid_map.end() == _ipfs_cid_map.find(h);
+	std::lock_guard<std::mutex> lck(_guid_mutex);
+	return _guid_map.end() == _guid_map.find(h);
 }
 
 /* ================================================================ */
@@ -114,7 +110,7 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 		int i=0;
 		for (const Handle& hout: h->getOutgoingSet())
 		{
-			oset[i] = get_atom_cid(hout);
+			oset[i] = get_atom_guid(hout);
 			i++;
 		}
 		jatom["outgoing"] = oset;
@@ -150,8 +146,8 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 
 	{
 		// This is multi-threaded; update the table under a lock.
-		std::lock_guard<std::mutex> lck(_cid_mutex);
-		_ipfs_cid_map.insert({h, id});
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map.insert({h, id});
 	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.

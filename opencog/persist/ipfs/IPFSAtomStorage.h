@@ -88,8 +88,8 @@ class IPFSAtomStorage : public BackingStore
 		ipfs::Json encodeAtomToJSON(const Handle&);
 		ipfs::Json encodeIncomingToJSON(const Handle&);
 
-		std::mutex _cid_mutex;
-		std::map<Handle, std::string> _ipfs_cid_map;
+		std::mutex _guid_mutex;
+		std::map<Handle, std::string> _guid_map;
 
 		// The inverted map.
 		std::mutex _inv_mutex;
@@ -99,7 +99,7 @@ class IPFSAtomStorage : public BackingStore
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&);
 
-		bool not_yet_stored(const Handle&);
+		bool guid_not_yet_stored(const Handle&);
 
 		bool bulk_load;
 		bool bulk_store;
@@ -164,7 +164,7 @@ class IPFSAtomStorage : public BackingStore
 		std::string get_ipfs_cid(void);
 		std::string get_ipns_cid(void);
 
-		std::string get_atom_cid(const Handle&);
+		std::string get_atom_guid(const Handle&);
 		Handle fetch_atom(const std::string&);
 		void load_atomspace(AtomSpace*, const std::string&);
 

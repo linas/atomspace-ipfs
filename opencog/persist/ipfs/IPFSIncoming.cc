@@ -29,8 +29,9 @@ ipfs::Json IPFSAtomStorage::encodeIncomingToJSON(const Handle& atom)
 
 	for (const LinkPtr& lnk: iset)
 	{
-		jinco.push_back(get_atom_cid(HandleCast(lnk)));
+		jinco.push_back(get_atom_guid(HandleCast(lnk)));
 	}
+	std::cout << "Incoming set: " << jinco.dump(2) << std::endl;
 	return jinco;
 }
 

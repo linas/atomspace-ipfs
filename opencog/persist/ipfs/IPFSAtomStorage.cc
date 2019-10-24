@@ -172,13 +172,15 @@ std::string IPFSAtomStorage::get_ipns_cid(void)
 }
 
 /**
- * Return the IPFS CID of the given Atom.
+ * Return the IPFS CID of the given (globally unique) Atom.
+ * The globally unique Atom is the one without any attached
+ * Values, or any other mutable state.
  */
-std::string IPFSAtomStorage::get_atom_cid(const Handle& h)
+std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
 {
-	if (not_yet_stored(h)) do_store_atom(h);
-	std::lock_guard<std::mutex> lck(_cid_mutex);
-	return _ipfs_cid_map.find(h)->second;
+	if (guid_not_yet_stored(h)) do_store_atom(h);
+	std::lock_guard<std::mutex> lck(_guid_mutex);
+	return _guid_map.find(h)->second;
 }
 
 /**
@@ -320,7 +322,7 @@ void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
 
-	_ipfs_cid_map.clear();
+	_guid_map.clear();
 
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;
