@@ -23,16 +23,12 @@ using namespace opencog;
 
 /* ================================================================ */
 
+/// Fetch the indicated atom from the IPFS CID.
+/// This will also grab and decode values. if present.
 Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 {
 	rethrow();
-	Handle h(doFetchAtom(cid));
-	if (h) get_atom_values(h);
-	return h;
-}
 
-Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
-{
 	ipfs::Json dag;
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagGet(cid, &dag);
@@ -42,6 +38,9 @@ Handle IPFSAtomStorage::doFetchAtom(const std::string& cid)
 
 	_num_get_atoms++;
 	Handle h(decodeJSONAtom(dag));
+	get_atom_values(h, dag);
+
+	// Cache it ... why?
 	{
 		std::lock_guard<std::mutex> lck(_inv_mutex);
 		_ipfs_inv_map.insert({cid, h});
@@ -77,7 +76,7 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 		auto hiter = _ipfs_inv_map.find(cid);
 		lck.unlock();
 		if (_ipfs_inv_map.end() == hiter)
-			oset.push_back(doFetchAtom(cid));
+			oset.push_back(fetch_atom(cid));
 		else
 			oset.push_back(hiter->second);
 	}
@@ -156,7 +155,7 @@ Handle IPFSAtomStorage::getNode(Type t, const char * str)
 	rethrow();
 	throw RuntimeException (TRACE_INFO, "Not implemented\n");
 	Handle h; // (doGetNode(t, str));
-	if (h) get_atom_values(h);
+	// if (h) get_atom_values(h);
 	return h;
 }
 
@@ -165,7 +164,7 @@ Handle IPFSAtomStorage::getLink(Type t, const HandleSeq& hs)
 	rethrow();
 	throw RuntimeException (TRACE_INFO, "Not implemented\n");
 	Handle hg; // (doGetLink(t, hs));
-	if (hg) get_atom_values(hg);
+	// if (hg) get_atom_values(hg);
 	return hg;
 }
 

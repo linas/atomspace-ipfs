@@ -30,24 +30,11 @@ void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
-/// Return a value, given by the VUID identifier, taken from the
-/// Values table. If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr IPFSAtomStorage::getValue(VUID vuid)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
 /// Return a value, given by the key-atom pair.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
 ValuePtr IPFSAtomStorage::getValuation(const Handle& key,
                                       const Handle& atom)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
-void IPFSAtomStorage::deleteValue(VUID vuid)
 {
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
@@ -142,13 +129,14 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 }
 
 /// Get ALL of the values associated with an atom.
-void IPFSAtomStorage::get_atom_values(Handle& atom)
+void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 {
-	if (nullptr == atom) return;
+	// If no values, then nothing to do.
+	auto pvals = jatom.find("values");
+	if (pvals == jatom.end()) return;
 
-// XXX FIXME  need to implement this stuff, but for now just
-// return to avoid a throw.
-	// throw SyntaxException(TRACE_INFO, "Not Implemented!");
+	ipfs::Json jvals = *pvals;
+	std::cout << "Jatom vals: " << jvals.dump(2) << std::endl;
 }
 
 /* ================================================================ */

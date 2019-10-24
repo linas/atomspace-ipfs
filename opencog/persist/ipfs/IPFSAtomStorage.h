@@ -76,7 +76,6 @@ class IPFSAtomStorage : public BackingStore
 		void add_atom_key_to_atomspace(const std::string&, const std::string&);
 
 		// Fetching of atoms.
-		Handle doFetchAtom(const std::string&);
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 
@@ -113,18 +112,10 @@ class IPFSAtomStorage : public BackingStore
 
 		// --------------------------
 		// Values
-#define NUMVMUT 16
-		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
-		void get_atom_values(Handle &);
+		void get_atom_values(Handle &, const ipfs::Json&);
 
-		typedef unsigned long VUID;
-
-		// ValuePtr doUnpackValue(Response&);
-		ValuePtr doGetValue(const char *);
-
-		ValuePtr getValue(VUID);
-		void deleteValue(VUID);
+		// void deleteValue(VUID);
 
 		// --------------------------
 		// Valuations
