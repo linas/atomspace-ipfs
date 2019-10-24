@@ -116,6 +116,7 @@ class IPFSAtomStorage : public BackingStore
 		void get_atom_values(Handle &, const ipfs::Json&);
 
 		// void deleteValue(VUID);
+		TruthValuePtr decodeStrTV(const std::string&);
 
 		// --------------------------
 		// Valuations

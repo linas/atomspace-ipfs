@@ -14,6 +14,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "IPFSAtomStorage.h"
@@ -142,15 +143,27 @@ void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 	{
 		std::cout << "KV Pair: " << jkey << " "<<jvalue<< std::endl;
 		Handle hkey = decodeStrAtom(jkey);
-		std::cout << "hkey=" << hkey->to_string() << std::endl;
 
 		// Special case handling for truth values.
 		if (*hkey == *tvpred)
-		{
-			// TruthValuePtr tvp = 
-			// atom->setTruthValue(tvp);
-		}
+			atom->setTruthValue(decodeStrTV(jvalue));
 	}
+}
+
+/* ================================================================ */
+
+TruthValuePtr IPFSAtomStorage::decodeStrTV(const std::string& stv)
+{
+	size_t pos = stv.find("(stv ");
+	if (std::string::npos != pos)
+	{
+		pos += 5;
+		double strength = stod(stv.substr(pos), &pos);
+		pos += 5;
+		double confidence = stod(stv.substr(pos), &pos);
+		return createSimpleTruthValue(strength, confidence);
+	}
+	throw SyntaxException(TRACE_INFO, "Unknown TV %s", stv.c_str());
 }
 
 /* ================================================================ */
