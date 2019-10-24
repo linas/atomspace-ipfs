@@ -45,6 +45,10 @@ void IPFSAtomStorage::init(const char * uri)
 	//    ipfs://hostname/atomspace-key
 	//    ipfs://hostname:port/atomspace-key
 	// where the key will be used to publish the IPNS for the atomspace.
+	// Read-only access to AtomSpaces is also supported. These have two
+	// forms: with IPFS and IPNS:
+	//    ipfs:///ipfs/Qm...
+	//    ipfs:///ipns/Qm...
 
 	_port = 5001;
 	if ('/' == uri[URIX_LEN])
@@ -75,6 +79,20 @@ void IPFSAtomStorage::init(const char * uri)
 			size_t len = p - start;
 			_hostname.resize(len);
 		}
+	}
+
+	// If the "key" is actually an IPFS or IPNS CID...
+	if (std::string::npos != _keyname.find("ipfs/"))
+	{
+		_atomspace_cid = &_keyname[sizeof("ipfs/")];
+		_keyname.clear();
+	}
+
+	if (std::string::npos != _keyname.find("ipns/"))
+	{
+		_key_cid = &_keyname[sizeof("ipns/")];
+		_keyname.clear();
+		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
 	}
 
 	// Create pool of IPFS server connections.
