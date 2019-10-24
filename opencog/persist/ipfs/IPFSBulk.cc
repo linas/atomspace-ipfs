@@ -143,11 +143,13 @@ void IPFSAtomStorage::load_as_from_cid(AtomSpace* as, const std::string& cid)
 	auto atom_list = dag["links"];
 	for (auto acid: atom_list)
 	{
-		// std::cout << "Atom CID is: " << acid["Cid"] << std::endl;
+		// std::cout << "Atom CID is: " << acid["Cid"]["/"] << std::endl;
 
-		// Rather than fetching objects, we just part the raw string.
-		// That seems faster, simpler, easier.
-		as->add_atom(decodeStrAtom(acid["Name"]));
+		// In the current design, the Cid entry is NOT an IPNS entry,
+		// but is instead the IPFS CID of the Atom, with values
+		// attached to it. So we have to fetch that, to get the latest
+		// values on the atom.
+		as->add_atom(fetch_atom(acid["Cid"]["/"]));
 		_load_count++;
 	}
 
