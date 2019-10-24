@@ -146,9 +146,7 @@ Handle IPFSAtomStorage::decodeStrAtom(const std::string& satom)
 /// Convert value (or Atom) into a string.
 std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 {
-	std::string name = v->to_short_string();
-	name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-	return name;
+	return v->to_short_string();
 }
 
 /* ================================================================ */

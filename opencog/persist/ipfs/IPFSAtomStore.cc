@@ -129,13 +129,13 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
 	// Convert C++ Atom to json.
-	ipfs::Json atom = encodeAtomToJSON(h);
+	ipfs::Json jatom = encodeAtomToJSON(h);
 
 	// XXX FIXME If ipfs throws, then this leaks from the pool
 	// We can't just catch here, we need to re-throw too.
 	ipfs::Json result;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->DagPut(atom, &result);
+	conn->DagPut(jatom, &result);
 	conn_pool.push(conn);
 
 	std::string id = result["Cid"]["/"];
@@ -148,7 +148,7 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
 	std::string name = encodeValueToStr(h);
-	add_atom_key_to_atomspace(name, "");
+	add_atom_key_to_atomspace(name, id);
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
 

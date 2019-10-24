@@ -326,11 +326,11 @@ void IPFSAtomStorage::kill_data(void)
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;
 
-	ipfs::Client* client = conn_pool.pop();
-	client->FilesAdd({{"AtomSpace",
+	ipfs::Client* conn = conn_pool.pop();
+	conn->FilesAdd({{"AtomSpace",
 		ipfs::http::FileUpload::Type::kFileContents,
 		text}}, &result);
-	conn_pool.push(client);
+	conn_pool.push(conn);
 
 	_atomspace_cid = result[0]["hash"];
 
