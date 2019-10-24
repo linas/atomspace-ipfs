@@ -57,4 +57,39 @@ void IPFSAtomStorage::store_atom_incoming(const Handle& atom)
 	          << " CID: " << atoid << std::endl;
 }
 
+/* ================================================================ */
+/**
+ * Retreive the incoming set of the indicated atom.
+ */
+void IPFSAtomStorage::getIncoming(AtomTable& table, const char *buff)
+{
+	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
+	// Performance stats
+#if 0
+	_num_get_insets++;
+	_num_get_inlinks += iset.size();
+#endif
+}
+
+/**
+ * Retreive the entire incoming set of the indicated atom.
+ */
+void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
+{
+	rethrow();
+
+	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
+}
+
+/**
+ * Retreive the incoming set of the indicated atom, but only those atoms
+ * of type t.
+ */
+void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	rethrow();
+
+	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
+}
+
 /* ============================= END OF FILE ================= */
