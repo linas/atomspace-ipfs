@@ -18,11 +18,10 @@ and "active" Atoms.
 
 **Status**: Design alternatives are being explored. In the current
 implementation:
- * It is possible to save Atoms to IPFS, but not values.
+ * It is possible to save and restores Atoms to IPFS.
  * AtomSpaces can be saved and restored in bulk. See the
    [examples](examples).
-
-The design for Values is unknown and likely to be challenging.
+ * Incoming-set query does not work.
 
 After much thought: there does not seem to be any way of mapping the
 AtomSpace into the current design of IPFS+IPNS without resorting to
@@ -30,7 +29,7 @@ a single, centralized file listing all of the Atoms in an AtomSpace.
 Implementing a single, centralized file seems like a "really bad idea"
 for all of the usual reasons:
  * When it gets large, it does not scale.
- * Impossible to optimze fetch of atoms-by-type.
+ * Impossible to optimize fetch of atoms-by-type.
  * Update conflicts when there are multiple writers.
  * Performance bottlenecks when there are multiple writers.
 Despite this, a bad, hacky implementation, with the above obvious

@@ -28,7 +28,7 @@
 ;     http://localhost:5001/webui
 (ipfs-atom-cid c)
 
-; A more complex examle...
+; A more complex example...
 (cog-set-value! c (Predicate "position") (FloatValue 1.1 2.2 3.3))
 (cog-set-value! c (Predicate "velocity") (FloatValue 4.4 5.5 6.6))
 (store-atom c)
@@ -42,19 +42,14 @@
 		(Predicate "Some relationship")
 		(List (Concept "foo") (Concept "bar"))))
 
+(cog-set-value! e (Predicate "position") (FloatValue 3 2 1))
+(cog-set-value! e (Predicate "velocity") (FloatValue 42 41 40))
 (store-atom e)
-(barrier)
-
-; Likewise, view the CID for the EvaluationLink:
-(ipfs-atom-cid e)
 
 ; The expected CID for the EvaluationLink is:
 ;
-; /ipfs/bafyreigll67ssepbqfhtooqobirodyyhsq3ptmxseuwxwnxs5aci75hpoq
+; /ipfs/bafyreiaak6j7psknn5id7d456jaxaqxq7xjczmi7boj4zg6pqhgr5oeuuu
 ;
-
-; Review the stats
-(ipfs-stats)
 
 ; Close the connection.
 (ipfs-close)

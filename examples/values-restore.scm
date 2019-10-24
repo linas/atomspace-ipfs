@@ -25,8 +25,17 @@
 		(format #t "Key ~A   has value ~A\n" key (cog-value c key)))
 	(cog-keys c))
 
-; Review the stats
-(ipfs-stats)
+; Fetch the previously-stored EvaluationLink
+(define e
+	(ipfs-fetch-atom "bafyreiaak6j7psknn5id7d456jaxaqxq7xjczmi7boj4zg6pqhgr5oeuuu"))
+
+(cog-keys e)
+
+; Print them all, too.
+(for-each
+	(lambda (key)
+		(format #t "Key ~A   has value ~A\n" key (cog-value e key)))
+	(cog-keys e))
 
 ; Close the connection.
 (ipfs-close)
