@@ -76,6 +76,8 @@ class IPFSAtomStorage : public BackingStore
 		void update_atom_in_atomspace(const Handle&,
 		                              const std::string&,
 		                              const ipfs::Json&);
+		std::mutex _json_mutex;
+		std::map<Handle, ipfs::Json> _json_map;
 
 		// Fetching of atoms.
 		ipfs::Json fetch_atom_dag(const std::string&);

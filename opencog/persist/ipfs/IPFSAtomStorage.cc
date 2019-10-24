@@ -247,6 +247,10 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
 	_atomspace_cid = new_as_id;
 	conn_pool.push(conn);
+
+	// Also track the current version of the json representation
+	std::lock_guard<std::mutex> lck(_json_mutex);
+	_json_map.insert({h, jatom});
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.

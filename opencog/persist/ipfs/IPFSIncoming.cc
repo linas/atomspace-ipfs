@@ -44,7 +44,11 @@ void IPFSAtomStorage::store_atom_incoming(const Handle& atom)
 	if (0 == _keyname.size()) return;
 
 	// Build a JSON representation of the Atom.
-	ipfs::Json jatom = encodeAtomToJSON(atom);
+	ipfs::Json jatom;
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		jatom = _json_map.find(atom)->second;
+	}
 	jatom["incoming"] = encodeIncomingToJSON(atom);
 
 	// Store the thing in IPFS
@@ -56,6 +60,8 @@ void IPFSAtomStorage::store_atom_incoming(const Handle& atom)
 	std::string atoid = result["Cid"]["/"];
 	std::cout << "Incoming Atom: " << encodeAtomToStr(atom)
 	          << " CID: " << atoid << std::endl;
+
+	update_atom_in_atomspace(atom, atoid, jatom);
 }
 
 /* ================================================================ */
