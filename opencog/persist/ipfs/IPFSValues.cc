@@ -137,33 +137,44 @@ void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 	if (pvals == jatom.end()) return;
 
 	ipfs::Json jvals = *pvals;
-	std::cout << "Jatom vals: " << jvals.dump(2) << std::endl;
+	// std::cout << "Jatom vals: " << jvals.dump(2) << std::endl;
 
 	for (const auto& [jkey, jvalue]: jvals.items())
 	{
-		std::cout << "KV Pair: " << jkey << " "<<jvalue<< std::endl;
-		Handle hkey = decodeStrAtom(jkey);
-
-		// Special case handling for truth values.
-		if (*hkey == *tvpred)
-			atom->setTruthValue(decodeStrTV(jvalue));
+		// std::cout << "KV Pair: " << jkey << " "<<jvalue<< std::endl;
+		atom->setValue(decodeStrAtom(jkey), decodeStrValue(jvalue));
 	}
 }
 
 /* ================================================================ */
 
-TruthValuePtr IPFSAtomStorage::decodeStrTV(const std::string& stv)
+ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 {
-	size_t pos = stv.find("(stv ");
+	size_t pos = stv.find("(FloatValue ");
 	if (std::string::npos != pos)
 	{
-		pos += 5;
-		double strength = stod(stv.substr(pos), &pos);
-		pos += 5;
-		double confidence = stod(stv.substr(pos), &pos);
-		return createSimpleTruthValue(strength, confidence);
+		pos += strlen("(FloatValue ");
+		std::vector<double> fv;
+		while (pos != std::string::npos and stv[pos] != ')')
+		{
+			size_t epos;
+			fv.push_back(stod(stv.substr(pos), &epos));
+			pos += epos;
+		}
+		return createFloatValue(fv);
 	}
-	throw SyntaxException(TRACE_INFO, "Unknown TV %s", stv.c_str());
+
+	pos = stv.find("(stv ");
+	if (std::string::npos != pos)
+	{
+		size_t epos;
+		pos += strlen("(stv ");
+		double strength = stod(stv.substr(pos), &epos);
+		pos += epos;
+		double confidence = stod(stv.substr(pos), &epos);
+		return ValueCast(createSimpleTruthValue(strength, confidence));
+	}
+	throw SyntaxException(TRACE_INFO, "Unknown Value %s", stv.c_str());
 }
 
 /* ================================================================ */
