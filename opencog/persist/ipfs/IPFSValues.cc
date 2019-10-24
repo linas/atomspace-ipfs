@@ -137,6 +137,20 @@ void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 
 	ipfs::Json jvals = *pvals;
 	std::cout << "Jatom vals: " << jvals.dump(2) << std::endl;
+
+	for (const auto& [jkey, jvalue]: jvals.items())
+	{
+		std::cout << "KV Pair: " << jkey << " "<<jvalue<< std::endl;
+		Handle hkey = decodeStrAtom(jkey);
+		std::cout << "hkey=" << hkey->to_string() << std::endl;
+
+		// Special case handling for truth values.
+		if (*hkey == *tvpred)
+		{
+			// TruthValuePtr tvp = 
+			// atom->setTruthValue(tvp);
+		}
+	}
 }
 
 /* ================================================================ */
