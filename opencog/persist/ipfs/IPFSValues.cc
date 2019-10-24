@@ -55,6 +55,9 @@ void IPFSAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
+	// No publication of Values, if there's no AtomSpace key.
+	if (0 == _keyname.size()) return;
+
 	// First, build some json that encodes the key-value pairs
 	ipfs::Json jvals;
 	HandleSet keys = atom->getKeys();
@@ -81,9 +84,47 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	conn->DagPut(jatom, &result);
 	conn_pool.push(conn);
 
-	std::string id = result["Cid"]["/"];
+	std::string atoid = result["Cid"]["/"];
 	std::cout << "Valued Atom: " << encodeValueToStr(atom)
-	          << " CID: " << id << std::endl;
+	          << " CID: " << atoid << std::endl;
+
+	// Find the key for this atom.
+	// XXX TODO this can be speeded up by caching the keys in C++
+	std::string atonam = _keyname + encodeValueToStr(atom);
+	std::string atokey;
+	conn = conn_pool.pop();
+	conn->KeyFind(atonam, &atokey);
+	if (0 == atokey.size())
+	{
+		// Not found; make a new one, by default.
+		conn->KeyNew(atonam, &atokey);
+		std::cout << "Generated Atom IPNS: " << atonam
+		          << " key: " << atokey << std::endl;
+	}
+
+	// Publish... XXX FIXME needs to be in a queue.
+	std::cout << "Publishing Atom Values: "
+	          << atokey << std::endl;
+
+	// XXX hack alert -- lifetime set to 4 hours, it should be
+	// infinity or something.... the TTL is 30 seconds, but should
+	// be shorter or user-configurable .. set both with scheme bindings.
+	try
+	{
+		std::string name;
+		conn->NamePublish(atoid, atonam, &name, "4h", "30s");
+		std::cout << "Published Atom Values: " << name << std::endl;
+	}
+	catch (const std::exception& ex)
+	{
+		// Arghh. IPNS keeps throwing this error:
+		// "can't replace a newer value with an older value"
+		// which is insane, because maybe I *do* want to do exactly
+		// that!  So WTF ... another IPNS bug.
+		std::cerr << "Failed to publish Atom Values: "
+		          << ex.what() << std::endl;
+	}
+	conn_pool.push(conn);
 }
 
 /// Get ALL of the values associated with an atom.
