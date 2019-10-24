@@ -86,6 +86,8 @@ class IPFSAtomStorage : public BackingStore
 		// Storing of atoms
 
 		std::string encodeValueToStr(const ValuePtr&);
+		std::string encodeAtomToStr(const Handle& h) {
+			return encodeValueToStr(h); }
 		ipfs::Json encodeAtomToJSON(const Handle&);
 		ipfs::Json encodeIncomingToJSON(const Handle&);
 

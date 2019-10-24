@@ -50,7 +50,7 @@ ipfs::Json IPFSAtomStorage::encodeValuesToJSON(const Handle& atom)
 			if (tv->isDefaultTV()) continue;
 		}
 		ValuePtr pap = atom->getValue(key);
-		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
+		jvals[encodeAtomToStr(key)] = encodeValueToStr(pap);
 	}
 	return jvals;
 }
@@ -66,7 +66,6 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	// Build a JSON representation of the Atom.
 	ipfs::Json jatom = encodeAtomToJSON(atom);
 	jatom["values"] = encodeValuesToJSON(atom);
-	jatom["incoming"] = encodeIncomingToJSON(atom);
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -75,7 +74,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	conn_pool.push(conn);
 
 	std::string atoid = result["Cid"]["/"];
-	std::cout << "Valued Atom: " << encodeValueToStr(atom)
+	std::cout << "Valued Atom: " << encodeAtomToStr(atom)
 	          << " CID: " << atoid << std::endl;
 
 	// The code below is ifdefed out. In a better world, we would
@@ -87,7 +86,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 #if LATER_WHEN_IPNS_WORKS
 	// Find the key for this atom.
 	// XXX TODO this can be speeded up by caching the keys in C++
-	std::string atonam = _keyname + encodeValueToStr(atom);
+	std::string atonam = _keyname + encodeAtomToStr(atom);
 	std::string atokey;
 	conn = conn_pool.pop();
 	conn->KeyFind(atonam, &atokey);
@@ -125,7 +124,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 #else // LATER_WHEN_IPNS_WORKS
 
    // Update the atomspace, so that it holds the new value.
-   std::string atostr = encodeValueToStr(atom);
+   std::string atostr = encodeAtomToStr(atom);
    add_atom_key_to_atomspace(atostr, atoid);
 #endif // LATER_WHEN_IPNS_WORKS
 }
