@@ -14,7 +14,7 @@
 (export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
 	ipfs-store ipfs-stats
 	ipfs-atom-cid ipfs-fetch-atom
-	ipfs-atomspace-cid ipns-atomspace-cid)
+	ipfs-atomspace-cid ipns-atomspace-cid ipfs-atomspace-resolve)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -142,4 +142,14 @@
         `ipfs name resolve /ipns/Qm...VHx`
      The result of this resolution should be equal to what the
      scheme command `(ipfs-atomspace-cid)` is returning.
+")
+
+(set-procedure-property! ipfs-resolve-atomspace 'documentation
+"
+ ipfs-resolve-atomspace - Perform IPNS resolution to get the
+     current CID of the current AtomSpace. Once resolved, Atoms
+     in that AtomSpace can be directly accessed.
+
+     Caution: In the current version of IPFS, resolution can take
+     60 seconds of more. This is a well-known IPFS bug.
 ")

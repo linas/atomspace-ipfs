@@ -166,9 +166,26 @@ std::string IPFSAtomStorage::get_ipfs_cid(void)
 /**
  * Return the IPNS CID of the current AtomSpace.
  */
-std::string IPFSAtomStorage::get_ipns_cid(void)
+std::string IPFSAtomStorage::get_ipns_key(void)
 {
 	return "/ipns/" + _key_cid;
+}
+
+/**
+ * Use IPNS to find the latest IPFS cid for this AtomSpace.
+ */
+void IPFSAtomStorage::resolve_atomspace(void)
+{
+	if (std::string::npos == path.find("/ipns/"))
+		return;
+
+	// Caution: as of this writing, name resolution takes
+	// exactly 60 seconds.
+	std::string ipfs_path;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->NameResolve(path, &ipfs_path);
+	conn_pool.push(conn);
+	_atomspace_cid = ipfs_path;
 }
 
 /**

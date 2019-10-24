@@ -167,7 +167,8 @@ class IPFSAtomStorage : public BackingStore
 		virtual ~IPFSAtomStorage();
 		bool connected(void); // connection to DB is alive
 		std::string get_ipfs_cid(void);
-		std::string get_ipns_cid(void);
+		std::string get_ipns_key(void);
+		void resolve_atomspace(void);
 
 		std::string get_atom_guid(const Handle&);
 		Handle fetch_atom(const std::string&);
