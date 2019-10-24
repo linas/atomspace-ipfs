@@ -31,22 +31,13 @@ void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	throw SyntaxException(TRACE_INFO, "Not Implemented!");
 }
 
-/// Return a value, given by the key-atom pair.
-/// If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr IPFSAtomStorage::getValuation(const Handle& key,
-                                      const Handle& atom)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
+/* ================================================================== */
 
-/// Store ALL of the values associated with the atom.
-void IPFSAtomStorage::store_atom_values(const Handle& atom)
+/// Get ALL of the values on the Atom, and return the corresponding
+/// JSON representation for them.
+ipfs::Json IPFSAtomStorage::encodeValuesToJSON(const Handle& atom)
 {
-	// No publication of Values, if there's no AtomSpace key.
-	if (0 == _keyname.size()) return;
-
-	// First, build some json that encodes the key-value pairs
+	// Build some json that encodes the key-value pairs
 	ipfs::Json jvals;
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
@@ -61,10 +52,20 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		ValuePtr pap = atom->getValue(key);
 		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
 	}
+	return jvals;
+}
 
-	// Next, park that json with the atom.
+/* ================================================================== */
+
+/// Store ALL of the values associated with the atom.
+void IPFSAtomStorage::store_atom_values(const Handle& atom)
+{
+	// No publication of Values, if there's no AtomSpace key.
+	if (0 == _keyname.size()) return;
+
+	// Build a JSON representation of the Atom.
 	ipfs::Json jatom = encodeAtomToJSON(atom);
-	jatom["values"] = jvals;
+	jatom["values"] = encodeValuesToJSON(atom);
 
 	// Store the thing in IPFS
 	ipfs::Json result;
