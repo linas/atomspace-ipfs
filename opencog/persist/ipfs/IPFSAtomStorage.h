@@ -85,6 +85,7 @@ class IPFSAtomStorage : public BackingStore
 		// Storing of atoms
 
 		std::string encodeValueToStr(const ValuePtr&);
+		ipfs::Json encodeAtomToJSON(const Handle&);
 
 		std::mutex _cid_mutex;
 		std::map<Handle, std::string> _ipfs_cid_map;

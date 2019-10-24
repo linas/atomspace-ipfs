@@ -55,8 +55,8 @@ void IPFSAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void IPFSAtomStorage::store_atom_values(const Handle& atom)
 {
+	// First, build some json that encodes the key-value pairs
 	ipfs::Json jvals;
-
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
@@ -70,6 +70,20 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		ValuePtr pap = atom->getValue(key);
 		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
 	}
+
+	// Next, park that json with the atom.
+	ipfs::Json jatom = encodeAtomToJSON(atom);
+	jatom["values"] = jvals;
+
+	// Store the thing in IPFS
+	ipfs::Json result;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagPut(jatom, &result);
+	conn_pool.push(conn);
+
+	std::string id = result["Cid"]["/"];
+	std::cout << "Valued Atom: " << encodeValueToStr(atom)
+	          << " CID: " << id << std::endl;
 }
 
 /// Get ALL of the values associated with an atom.

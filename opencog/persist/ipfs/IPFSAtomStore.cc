@@ -90,19 +90,15 @@ bool IPFSAtomStorage::not_yet_stored(const Handle& h)
 
 /* ================================================================ */
 
-/**
- * Store just this one single atom.
- * Atoms in the outgoing set are NOT stored!
- * The store is performed synchronously (in the calling thread).
- */
-void IPFSAtomStorage::do_store_single_atom(const Handle& h)
+/// Convert a single C++ Atom into a Json expression.
+ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 {
-	// Build the same structure, but this time as json.
-	ipfs::Json atom;
+	// The minimalist Atom definition, as json.
+	ipfs::Json jatom;
+	jatom["type"] = nameserver().getTypeName(h->get_type());
 	if (h->is_node())
 	{
-		atom["type"] = nameserver().getTypeName(h->get_type());
-		atom["name"] = h->get_name();
+		jatom["name"] = h->get_name();
 	}
 	else
 	if (h->is_link())
@@ -114,15 +110,33 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 			oset[i] = _ipfs_cid_map.find(hout)->second;
 			i++;
 		}
-		atom["type"] = nameserver().getTypeName(h->get_type());
-		atom["outgoing"] = oset;
+		jatom["outgoing"] = oset;
 	}
+	else
+	{
+		throw RuntimeException(TRACE_INFO, "Neither Node nor Link!\n");
+	}
+	return jatom;
+}
+
+/* ================================================================ */
+
+/**
+ * Store just this one single atom.
+ * Atoms in the outgoing set are NOT stored!
+ * The store is performed synchronously (in the calling thread).
+ */
+void IPFSAtomStorage::do_store_single_atom(const Handle& h)
+{
+	// Convert C++ Atom to json.
+	ipfs::Json atom = encodeAtomToJSON(h);
 
 	// XXX FIXME If ipfs throws, then this leaks from the pool
 	// We can't just catch here, we need to re-throw too.
 	ipfs::Json result;
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagPut(atom, &result);
+	conn_pool.push(conn);
 
 	std::string id = result["Cid"]["/"];
 
