@@ -84,7 +84,7 @@ class IPFSAtomStorage : public BackingStore
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 
-		void store_atom_incoming(const Handle &);
+		void store_incoming_of(const Handle &, const Handle&);
 		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
@@ -93,7 +93,6 @@ class IPFSAtomStorage : public BackingStore
 		std::string encodeAtomToStr(const Handle& h) {
 			return encodeValueToStr(h); }
 		ipfs::Json encodeAtomToJSON(const Handle&);
-		ipfs::Json encodeIncomingToJSON(const Handle&);
 
 		std::mutex _guid_mutex;
 		std::map<Handle, std::string> _guid_map;

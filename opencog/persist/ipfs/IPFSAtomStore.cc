@@ -69,6 +69,10 @@ void IPFSAtomStorage::do_store_atom(const Handle& h)
 		do_store_atom(ho);
 
 	do_store_single_atom(h);
+
+	// Make note of the incoming set.
+	for (const Handle& ho: h->getOutgoingSet())
+		store_incoming_of(ho,h);
 }
 
 /// This method runs in the write-pool dispatcher thread.
@@ -82,13 +86,6 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 	{
 		do_store_atom(h);
 		store_atom_values(h);
-		if (h->is_link())
-		{
-			for (const Handle& hout: h->getOutgoingSet())
-			{
-				store_atom_incoming(hout);
-			}
-		}
 	}
 	catch (...)
 	{

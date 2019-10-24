@@ -17,39 +17,33 @@ using namespace opencog;
 
 /* ================================================================== */
 
-/// Get the IncomingSet of the Atom, and return the corresponding
-/// JSON representation for it.  This object will have CID's to
-/// the Atoms in that incoming set, those CID's will identify the
-/// globally-unique atoms, and NOT the Atoms w/ values, etc.
-ipfs::Json IPFSAtomStorage::encodeIncomingToJSON(const Handle& atom)
-{
-	ipfs::Json jinco;
-
-	IncomingSet iset(atom->getIncomingSet());
-
-	for (const LinkPtr& lnk: iset)
-	{
-		jinco.push_back(get_atom_guid(HandleCast(lnk)));
-	}
-	std::cout << "Incoming set: " << jinco.dump(2) << std::endl;
-	return jinco;
-}
-
-/* ================================================================== */
-
-/// Store ALL of the incoming set associated with the atom.
-void IPFSAtomStorage::store_atom_incoming(const Handle& atom)
+/// Store `holder` into the incoming set of atom.
+void IPFSAtomStorage::store_incoming_of(const Handle& atom,
+                                        const Handle& holder)
 {
 	// No publication of Incoming Set, if there's no AtomSpace key.
 	if (0 == _keyname.size()) return;
 
-	// Build a JSON representation of the Atom.
+	// Obtain the JSON representation of the Atom.
 	ipfs::Json jatom;
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		jatom = _json_map.find(atom)->second;
 	}
-	jatom["incoming"] = encodeIncomingToJSON(atom);
+
+	ipfs::Json jinco;
+	auto incli = jatom.find("incoming");
+	if (jatom.end() != incli)
+	{
+		// Is the atom already a part of the incoming set?
+		// If so, then there's nothing to do.
+		auto havit = incli->find(get_atom_guid(holder));
+		if (incli->end() != havit) return;
+		jinco = *incli;
+	}
+
+	jinco.push_back(get_atom_guid(holder));
+	jatom["incoming"] = jinco;
 
 	// Store the thing in IPFS
 	ipfs::Json result;
