@@ -88,6 +88,13 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	std::cout << "Valued Atom: " << encodeValueToStr(atom)
 	          << " CID: " << atoid << std::endl;
 
+	// The code below is ifdefed out. In a better world, we would
+	// publish just the IPNS name of where to find the atom values,
+	// and, to get those values, we'd simply look them up in IPNS.
+	// Doing it this way would avoid a need to update the master
+	// AtomSpace file. However, we're not quite ready for that, yet.
+	// So this is stubbed out, for now.
+#if LATER_WHEN_IPNS_WORKS
 	// Find the key for this atom.
 	// XXX TODO this can be speeded up by caching the keys in C++
 	std::string atonam = _keyname + encodeValueToStr(atom);
@@ -103,17 +110,17 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	}
 
 	// Publish... XXX FIXME needs to be in a queue.
-	std::cout << "Publishing Atom Values: "
-	          << atokey << std::endl;
+	std::cout << "Publishing Atom Values: " << atokey << std::endl;
 
 	// XXX hack alert -- lifetime set to 4 hours, it should be
 	// infinity or something.... the TTL is 30 seconds, but should
 	// be shorter or user-configurable .. set both with scheme bindings.
 	try
 	{
-		std::string name;
-		conn->NamePublish(atoid, atonam, &name, "4h", "30s");
-		std::cout << "Published Atom Values: " << name << std::endl;
+		// The `ipns_name` should be identical to the `atokey` above.
+		std::string ipns_name;
+		conn->NamePublish(atoid, atonam, &ipns_name, "4h", "30s");
+		std::cout << "Published Atom Values: " << ipns_name << std::endl;
 	}
 	catch (const std::exception& ex)
 	{
@@ -124,6 +131,13 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		std::cerr << "Failed to publish Atom Values: "
 		          << ex.what() << std::endl;
 	}
+#else // LATER_WHEN_IPNS_WORKS
+
+   // Update the atomspace, so that it holds the new value.
+   std::string atostr = encodeValueToStr(atom);
+   add_atom_key_to_atomspace(atostr, atoid);
+
+#endif // LATER_WHEN_IPNS_WORKS
 	conn_pool.push(conn);
 }
 
