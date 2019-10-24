@@ -60,25 +60,22 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 
 /* ================================================================ */
 /**
- * Retreive the incoming set of the indicated atom.
- */
-void IPFSAtomStorage::getIncoming(AtomTable& table, const char *buff)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	// Performance stats
-#if 0
-	_num_get_insets++;
-	_num_get_inlinks += iset.size();
-#endif
-}
-
-/**
  * Retreive the entire incoming set of the indicated atom.
+ * This fetches only teh Atoms in the incoming set, and not
+ * the Values associated with them!  XXX FIXME Double check,
+ * I think the intent is to also get teh attached values,
+ * but I'm not sure, because the spec is ill-defined on this
+ * and I'm not sure what postgres is going, here.  All backends
+ * should be compatible on this.
  */
 void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	rethrow();
 
+#if 0
+	_num_get_insets++;
+	_num_get_inlinks += iset.size();
+#endif
 	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 }
 

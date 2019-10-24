@@ -14,7 +14,7 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Alpha version 0.0.4
+## Alpha version 0.0.5
 
 **Status**: Design alternatives are being explored. In the current
 implementation:
@@ -30,8 +30,12 @@ Implementing a single, centralized file seems like a "really bad idea"
 for all of the usual reasons:
  * When it gets large, it does not scale.
  * Impossible to optimize fetch of atoms-by-type.
+ * Impossible to optimize fetch of incoming set.
  * Update conflicts when there are multiple writers.
  * Performance bottlenecks when there are multiple writers.
+Basically, one is forced to load the entire AtomSpace, which is
+not only wastefully slow, but might not even fit into available RAM.
+
 Despite this, a bad, hacky implementation, with the above obvious
 failures, is created anyway.  But we need a better design, and that
 better design seems to be blocked without core changes to the IPFS
@@ -121,6 +125,10 @@ install mechanisms are the same.
      ++ Fetch the file corresponding to the CID that IPNS returned.
      ++ Parse the file, extract the desired Value.
   -- Incoming sets are stored along with the Valuation file.
+     (Except that this is pointless, because there is no way of
+     knowing the CID of this file, unless one first loads all of
+     the AtomSpace, in which case the loading of the incoming set is
+     pointless...)
   -- If a user wants to change (update) the Valuation of a Atom,
      they must:
      ++ Obtain the private key for that Atom/Atomspace combination,
@@ -136,13 +144,21 @@ install mechanisms are the same.
      scalable. There's conflict resolution issues if there are multiple
      updaters.
 
-* Q: How to search incoming set?
+* Q: How to load the incoming set of an Atom?
+  One can certainly store the incoming set of an Atom, and the current
+  code does this. But it is impossible to know what the CID of that
+  Atom is, unless one either (a) loads the entire AtomSpace (which makes
+  the load of incoming sets completely pointless) or (b) performs an
+  IPNS query for that Atom (which is not only slow, but also klunky
+  per discussion below).
 
-* Q: is pin needed to prevent a published atomspace from disappearing?
+* Q: is Pin needed to prevent a published atomspace from disappearing?
+  Doesn't seem to be!?
 
 * Use pubsub to publish value updates.
 
-* The current encoding is gonna do alpha-equivalence all wrong.
+* The current encoding is gonna do alpha-equivalence all wrong. This is
+  an implementation bug.
 
 ## IPNS++
 It currently appears to be impossible to map the AtomSpace into IPFS
