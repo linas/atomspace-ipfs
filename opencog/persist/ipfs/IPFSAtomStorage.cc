@@ -174,7 +174,8 @@ std::string IPFSAtomStorage::get_ipns_cid(void)
 /**
  * Return the IPFS CID of the given (globally unique) Atom.
  * The globally unique Atom is the one without any attached
- * Values, or any other mutable state.
+ * Values, or any other mutable state. Because it's just the
+ * immutable Atom, it's by definition globally unique.
  */
 std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
 {

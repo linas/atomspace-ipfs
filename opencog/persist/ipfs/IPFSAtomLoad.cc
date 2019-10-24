@@ -24,8 +24,8 @@ using namespace opencog;
 /* ================================================================ */
 
 /// Fetch the indicated atom from the IPFS CID.
-/// This will also grab and decode values. if present.
-Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
+/// This will return the raw JSON representation.
+ipfs::Json IPFSAtomStorage::fetch_atom_dag(const std::string& cid)
 {
 	rethrow();
 
@@ -33,14 +33,23 @@ Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagGet(cid, &dag);
 	conn_pool.push(conn);
+	_num_get_atoms++;
 
 	std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
+	return dag;
+}
 
-	_num_get_atoms++;
+/* ================================================================ */
+
+/// Fetch the indicated atom from the IPFS CID.
+/// This will also grab and decode values. if present.
+Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
+{
+	ipfs::Json dag(fetch_atom_dag(cid));
 	Handle h(decodeJSONAtom(dag));
 	get_atom_values(h, dag);
 
-	// Cache it ... why?
+	// Cache it ... so that outgoing-set fetches run faster.
 	{
 		std::lock_guard<std::mutex> lck(_inv_mutex);
 		_ipfs_inv_map.insert({cid, h});

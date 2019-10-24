@@ -76,6 +76,7 @@ class IPFSAtomStorage : public BackingStore
 		void add_atom_key_to_atomspace(const std::string&, const std::string&);
 
 		// Fetching of atoms.
+		ipfs::Json fetch_atom_dag(const std::string&);
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 

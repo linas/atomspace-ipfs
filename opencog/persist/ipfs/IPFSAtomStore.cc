@@ -46,12 +46,18 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 }
 
 /**
- * Synchronously store a single atom. That is, the actual store is done
- * in the calling thread.  All values attached to the atom are also
- * stored.
+ * Synchronously store a single globally-unique atom.
+ * A "globally unique Atom" is the one without any attached values or
+ * other mutable state. Thus, it posses a single globally unique CID.
+ *
+ * The store is synchronous, as it is done in the calling thread.
+ * The intent is that the writeback queue is the one calling this
+ * method.
  */
 void IPFSAtomStorage::do_store_atom(const Handle& h)
 {
+	if (not guid_not_yet_stored(h)) return;
+
 	if (h->is_node())
 	{
 		do_store_single_atom(h);
@@ -65,6 +71,11 @@ void IPFSAtomStorage::do_store_atom(const Handle& h)
 	do_store_single_atom(h);
 }
 
+/// This method runs in the write-pool dispatcher thread.
+/// That is, for each atom that was queued into the write queue,
+/// when it gets dequeued, this method is called to store it.
+/// Take careful note of the design here: the only things that
+///
 void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 {
 	try
