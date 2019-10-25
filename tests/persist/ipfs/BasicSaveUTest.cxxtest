@@ -341,7 +341,8 @@ void BasicSaveUTest::test_table()
         return;
     }
 
-    AtomTable *table1 = new AtomTable();
+    AtomSpace *as1 = new AtomSpace();
+    AtomTable *table1 = &as1->get_atomtable();
     int idx = 0;
     add_to_table(idx++, table1, "AA-aa-wow ");
     add_to_table(idx++, table1, "BB-bb-wow ");
@@ -352,13 +353,14 @@ void BasicSaveUTest::test_table()
     store->storeAtomSpace(*table1);
     // table1->print();
     delete store;
-    delete table1;
+    delete as1;
 
     // Reopen connection, and load the atom table.
     store = new IPFSAtomStorage(uri);
     TSM_ASSERT("Not connected to database", store->connected());
 
-    AtomTable *table2 = new AtomTable();
+    AtomSpace *as2 = new AtomSpace();
+    AtomTable *table2 = &as2->get_atomtable();
 
     store->loadAtomSpace(*table2);
     // table2->print();
@@ -372,7 +374,7 @@ void BasicSaveUTest::test_table()
 
     store->kill_data();
     delete store;
-    delete table2;
+    delete as2;
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
