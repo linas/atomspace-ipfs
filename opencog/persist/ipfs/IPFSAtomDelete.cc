@@ -35,7 +35,17 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 	std::string path = _atomspace_cid + "/" + name;
 	ipfs::Json dag;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->DagGet(path, &dag);
+
+	// Delete can fail if Atom is not in the AtomSpace.
+	try
+	{
+		conn->DagGet(path, &dag);
+	}
+	catch (const std::exception &ex)
+	{
+		conn_pool.push(conn);
+		return;
+	}
 	conn_pool.push(conn);
 
 	auto iset = dag["incoming"];
