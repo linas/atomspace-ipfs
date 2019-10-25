@@ -84,6 +84,7 @@ class IPFSAtomStorage : public BackingStore
 		ipfs::Json fetch_atom_dag(const std::string&);
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
+		Handle do_fetch_atom(Handle&);
 
 		void store_incoming_of(const Handle &, const Handle&);
 		// --------------------------

@@ -166,12 +166,9 @@ std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 
 /* ================================================================ */
 
-Handle IPFSAtomStorage::getNode(Type t, const char * str)
+Handle IPFSAtomStorage::do_fetch_atom(Handle &h)
 {
-	rethrow();
-
 	// Build the name
-	Handle h(createNode(t, str));
 	std::string path = _atomspace_cid + "/" + h->to_short_string();
 
 	// std::cout << "Query path = " << path << std::endl;
@@ -185,13 +182,18 @@ Handle IPFSAtomStorage::getNode(Type t, const char * str)
 	return h;
 }
 
+Handle IPFSAtomStorage::getNode(Type t, const char * str)
+{
+	rethrow();
+	Handle h(createNode(t, str));
+	return do_fetch_atom(h);
+}
+
 Handle IPFSAtomStorage::getLink(Type t, const HandleSeq& hs)
 {
 	rethrow();
-	throw RuntimeException (TRACE_INFO, "Not implemented\n");
-	Handle hg; // (doGetLink(t, hs));
-	// if (hg) get_atom_values(hg);
-	return hg;
+	Handle h(createLink(hs, t));
+	return do_fetch_atom(h);
 }
 
 /* ============================= END OF FILE ================= */
