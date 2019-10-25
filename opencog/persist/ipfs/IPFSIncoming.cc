@@ -78,12 +78,12 @@ void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagGet(path, &dag);
 	conn_pool.push(conn);
-	std::cout << "The dag is:" << dag.dump(2) << std::endl;
+	// std::cout << "The dag is:" << dag.dump(2) << std::endl;
 
 	auto iset = dag["incoming"];
 	for (auto acid: iset)
 	{
-		std::cout << "The incoming is:" << acid.dump(2) << std::endl;
+		// std::cout << "The incoming is:" << acid.dump(2) << std::endl;
 		table.add(fetch_atom(acid), false);
 	}
 
@@ -99,7 +99,27 @@ void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type 
 {
 	rethrow();
 
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
+	// Code is almost same as above. It's not terribly efficient.
+	// But it works, at least.
+	std::string path = _atomspace_cid + "/" + h->to_short_string();
+
+	ipfs::Json dag;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(path, &dag);
+	conn_pool.push(conn);
+
+	auto iset = dag["incoming"];
+	for (auto acid: iset)
+	{
+		Handle h(fetch_atom(acid));
+		if (t == h->get_type())
+		{
+			table.add(h, false);
+			_num_get_inlinks ++;
+		}
+	}
+
+	_num_get_insets++;
 }
 
 /* ============================= END OF FILE ================= */
