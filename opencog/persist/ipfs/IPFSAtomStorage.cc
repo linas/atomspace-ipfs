@@ -194,14 +194,13 @@ std::string IPFSAtomStorage::get_ipns_key(void)
  */
 void IPFSAtomStorage::resolve_atomspace(void)
 {
-	if (std::string::npos == path.find("/ipns/"))
-		return;
+	if (0 == _key_cid.size()) return;
 
 	// Caution: as of this writing, name resolution takes
 	// exactly 60 seconds.
 	std::string ipfs_path;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->NameResolve(path, &ipfs_path);
+	conn->NameResolve(_key_cid, &ipfs_path);
 	conn_pool.push(conn);
 	_atomspace_cid = ipfs_path;
 }

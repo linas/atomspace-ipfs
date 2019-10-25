@@ -169,8 +169,22 @@ std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 Handle IPFSAtomStorage::getNode(Type t, const char * str)
 {
 	rethrow();
-	throw RuntimeException (TRACE_INFO, "Not implemented\n");
-	Handle h; // (doGetNode(t, str));
+
+	// Build the name
+	std::string name =
+		"(" + nameserver().getTypeName(t) + " " + str + ")";
+
+	std::string path =
+		_atomspace_cid + "/" + name;
+
+	ipfs::Json dag;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(path, &dag);
+	conn_pool.push(conn);
+
+	std::cout << "The dag is:" << dag.dump(2) << std::endl;
+
+	Handle h;
 	// if (h) get_atom_values(h);
 	return h;
 }
