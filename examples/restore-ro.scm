@@ -33,6 +33,9 @@
 (define ll (List (Concept "foo") (Concept "bar")))
 (fetch-incoming-set ll)
 
+; Verify that the EvaluationLink was loaded.
+(cog-prt-atomspace)
+
 ; Review the stats
 (ipfs-stats)
 

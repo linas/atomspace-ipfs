@@ -192,13 +192,11 @@ class IPFSAtomStorage : public BackingStore
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);
+		void loadAtomSpace(AtomTable&); // Load entire contents
+		void storeAtomSpace(const AtomTable&); // Store entire contents
 		void barrier();
 		void flushStoreQueue();
 
-		// Large-scale loads and saves
-		void loadAtomSpace(AtomSpace*);
-		void storeAtomSpace(AtomSpace*);
-		void store(const AtomTable &); // Store entire contents of AtomTable
 
 		// Debugging and performance monitoring
 		void print_stats(void);

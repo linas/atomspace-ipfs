@@ -48,8 +48,6 @@ void IPFSPersistSCM::init(void)
 {
     define_scheme_primitive("ipfs-open", &IPFSPersistSCM::do_open, this, "persist-ipfs");
     define_scheme_primitive("ipfs-close", &IPFSPersistSCM::do_close, this, "persist-ipfs");
-    define_scheme_primitive("ipfs-load", &IPFSPersistSCM::do_load, this, "persist-ipfs");
-    define_scheme_primitive("ipfs-store", &IPFSPersistSCM::do_store, this, "persist-ipfs");
     define_scheme_primitive("ipfs-stats", &IPFSPersistSCM::do_stats, this, "persist-ipfs");
     define_scheme_primitive("ipfs-clear-stats", &IPFSPersistSCM::do_clear_stats, this, "persist-ipfs");
 
@@ -117,24 +115,6 @@ void IPFSPersistSCM::do_close(void)
     // Only then actually call the dtor.
     backing->unregisterWith(_as);
     delete backing;
-}
-
-void IPFSPersistSCM::do_load(void)
-{
-    if (nullptr == _backing)
-        throw RuntimeException(TRACE_INFO,
-            "ipfs-load: Error: Database not open");
-
-    _backing->loadAtomSpace(_as);
-}
-
-void IPFSPersistSCM::do_store(void)
-{
-    if (nullptr == _backing)
-        throw RuntimeException(TRACE_INFO,
-            "ipfs-store: Error: Database not open");
-
-    _backing->storeAtomSpace(_as);
 }
 
 std::string IPFSPersistSCM::do_atom_cid(const Handle& h)

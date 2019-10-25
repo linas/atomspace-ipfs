@@ -147,7 +147,7 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 }
 
 /// Store all of the atoms in the atom table.
-void IPFSAtomStorage::store(const AtomTable &table)
+void IPFSAtomStorage::storeAtomSpace(const AtomTable &table)
 {
 	rethrow();
 
@@ -176,17 +176,10 @@ void IPFSAtomStorage::store(const AtomTable &table)
 	printf("\tAtomSpace CID: %s\n", _atomspace_cid.c_str());
 }
 
-void IPFSAtomStorage::storeAtomSpace(AtomSpace* atomspace)
+void IPFSAtomStorage::loadAtomSpace(AtomTable &table)
 {
-	store(atomspace->get_atomtable());
-}
-
-void IPFSAtomStorage::loadAtomSpace(AtomSpace* atomspace)
-{
-	// XXX This is wrong, it should instead do an IPNS resolve
-	// and load that!
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	load_atomspace(atomspace, _atomspace_cid);
+	// XXX FIXME This should probably do an IPNS resolve first ??
+	load_atomspace(table.getAtomSpace(), _atomspace_cid);
 }
 
 /* ============================= END OF FILE ================= */

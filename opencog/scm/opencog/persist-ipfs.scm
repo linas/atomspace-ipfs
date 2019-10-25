@@ -11,8 +11,7 @@
 	(string-append opencog-ext-path-persist-ipfs "libpersist-ipfs")
 	"opencog_persist_ipfs_init")
 
-(export ipfs-clear-stats ipfs-close ipfs-load ipfs-open
-	ipfs-store ipfs-stats
+(export ipfs-clear-stats ipfs-close ipfs-open ipfs-stats
 	ipfs-atom-cid ipfs-fetch-atom
 	ipfs-atomspace-cid ipns-atomspace-cid ipfs-atomspace-resolve)
 
@@ -32,15 +31,6 @@
     no longer be stored to or fetched from the database.
 ")
 
-(set-procedure-property! ipfs-load 'documentation
-"
- ipfs-load - load all atoms in the database.
-    This will cause ALL of the atoms in the open database to be loaded
-    into the atomspace. This can be a very time-consuming operation.
-    In normal operation, it is rarely necessary to load all atoms;
-    atoms can always be fetched and stored one at a time, on demand.
-")
-
 (set-procedure-property! ipfs-open 'documentation
 "
  ipfs-open URL - Open a connection to an IPFS server.
@@ -57,15 +47,6 @@
      (ipfs-open \"ipfs:///atomspace-test\")
      (ipfs-open \"ipfs://localhost/atomspace-test\")
      (ipfs-open \"ipfs://localhost:5001/atomspace-test\")
-")
-
-(set-procedure-property! ipfs-store 'documentation
-"
- ipfs-store - Store all atoms in the atomspace to the database.
-    This will dump the ENTIRE contents of the atomspace to the databse.
-    Depending on the size of the database, this can potentially take a
-    lot of time.  During normal operation, a bulk-save is rarely
-    required, as individual atoms can always be stored, one at a time.
 ")
 
 (set-procedure-property! ipfs-stats 'documentation

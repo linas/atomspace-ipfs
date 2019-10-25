@@ -63,7 +63,7 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
  * Retreive the entire incoming set of the indicated atom.
  * This fetches only teh Atoms in the incoming set, and not
  * the Values associated with them!  XXX FIXME Double check,
- * I think the intent is to also get teh attached values,
+ * I think the intent is to also get the attached values,
  * but I'm not sure, because the spec is ill-defined on this
  * and I'm not sure what postgres is going, here.  All backends
  * should be compatible on this.
@@ -72,11 +72,23 @@ void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	rethrow();
 
-#if 0
+	std::string path = _atomspace_cid + "/" + h->to_short_string();
+
+	ipfs::Json dag;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(path, &dag);
+	conn_pool.push(conn);
+	std::cout << "The dag is:" << dag.dump(2) << std::endl;
+
+	auto iset = dag["incoming"];
+	for (auto acid: iset)
+	{
+		std::cout << "The incoming is:" << acid.dump(2) << std::endl;
+		table.add(fetch_atom(acid), false);
+	}
+
 	_num_get_insets++;
 	_num_get_inlinks += iset.size();
-#endif
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
 }
 
 /**
