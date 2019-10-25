@@ -171,11 +171,8 @@ Handle IPFSAtomStorage::getNode(Type t, const char * str)
 	rethrow();
 
 	// Build the name
-	std::string name =
-		"(" + nameserver().getTypeName(t) + " \"" + str + "\")";
-
-	std::string path =
-		_atomspace_cid + "/" + name;
+	Handle h(createNode(t, str));
+	std::string path = _atomspace_cid + "/" + h->to_short_string();
 
 	// std::cout << "Query path = " << path << std::endl;
 	ipfs::Json dag;
@@ -183,10 +180,8 @@ Handle IPFSAtomStorage::getNode(Type t, const char * str)
 	conn->DagGet(path, &dag);
 	conn_pool.push(conn);
 
-	std::cout << "The dag is:" << dag.dump(2) << std::endl;
-
-	Handle h;
-	// if (h) get_atom_values(h);
+	// std::cout << "The dag is:" << dag.dump(2) << std::endl;
+	get_atom_values(h, dag);
 	return h;
 }
 
