@@ -52,7 +52,13 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 	// We're recursive; so recurse.
 	for (auto acid: iset)
 	{
-		removeAtom(fetch_atom(acid), true);
+		Handle hin(fetch_atom(acid));
+		removeAtom(hin, true);
+		for (const Handle& hoth: hin->getOutgoingSet())
+		{
+			// if (*hoth != *h)
+			remove_incoming_of(hoth, acid);
+		}
 	}
 
 	// Now actually remove.

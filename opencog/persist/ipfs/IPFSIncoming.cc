@@ -62,7 +62,8 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
                                          const std::string& holder)
 {
-	std::cout << "Remove " << std::endl;
+	std::cout << "Remove from " << atom->to_short_string()
+	          << " inCID " << holder << std::endl;
 }
 
 /* ================================================================ */
