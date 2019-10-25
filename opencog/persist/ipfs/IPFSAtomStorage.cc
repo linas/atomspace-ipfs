@@ -276,10 +276,16 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 
 	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
 	// We can't just catch, we need to rethrow, too.
-	ipfs::Client* conn = conn_pool.pop();
 	std::string new_as_id;
-	conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
-	_atomspace_cid = new_as_id;
+	ipfs::Client* conn = conn_pool.pop();
+	{
+		// Update the cid under a lock, as this method can
+		// be called from multiple threads.  It's not actually
+		// the cid that matters, its the patch itself.
+		std::lock_guard<std::mutex> lck(_atomspace_cid_mutex);
+		conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
+		_atomspace_cid = new_as_id;
+	}
 	conn_pool.push(conn);
 
 	// Also track the current version of the json representation
