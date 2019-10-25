@@ -125,16 +125,7 @@ class IPFSAtomStorage : public BackingStore
 		void get_atom_values(Handle &, const ipfs::Json&);
 
 		ipfs::Json encodeValuesToJSON(const Handle&);
-
-		// void deleteValue(VUID);
 		ValuePtr decodeStrValue(const std::string&);
-
-		// --------------------------
-		// Valuations
-		std::mutex _valuation_mutex;
-		void deleteValuation(const Handle&, const Handle&);
-		// void deleteValuation(Response&, UUID, UUID);
-		// void deleteAllValuations(Response&, UUID);
 
 		Handle tvpred; // the key to a very special valuation.
 

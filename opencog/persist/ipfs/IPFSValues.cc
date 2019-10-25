@@ -23,16 +23,6 @@ using namespace opencog;
 
 /* ================================================================== */
 
-/// Delete the valuation, if it exists. This is required, in order
-/// to prevent garbage from accumulating in the Values table.
-/// It also simplifies, ever-so-slightly, the update of valuations.
-void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
-/* ================================================================== */
-
 /// Get ALL of the values on the Atom, and return the corresponding
 /// JSON representation for them.
 ipfs::Json IPFSAtomStorage::encodeValuesToJSON(const Handle& atom)
@@ -179,6 +169,10 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 
 /* ================================================================ */
 
+/// Get all atoms having indicated key on them.
+/// If the `get_all_values` is not set, then only that one
+/// value is updated. Otherwise, all of the values on the
+/// Atom are updated.
 void IPFSAtomStorage::getValuations(AtomTable& table,
                                    const Handle& key, bool get_all_values)
 {
