@@ -60,12 +60,15 @@ Details are described below.
 
 ### Known Bugs
 There are several bugs that are known, but are problematic to fix:
+ * Excess debug printfs still in the code. (convert to logger().debug())
  * Centralized design, as noted above.
  * Race conditions if Multiple usersame AtomSpace at the same time.
    These race conditions will result in lost data (lost Atom inserts,
    deletes, or changes of TruthValues or other Values.)
  * Unsafe access to _atomspace_cid from multiple threads.
  * Potential crashes if user manipulates non-existant Atoms.(?)
+ * Atom removal is a particularly heavy-weight operation, due
+   to heavy interaction with incoming sets.
 
 ### Architecture:
 This implementation provides the a standard `BackingStore` API
