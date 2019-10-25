@@ -170,9 +170,9 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 /* ================================================================ */
 
 /// Get all atoms having indicated key on them.
-/// If the `get_all_values` is not set, then only that one
-/// value is updated. Otherwise, all of the values on the
-/// Atom are updated.
+/// It appears that there are zero users of thi thing, because the
+/// guile API for this was never created.  Should probably get rid
+/// of this.
 void IPFSAtomStorage::getValuations(AtomTable& table,
                                    const Handle& key, bool get_all_values)
 {
