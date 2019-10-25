@@ -352,11 +352,12 @@ void BasicSaveUTest::test_table()
 
     store->storeAtomSpace(*table1);
     // table1->print();
+    std::string saved_cid = store->get_ipfs_cid();
     delete store;
     delete as1;
 
     // Reopen connection, and load the atom table.
-    store = new IPFSAtomStorage(uri);
+    store = new IPFSAtomStorage("ipfs:///ipfs/" + saved_cid);
     TSM_ASSERT("Not connected to database", store->connected());
 
     AtomSpace *as2 = new AtomSpace();
