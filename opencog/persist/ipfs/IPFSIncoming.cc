@@ -62,8 +62,8 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
                                          const std::string& holder)
 {
-	std::cout << "Remove from " << atom->to_short_string()
-	          << " inCID " << holder << std::endl;
+	// std::cout << "Remove from " << atom->to_short_string()
+	//           << " inCID " << holder << std::endl;
 
 	// XXX FIXME. This is wildly, insanely inefficient. First,
 	// We get a list of all the Atoms in the current AtomSpace.
@@ -88,7 +88,7 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 			break;
 		}
 	}
-	std::cout << "Found current Atom: " << cid_of_atom << std::endl;
+	// std::cout << "Found current Atom: " << cid_of_atom << std::endl;
 
 	if (0 == cid_of_atom.size())
 		throw RuntimeException(TRACE_INFO,
@@ -100,7 +100,7 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 	conn = conn_pool.pop();
 	conn->DagGet(cid_of_atom, &jatom);
 	conn_pool.push(conn);
-	std::cout << "The Atom:" << jatom.dump(2) << std::endl;
+	// std::cout << "The Atom:" << jatom.dump(2) << std::endl;
 
 	// Remove the holder from the incoming set ...
 	std::set<std::string> inco = jatom["incoming"];
@@ -109,7 +109,7 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 		jatom["incoming"] = inco;
 	else
 		jatom.erase("incoming");
-	std::cout << "Atom after erasure:" << jatom.dump(2) << std::endl;
+	// std::cout << "Atom after erasure: " << jatom.dump(2) << std::endl;
 
 	// Store the edited Atom back into IPFS...
 	ipfs::Json result;

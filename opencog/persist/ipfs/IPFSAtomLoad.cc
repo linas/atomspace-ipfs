@@ -35,7 +35,7 @@ ipfs::Json IPFSAtomStorage::fetch_atom_dag(const std::string& cid)
 	conn_pool.push(conn);
 	_num_get_atoms++;
 
-	std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
+	// std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
 	return dag;
 }
 
