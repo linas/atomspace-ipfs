@@ -6,6 +6,7 @@ ADD_LIBRARY (persist-ipfs SHARED
 	IPFSAtomStorage
 	IPFSAtomStore
 	IPFSBulk
+	IPFSIncoming
 	IPFSValues
 	IPFSPersistSCM
 )

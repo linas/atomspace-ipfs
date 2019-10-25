@@ -23,30 +23,11 @@ using namespace opencog;
 
 /* ================================================================== */
 
-/// Delete the valuation, if it exists. This is required, in order
-/// to prevent garbage from accumulating in the Values table.
-/// It also simplifies, ever-so-slightly, the update of valuations.
-void IPFSAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
+/// Get ALL of the values on the Atom, and return the corresponding
+/// JSON representation for them.
+ipfs::Json IPFSAtomStorage::encodeValuesToJSON(const Handle& atom)
 {
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
-/// Return a value, given by the key-atom pair.
-/// If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr IPFSAtomStorage::getValuation(const Handle& key,
-                                      const Handle& atom)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
-/// Store ALL of the values associated with the atom.
-void IPFSAtomStorage::store_atom_values(const Handle& atom)
-{
-	// No publication of Values, if there's no AtomSpace key.
-	if (0 == _keyname.size()) return;
-
-	// First, build some json that encodes the key-value pairs
+	// Build some json that encodes the key-value pairs
 	ipfs::Json jvals;
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
@@ -59,12 +40,22 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 			if (tv->isDefaultTV()) continue;
 		}
 		ValuePtr pap = atom->getValue(key);
-		jvals[encodeValueToStr(key)] = encodeValueToStr(pap);
+		jvals[encodeAtomToStr(key)] = encodeValueToStr(pap);
 	}
+	return jvals;
+}
 
-	// Next, park that json with the atom.
+/* ================================================================== */
+
+/// Store ALL of the values associated with the atom.
+void IPFSAtomStorage::store_atom_values(const Handle& atom)
+{
+	// No publication of Values, if there's no AtomSpace key.
+	if (0 == _keyname.size()) return;
+
+	// Build a JSON representation of the Atom.
 	ipfs::Json jatom = encodeAtomToJSON(atom);
-	jatom["values"] = jvals;
+	jatom["values"] = encodeValuesToJSON(atom);
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -73,7 +64,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	conn_pool.push(conn);
 
 	std::string atoid = result["Cid"]["/"];
-	std::cout << "Valued Atom: " << encodeValueToStr(atom)
+	std::cout << "Valued Atom: " << encodeAtomToStr(atom)
 	          << " CID: " << atoid << std::endl;
 
 	// The code below is ifdefed out. In a better world, we would
@@ -85,7 +76,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 #if LATER_WHEN_IPNS_WORKS
 	// Find the key for this atom.
 	// XXX TODO this can be speeded up by caching the keys in C++
-	std::string atonam = _keyname + encodeValueToStr(atom);
+	std::string atonam = _keyname + encodeAtomToStr(atom);
 	std::string atokey;
 	conn = conn_pool.pop();
 	conn->KeyFind(atonam, &atokey);
@@ -119,15 +110,14 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		std::cerr << "Failed to publish Atom Values: "
 		          << ex.what() << std::endl;
 	}
+	conn_pool.push(conn);
 #else // LATER_WHEN_IPNS_WORKS
 
    // Update the atomspace, so that it holds the new value.
-   std::string atostr = encodeValueToStr(atom);
-   add_atom_key_to_atomspace(atostr, atoid);
-
+   update_atom_in_atomspace(atom, atoid, jatom);
 #endif // LATER_WHEN_IPNS_WORKS
-	conn_pool.push(conn);
 }
+/* ================================================================== */
 
 /// Get ALL of the values associated with an atom.
 void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
@@ -179,6 +169,10 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 
 /* ================================================================ */
 
+/// Get all atoms having indicated key on them.
+/// It appears that there are zero users of thi thing, because the
+/// guile API for this was never created.  Should probably get rid
+/// of this.
 void IPFSAtomStorage::getValuations(AtomTable& table,
                                    const Handle& key, bool get_all_values)
 {

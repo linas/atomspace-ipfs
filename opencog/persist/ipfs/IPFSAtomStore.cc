@@ -36,7 +36,7 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
-		if (not_yet_stored(h)) do_store_atom(h);
+		if (guid_not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 		return;
 	}
@@ -46,15 +46,17 @@ void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 }
 
 /**
- * Synchronously store a single atom. That is, the actual store is done
- * in the calling thread.  All values attached to the atom are also
- * stored.
+ * Synchronously store a single globally-unique atom.
+ * A "globally unique Atom" is the one without any attached values or
+ * other mutable state. Thus, it posses a single globally unique CID.
  *
- * Returns the height of the atom.
+ * The store is synchronous, as it is done in the calling thread.
+ * The intent is that the writeback queue is the one calling this
+ * method.
  */
 void IPFSAtomStorage::do_store_atom(const Handle& h)
 {
-	if (not not_yet_stored(h)) return;
+	if (not guid_not_yet_stored(h)) return;
 
 	if (h->is_node())
 	{
@@ -67,8 +69,17 @@ void IPFSAtomStorage::do_store_atom(const Handle& h)
 		do_store_atom(ho);
 
 	do_store_single_atom(h);
+
+	// Make note of the incoming set.
+	for (const Handle& ho: h->getOutgoingSet())
+		store_incoming_of(ho,h);
 }
 
+/// This method runs in the write-pool dispatcher thread.
+/// That is, for each atom that was queued into the write queue,
+/// when it gets dequeued, this method is called to store it.
+/// Take careful note of the design here: the only things that
+///
 void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 {
 	try
@@ -82,10 +93,10 @@ void IPFSAtomStorage::vdo_store_atom(const Handle& h)
 	}
 }
 
-bool IPFSAtomStorage::not_yet_stored(const Handle& h)
+bool IPFSAtomStorage::guid_not_yet_stored(const Handle& h)
 {
-	std::lock_guard<std::mutex> lck(_cid_mutex);
-	return _ipfs_cid_map.end() == _ipfs_cid_map.find(h);
+	std::lock_guard<std::mutex> lck(_guid_mutex);
+	return _guid_map.end() == _guid_map.find(h);
 }
 
 /* ================================================================ */
@@ -107,7 +118,7 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 		int i=0;
 		for (const Handle& hout: h->getOutgoingSet())
 		{
-			oset[i] = _ipfs_cid_map.find(hout)->second;
+			oset[i] = get_atom_guid(hout);
 			i++;
 		}
 		jatom["outgoing"] = oset;
@@ -128,7 +139,8 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 {
-	// Convert C++ Atom to json.
+	// Convert C++ Atom to json. But only the core, unique
+	// Atom, and NOT the values! Nor the incoming set...
 	ipfs::Json jatom = encodeAtomToJSON(h);
 
 	// XXX FIXME If ipfs throws, then this leaks from the pool
@@ -142,13 +154,12 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 
 	{
 		// This is multi-threaded; update the table under a lock.
-		std::lock_guard<std::mutex> lck(_cid_mutex);
-		_ipfs_cid_map.insert({h, id});
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map.insert({h, id});
 	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	std::string name = encodeValueToStr(h);
-	add_atom_key_to_atomspace(name, id);
+	update_atom_in_atomspace(h, id, jatom);
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
 

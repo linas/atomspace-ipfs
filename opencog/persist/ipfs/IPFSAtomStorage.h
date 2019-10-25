@@ -72,22 +72,31 @@ class IPFSAtomStorage : public BackingStore
 
 		// ---------------------------------------------
 		// The IPFS CID of the current atomspace.
+		std::mutex _atomspace_cid_mutex;
 		std::string _atomspace_cid;
-		void add_atom_key_to_atomspace(const std::string&, const std::string&);
+		void update_atom_in_atomspace(const Handle&,
+		                              const std::string&,
+		                              const ipfs::Json&);
+		std::mutex _json_mutex;
+		std::map<Handle, ipfs::Json> _json_map;
 
 		// Fetching of atoms.
+		ipfs::Json fetch_atom_dag(const std::string&);
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
+		Handle do_fetch_atom(Handle&);
 
-		void getIncoming(AtomTable&, const char *);
+		void store_incoming_of(const Handle &, const Handle&);
 		// --------------------------
 		// Storing of atoms
 
 		std::string encodeValueToStr(const ValuePtr&);
+		std::string encodeAtomToStr(const Handle& h) {
+			return encodeValueToStr(h); }
 		ipfs::Json encodeAtomToJSON(const Handle&);
 
-		std::mutex _cid_mutex;
-		std::map<Handle, std::string> _ipfs_cid_map;
+		std::mutex _guid_mutex;
+		std::map<Handle, std::string> _guid_map;
 
 		// The inverted map.
 		std::mutex _inv_mutex;
@@ -97,7 +106,7 @@ class IPFSAtomStorage : public BackingStore
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&);
 
-		bool not_yet_stored(const Handle&);
+		bool guid_not_yet_stored(const Handle&);
 
 		bool bulk_load;
 		bool bulk_store;
@@ -115,20 +124,8 @@ class IPFSAtomStorage : public BackingStore
 		void store_atom_values(const Handle &);
 		void get_atom_values(Handle &, const ipfs::Json&);
 
-		// void deleteValue(VUID);
+		ipfs::Json encodeValuesToJSON(const Handle&);
 		ValuePtr decodeStrValue(const std::string&);
-
-		// --------------------------
-		// Valuations
-		std::mutex _valuation_mutex;
-		ValuePtr getValuation(const Handle&, const Handle&);
-		void deleteValuation(const Handle&, const Handle&);
-		// void deleteValuation(Response&, UUID, UUID);
-		// void deleteAllValuations(Response&, UUID);
-
-		std::string float_to_string(const FloatValuePtr&);
-		std::string string_to_string(const StringValuePtr&);
-		std::string link_to_string(const LinkValuePtr&);
 
 		Handle tvpred; // the key to a very special valuation.
 
@@ -163,9 +160,10 @@ class IPFSAtomStorage : public BackingStore
 		virtual ~IPFSAtomStorage();
 		bool connected(void); // connection to DB is alive
 		std::string get_ipfs_cid(void);
-		std::string get_ipns_cid(void);
+		std::string get_ipns_key(void);
+		void resolve_atomspace(void);
 
-		std::string get_atom_cid(const Handle&);
+		std::string get_atom_guid(const Handle&);
 		Handle fetch_atom(const std::string&);
 		void load_atomspace(AtomSpace*, const std::string&);
 
@@ -185,13 +183,11 @@ class IPFSAtomStorage : public BackingStore
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);
+		void loadAtomSpace(AtomTable&); // Load entire contents
+		void storeAtomSpace(const AtomTable&); // Store entire contents
 		void barrier();
 		void flushStoreQueue();
 
-		// Large-scale loads and saves
-		void loadAtomSpace(AtomSpace*);
-		void storeAtomSpace(AtomSpace*);
-		void store(const AtomTable &); // Store entire contents of AtomTable
 
 		// Debugging and performance monitoring
 		void print_stats(void);

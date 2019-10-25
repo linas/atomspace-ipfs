@@ -13,7 +13,7 @@
 (ipfs-open "ipfs:///demo-atomspace")
 
 ; Create some atoms
-(Concept "example concept")
+(Concept "example concept" (stv 0.45 0.33))
 (Evaluation
 	(Predicate "Some relationship")
 	(List (Concept "foo") (Concept "bar")))

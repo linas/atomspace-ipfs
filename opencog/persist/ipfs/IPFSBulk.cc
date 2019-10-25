@@ -23,64 +23,6 @@
 
 using namespace opencog;
 
-#define BUFSZ 120
-
-/* ================================================================ */
-/**
- * Retreive the incoming set of the indicated atom.
- */
-void IPFSAtomStorage::getIncoming(AtomTable& table, const char *buff)
-{
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-#if 0
-	// Parallelize always.
-	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
-
-	// A parallel fetch is much much faster, esp for big osets.
-	// std::for_each(std::execution::par_unseq, ... requires C++17
-	OMP_ALGO::for_each(pset.begin(), pset.end(),
-		[&] (const PseudoPtr& p)
-	{
-		Handle hi(get_recursive_if_not_exists(p));
-		hi = table.add(hi, false);
-		get_atom_values(hi);
-		std::lock_guard<std::mutex> lck(iset_mutex);
-		iset.emplace_back(hi);
-	});
-
-	// Performance stats
-	_num_get_insets++;
-	_num_get_inlinks += iset.size();
-#endif
-}
-
-/**
- * Retreive the entire incoming set of the indicated atom.
- */
-void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
-{
-	rethrow();
-
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-
-	char buff[BUFSZ];
-	getIncoming(table, buff);
-}
-
-/**
- * Retreive the incoming set of the indicated atom, but only those atoms
- * of type t.
- */
-void IPFSAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
-{
-	rethrow();
-
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-
-	char buff[BUFSZ];
-	getIncoming(table, buff);
-}
-
 /* ================================================================ */
 
 /// load_atomspace -- load AtomSpace from path.
@@ -205,7 +147,7 @@ void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 }
 
 /// Store all of the atoms in the atom table.
-void IPFSAtomStorage::store(const AtomTable &table)
+void IPFSAtomStorage::storeAtomSpace(const AtomTable &table)
 {
 	rethrow();
 
@@ -234,17 +176,10 @@ void IPFSAtomStorage::store(const AtomTable &table)
 	printf("\tAtomSpace CID: %s\n", _atomspace_cid.c_str());
 }
 
-void IPFSAtomStorage::storeAtomSpace(AtomSpace* atomspace)
+void IPFSAtomStorage::loadAtomSpace(AtomTable &table)
 {
-	store(atomspace->get_atomtable());
-}
-
-void IPFSAtomStorage::loadAtomSpace(AtomSpace* atomspace)
-{
-	// XXX This is wrong, it should instead do an IPNS resolve
-	// and load that!
-	throw SyntaxException(TRACE_INFO, "Not Implemented!\n");
-	load_atomspace(atomspace, _atomspace_cid);
+	// XXX FIXME This should probably do an IPNS resolve first ??
+	load_atomspace(table.getAtomSpace(), _atomspace_cid);
 }
 
 /* ============================= END OF FILE ================= */

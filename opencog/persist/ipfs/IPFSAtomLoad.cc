@@ -24,8 +24,8 @@ using namespace opencog;
 /* ================================================================ */
 
 /// Fetch the indicated atom from the IPFS CID.
-/// This will also grab and decode values. if present.
-Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
+/// This will return the raw JSON representation.
+ipfs::Json IPFSAtomStorage::fetch_atom_dag(const std::string& cid)
 {
 	rethrow();
 
@@ -33,18 +33,34 @@ Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagGet(cid, &dag);
 	conn_pool.push(conn);
+	_num_get_atoms++;
 
 	std::cout << "Fetched the DAG:" << dag.dump(2) << std::endl;
+	return dag;
+}
 
-	_num_get_atoms++;
+/* ================================================================ */
+
+/// Fetch the indicated atom from the IPFS CID.
+/// This will also grab and decode values. if present.
+Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
+{
+	ipfs::Json dag(fetch_atom_dag(cid));
 	Handle h(decodeJSONAtom(dag));
 	get_atom_values(h, dag);
 
-	// Cache it ... why?
+	// Cache it ... so that outgoing-set fetches run faster.
 	{
 		std::lock_guard<std::mutex> lck(_inv_mutex);
 		_ipfs_inv_map.insert({cid, h});
 	}
+
+	// Update the local json cache too.
+	// XXX FIXME well, we *should* do this here, except that we
+	// don't have the AtomSpace version of the handle yet.
+	// We want to use that. So maybe later...
+	// update_atom_in_atomspace(h, cid, dag);
+
 	return h;
 }
 
@@ -150,22 +166,34 @@ std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 
 /* ================================================================ */
 
+Handle IPFSAtomStorage::do_fetch_atom(Handle &h)
+{
+	// Build the name
+	std::string path = _atomspace_cid + "/" + h->to_short_string();
+
+	// std::cout << "Query path = " << path << std::endl;
+	ipfs::Json dag;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(path, &dag);
+	conn_pool.push(conn);
+
+	// std::cout << "The dag is:" << dag.dump(2) << std::endl;
+	get_atom_values(h, dag);
+	return h;
+}
+
 Handle IPFSAtomStorage::getNode(Type t, const char * str)
 {
 	rethrow();
-	throw RuntimeException (TRACE_INFO, "Not implemented\n");
-	Handle h; // (doGetNode(t, str));
-	// if (h) get_atom_values(h);
-	return h;
+	Handle h(createNode(t, str));
+	return do_fetch_atom(h);
 }
 
 Handle IPFSAtomStorage::getLink(Type t, const HandleSeq& hs)
 {
 	rethrow();
-	throw RuntimeException (TRACE_INFO, "Not implemented\n");
-	Handle hg; // (doGetLink(t, hs));
-	// if (hg) get_atom_values(hg);
-	return hg;
+	Handle h(createLink(hs, t));
+	return do_fetch_atom(h);
 }
 
 /* ============================= END OF FILE ================= */

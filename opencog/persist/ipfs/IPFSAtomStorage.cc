@@ -34,6 +34,8 @@ using namespace opencog;
 
 void IPFSAtomStorage::init(const char * uri)
 {
+	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+
 	_uri = uri;
 
 #define URIX_LEN (sizeof("ipfs://") - 1)  // Should be 7
@@ -45,6 +47,10 @@ void IPFSAtomStorage::init(const char * uri)
 	//    ipfs://hostname/atomspace-key
 	//    ipfs://hostname:port/atomspace-key
 	// where the key will be used to publish the IPNS for the atomspace.
+	// Read-only access to AtomSpaces is also supported. These have two
+	// forms: with IPFS and IPNS:
+	//    ipfs:///ipfs/Qm...
+	//    ipfs:///ipns/Qm...
 
 	_port = 5001;
 	if ('/' == uri[URIX_LEN])
@@ -75,6 +81,20 @@ void IPFSAtomStorage::init(const char * uri)
 			size_t len = p - start;
 			_hostname.resize(len);
 		}
+	}
+
+	// If the "key" is actually an IPFS or IPNS CID...
+	if (std::string::npos != _keyname.find("ipfs/"))
+	{
+		_atomspace_cid = &_keyname[sizeof("ipfs/")-1];
+		_keyname.clear();
+	}
+	else
+	if (std::string::npos != _keyname.find("ipns/"))
+	{
+		_key_cid = &_keyname[sizeof("ipns/")];
+		_keyname.clear();
+		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
 	}
 
 	// Create pool of IPFS server connections.
@@ -121,8 +141,9 @@ void IPFSAtomStorage::init(const char * uri)
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
-	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
-	kill_data();
+	// Initialize a new AtomSpace, but only if
+	// we're not already working with one.
+	if (0 == _atomspace_cid.size()) kill_data();
 }
 
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :
@@ -166,20 +187,38 @@ std::string IPFSAtomStorage::get_ipfs_cid(void)
 /**
  * Return the IPNS CID of the current AtomSpace.
  */
-std::string IPFSAtomStorage::get_ipns_cid(void)
+std::string IPFSAtomStorage::get_ipns_key(void)
 {
 	return "/ipns/" + _key_cid;
 }
 
 /**
- * Return the IPFS CID of the given Atom.
+ * Use IPNS to find the latest IPFS cid for this AtomSpace.
  */
-std::string IPFSAtomStorage::get_atom_cid(const Handle& h)
+void IPFSAtomStorage::resolve_atomspace(void)
 {
-	if (not_yet_stored(h)) do_store_atom(h);
-	std::lock_guard<std::mutex> lck(_cid_mutex);
-	const std::string& cid = _ipfs_cid_map.find(h)->second;
-	return "/ipfs/" + cid;
+	if (0 == _key_cid.size()) return;
+
+	// Caution: as of this writing, name resolution takes
+	// exactly 60 seconds.
+	std::string ipfs_path;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->NameResolve(_key_cid, &ipfs_path);
+	conn_pool.push(conn);
+	_atomspace_cid = ipfs_path;
+}
+
+/**
+ * Return the IPFS CID of the given (globally unique) Atom.
+ * The globally unique Atom is the one without any attached
+ * Values, or any other mutable state. Because it's just the
+ * immutable Atom, it's by definition globally unique.
+ */
+std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
+{
+	if (guid_not_yet_stored(h)) do_store_atom(h);
+	std::lock_guard<std::mutex> lck(_guid_mutex);
+	return _guid_map.find(h)->second;
 }
 
 /**
@@ -232,16 +271,29 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 	}
 }
 
-void IPFSAtomStorage::add_atom_key_to_atomspace(const std::string& label,
-                                                const std::string& key)
+void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
+                                               const std::string& cid,
+                                               const ipfs::Json& jatom)
 {
+	std::string label(encodeAtomToStr(h));
+
 	// XXX FIXME ... this leaks pool entries, if ipfs ever throws.
 	// We can't just catch, we need to rethrow, too.
-	ipfs::Client* conn = conn_pool.pop();
 	std::string new_as_id;
-	conn->ObjectPatchAddLink(_atomspace_cid, label, key, &new_as_id);
-	_atomspace_cid = new_as_id;
+	ipfs::Client* conn = conn_pool.pop();
+	{
+		// Update the cid under a lock, as this method can
+		// be called from multiple threads.  It's not actually
+		// the cid that matters, its the patch itself.
+		std::lock_guard<std::mutex> lck(_atomspace_cid_mutex);
+		conn->ObjectPatchAddLink(_atomspace_cid, label, cid, &new_as_id);
+		_atomspace_cid = new_as_id;
+	}
 	conn_pool.push(conn);
+
+	// Also track the current version of the json representation
+	std::lock_guard<std::mutex> lck(_json_mutex);
+	_json_map.insert({h, jatom});
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
@@ -321,7 +373,7 @@ void IPFSAtomStorage::kill_data(void)
 {
 	rethrow();
 
-	_ipfs_cid_map.clear();
+	_guid_map.clear();
 
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;
