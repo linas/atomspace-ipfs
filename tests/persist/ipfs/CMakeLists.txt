@@ -1,7 +1,8 @@
 
 LINK_LIBRARIES(
-    atomspace
+    persist-ipfs
     persist
+    atomspace
 )
 
 
