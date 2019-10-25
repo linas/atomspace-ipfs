@@ -7,12 +7,8 @@
  */
 
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "IPFSAtomStorage.h"

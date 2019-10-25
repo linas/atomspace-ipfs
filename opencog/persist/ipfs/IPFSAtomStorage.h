@@ -58,6 +58,8 @@ class IPFSAtomStorage : public BackingStore
 		concurrent_stack<ipfs::Client*> conn_pool;
 		int _initial_conn_pool_size;
 
+		Handle tvpred; // the key to a very special valuation.
+
 		// ---------------------------------------------
 		// IPNS Publication happens in it's own thread, because
 		// it's slow. That means it needs a semaphore.
@@ -80,13 +82,13 @@ class IPFSAtomStorage : public BackingStore
 		std::mutex _json_mutex;
 		std::map<Handle, ipfs::Json> _json_map;
 
+		// ---------------------------------------------
 		// Fetching of atoms.
 		ipfs::Json fetch_atom_dag(const std::string&);
 		Handle decodeStrAtom(const std::string&);
 		Handle decodeJSONAtom(const ipfs::Json&);
 		Handle do_fetch_atom(Handle&);
 
-		void store_incoming_of(const Handle &, const Handle&);
 		// --------------------------
 		// Storing of atoms
 
@@ -108,16 +110,13 @@ class IPFSAtomStorage : public BackingStore
 
 		bool guid_not_yet_stored(const Handle&);
 
+		// --------------------------
+		// Bulk load and store
 		bool bulk_load;
 		bool bulk_store;
 		time_t bulk_start;
 
 		void load_as_from_cid(AtomSpace*, const std::string&);
-
-		// --------------------------
-		// Atom removal
-		// void removeAtom(Response&, UUID, bool recursive);
-		// void deleteSingleAtom(Response&, UUID);
 
 		// --------------------------
 		// Values
@@ -127,7 +126,10 @@ class IPFSAtomStorage : public BackingStore
 		ipfs::Json encodeValuesToJSON(const Handle&);
 		ValuePtr decodeStrValue(const std::string&);
 
-		Handle tvpred; // the key to a very special valuation.
+		// --------------------------
+		// Incoming set management
+		void store_incoming_of(const Handle &, const Handle&);
+		void remove_incoming_of(const Handle &, const std::string&);
 
 		// --------------------------
 		// Performance statistics
@@ -187,7 +189,6 @@ class IPFSAtomStorage : public BackingStore
 		void storeAtomSpace(const AtomTable&); // Store entire contents
 		void barrier();
 		void flushStoreQueue();
-
 
 		// Debugging and performance monitoring
 		void print_stats(void);

@@ -1,15 +1,13 @@
 /*
- * IPFSIncomin.cc
+ * IPFSIncoming.cc
  * Save and restore of atom incoming set.
  *
  * Copyright (c) 2008,2009,2013,2017,2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/atom_types/NameServer.h>
 
 #include "IPFSAtomStorage.h"
 
@@ -56,6 +54,15 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	          << " CID: " << atoid << std::endl;
 
 	update_atom_in_atomspace(atom, atoid, jatom);
+}
+
+/* ================================================================== */
+
+/// Remove `holder` from the incoming set of atom.
+void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
+                                         const std::string& holder)
+{
+	std::cout << "Remove " << std::endl;
 }
 
 /* ================================================================ */
