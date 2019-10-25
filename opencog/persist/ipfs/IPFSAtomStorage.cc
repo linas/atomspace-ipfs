@@ -34,6 +34,8 @@ using namespace opencog;
 
 void IPFSAtomStorage::init(const char * uri)
 {
+	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+
 	_uri = uri;
 
 #define URIX_LEN (sizeof("ipfs://") - 1)  // Should be 7
@@ -84,10 +86,10 @@ void IPFSAtomStorage::init(const char * uri)
 	// If the "key" is actually an IPFS or IPNS CID...
 	if (std::string::npos != _keyname.find("ipfs/"))
 	{
-		_atomspace_cid = &_keyname[sizeof("ipfs/")];
+		_atomspace_cid = &_keyname[sizeof("ipfs/")-1];
 		_keyname.clear();
 	}
-
+	else
 	if (std::string::npos != _keyname.find("ipns/"))
 	{
 		_key_cid = &_keyname[sizeof("ipns/")];
@@ -139,8 +141,9 @@ void IPFSAtomStorage::init(const char * uri)
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
-	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
-	kill_data();
+	// Initialize a new AtomSpace, but only if
+	// we're not already working with one.
+	if (0 == _atomspace_cid.size()) kill_data();
 }
 
 IPFSAtomStorage::IPFSAtomStorage(std::string uri) :

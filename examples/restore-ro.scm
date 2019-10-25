@@ -12,7 +12,7 @@
 ; AtomSpace.
 ; (ipfs-open "ipfs://localhost/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx")
 ; (ipfs-open "ipfs://localhost:5001/ipns/QmVkzxhCMDYisZ2QEMA5WYTjrZEPVbETZg5rehsijUxVHx")
-(ipfs-open "ipfs:///ipfs/QmaHDniEkN8uzcoPFc8htBakBLg4qkhZsj3nhyYbHM5Q2i")
+(ipfs-open "ipfs:///ipfs/QmUqobJLPNyB7kQcczLo3GrJBDpXJG2JcHqfDCCWCt2NCg")
 
 ; (ipfs-resolve-atomspace)
 
