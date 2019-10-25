@@ -178,7 +178,9 @@ void IPFSAtomStorage::storeAtomSpace(const AtomTable &table)
 
 void IPFSAtomStorage::loadAtomSpace(AtomTable &table)
 {
-	// XXX FIXME This should probably do an IPNS resolve first ??
+	// Perform an IPNS lookup, if a key was given.
+	if (0 < _keyname.size()) resolve_atomspace();
+
 	load_atomspace(table.getAtomSpace(), _atomspace_cid);
 }
 
