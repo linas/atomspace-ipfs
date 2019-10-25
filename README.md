@@ -14,14 +14,18 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Alpha version 0.0.5
+## Beta version 0.1.0
 
-**Status**: Design alternatives are being explored. In the current
-implementation:
- * Everything works, except for Atom deletion and IPNS resolution.
- * Due to IPFS bugs with thhe performance of IPNS, its not currently
-   usable, and so is mostly unused in this implementation.
- * Many of most operations are slow. Some could be improved
+**Status**: In the current implementation:
+ * A design for representing the AtomSpace in IPFS has been chosen.
+   It has numerous shortcomings, detailed below.
+ * Everything works(?) Might be buggy? Only shallow testing done.
+ * Due to IPFS bugs with the performance of IPNS, its not currently
+   usable, and so IPNS is mostly unused in this implementation.
+   This means that users need to arrange other channels of
+   communication for find out what the latest AtomSpace is (by sharing
+   the CID in some other way, rather than sharing via IPNS).
+ * Many or most operations are slow. Some could be improved
    by better caching.  Others might need a major design overhaul.
 
 After much thought: there does not seem to be any way of mapping the
@@ -53,6 +57,18 @@ The ideal enhanced-IPNS lookup would be this:
     (PKI public-key, hash) ==> resolved CID
 ```
 Details are described below.
+
+### Known Bugs
+There are several bugs that are known, but are problematic to fix:
+ * Excess debug printfs still in the code. (convert to logger().debug())
+ * Centralized design, as noted above.
+ * Race conditions if Multiple usersame AtomSpace at the same time.
+   These race conditions will result in lost data (lost Atom inserts,
+   deletes, or changes of TruthValues or other Values.)
+ * Unsafe access to _atomspace_cid from multiple threads.
+ * Potential crashes if user manipulates non-existant Atoms.(?)
+ * Atom removal is a particularly heavy-weight operation, due
+   to heavy interaction with incoming sets.
 
 ### Architecture:
 This implementation provides the a standard `BackingStore` API

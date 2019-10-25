@@ -1,15 +1,13 @@
 /*
- * IPFSIncomin.cc
+ * IPFSIncoming.cc
  * Save and restore of atom incoming set.
  *
  * Copyright (c) 2008,2009,2013,2017,2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/atom_types/NameServer.h>
 
 #include "IPFSAtomStorage.h"
 
@@ -56,6 +54,74 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	          << " CID: " << atoid << std::endl;
 
 	update_atom_in_atomspace(atom, atoid, jatom);
+}
+
+/* ================================================================== */
+
+/// Remove `holder` from the incoming set of atom.
+void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
+                                         const std::string& holder)
+{
+	// std::cout << "Remove from " << atom->to_short_string()
+	//           << " inCID " << holder << std::endl;
+
+	// XXX FIXME. This is wildly, insanely inefficient. First,
+	// We get a list of all the Atoms in the current AtomSpace.
+	// We need this, because we need to find the CID of the
+	// Atom passed in.
+	std::string path = _atomspace_cid;
+	ipfs::Json lsres;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(path, &lsres);
+	conn_pool.push(conn);
+	// std::cout << "Ls Result " << lsres.dump(2) << std::endl;
+
+	// Now look for the CID of Atom
+	std::string cid_of_atom;
+	std::string name = atom->to_short_string();
+	for (const auto& item : lsres["links"])
+	{
+		// std::cout << "Item " << item.dump(2) << std::endl;
+		if (0 == name.compare(item["Name"]))
+		{
+			cid_of_atom = item["Cid"]["/"];
+			break;
+		}
+	}
+	// std::cout << "Found current Atom: " << cid_of_atom << std::endl;
+
+	if (0 == cid_of_atom.size())
+		throw RuntimeException(TRACE_INFO,
+			"Error: remove_incoming_of(): cannot find %s\n", name.c_str());
+
+	// Now that we have the cid, get the Atom, so that we can
+	// remove holder from it's incoming set.
+	ipfs::Json jatom;
+	conn = conn_pool.pop();
+	conn->DagGet(cid_of_atom, &jatom);
+	conn_pool.push(conn);
+	// std::cout << "The Atom:" << jatom.dump(2) << std::endl;
+
+	// Remove the holder from the incoming set ...
+	std::set<std::string> inco = jatom["incoming"];
+	inco.erase(holder);
+	if (0 < inco.size())
+		jatom["incoming"] = inco;
+	else
+		jatom.erase("incoming");
+	// std::cout << "Atom after erasure: " << jatom.dump(2) << std::endl;
+
+	// Store the edited Atom back into IPFS...
+	ipfs::Json result;
+	conn = conn_pool.pop();
+	conn->DagPut(jatom, &result);
+	conn_pool.push(conn);
+
+	// Finally, update the Atomspace with this revised Atom.
+	std::string atoid = result["Cid"]["/"];
+	update_atom_in_atomspace(atom, atoid, jatom);
+
+	// Phew. Done.
 }
 
 /* ================================================================ */

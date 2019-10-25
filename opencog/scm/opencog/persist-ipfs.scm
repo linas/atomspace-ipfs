@@ -12,8 +12,8 @@
 	"opencog_persist_ipfs_init")
 
 (export ipfs-clear-stats ipfs-close ipfs-open ipfs-stats
-	ipfs-atom-cid ipfs-fetch-atom
-	ipfs-atomspace-cid ipns-atomspace-cid ipfs-atomspace-resolve)
+	ipfs-atom-cid ipfs-fetch-atom ipfs-load-atomspace
+	ipfs-atomspace-cid ipns-atomspace-cid ipfs-resolve-atomspace)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
