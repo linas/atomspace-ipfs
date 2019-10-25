@@ -34,6 +34,7 @@ using namespace opencog;
 
 void IPFSAtomStorage::init(const char * uri)
 {
+	_as = nullptr;
 	tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
 
 	_uri = uri;
@@ -292,8 +293,10 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	conn_pool.push(conn);
 
 	// Also track the current version of the json representation
+	if (nullptr == _as) return;
 	std::lock_guard<std::mutex> lck(_json_mutex);
-	_json_map.insert({h, jatom});
+	Handle has(_as->get_atom(h));
+	_json_map.insert({has, jatom});
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
@@ -348,6 +351,7 @@ void IPFSAtomStorage::barrier()
 
 void IPFSAtomStorage::registerWith(AtomSpace* as)
 {
+	_as = as;
 	BackingStore::registerWith(as);
 }
 
@@ -356,6 +360,7 @@ void IPFSAtomStorage::unregisterWith(AtomSpace* as)
 	BackingStore::unregisterWith(as);
 
 	flushStoreQueue();
+	_as = nullptr;
 }
 
 /* ================================================================ */

@@ -49,6 +49,7 @@ namespace opencog
 class IPFSAtomStorage : public BackingStore
 {
 	private:
+		AtomSpace* _as;
 		void init(const char *);
 		std::string _uri;
 		std::string _hostname;

@@ -343,6 +343,8 @@ void BasicSaveUTest::test_table()
 
     AtomSpace *as1 = new AtomSpace();
     AtomTable *table1 = &as1->get_atomtable();
+    store->registerWith(as1);
+
     int idx = 0;
     add_to_table(idx++, table1, "AA-aa-wow ");
     add_to_table(idx++, table1, "BB-bb-wow ");
@@ -362,6 +364,7 @@ void BasicSaveUTest::test_table()
 
     AtomSpace *as2 = new AtomSpace();
     AtomTable *table2 = &as2->get_atomtable();
+    store->registerWith(as2);
 
     store->loadAtomSpace(*table2);
     // table2->print();
