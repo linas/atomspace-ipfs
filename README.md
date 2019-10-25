@@ -18,10 +18,11 @@ and "active" Atoms.
 
 **Status**: Design alternatives are being explored. In the current
 implementation:
- * It is possible to save and restores Atoms to IPFS.
- * AtomSpaces can be saved and restored in bulk. See the
-   [examples](examples).
- * Incoming-set query does not work.
+ * Everything works, except for Atom deletion and IPNS resolution.
+ * Due to IPFS bugs with thhe performance of IPNS, its not currently
+   usable, and so is mostly unused in this implementation.
+ * Many of most operations are slow. Some could be improved
+   by better caching.  Others might need a major design overhaul.
 
 After much thought: there does not seem to be any way of mapping the
 AtomSpace into the current design of IPFS+IPNS without resorting to
@@ -30,11 +31,11 @@ Implementing a single, centralized file seems like a "really bad idea"
 for all of the usual reasons:
  * When it gets large, it does not scale.
  * Impossible to optimize fetch of atoms-by-type.
- * Impossible to optimize fetch of incoming set.
- * Update conflicts when there are multiple writers.
+ * Hard to optimize fetch of incoming set.
+ * Unresolvable update conflicts (race conditions) when there
+   are multiple writers (i.e. which of the published AtomSpace
+   versions really are the "latest"?)
  * Performance bottlenecks when there are multiple writers.
-Basically, one is forced to load the entire AtomSpace, which is
-not only wastefully slow, but might not even fit into available RAM.
 
 Despite this, a bad, hacky implementation, with the above obvious
 failures, is created anyway.  But we need a better design, and that
@@ -145,12 +146,11 @@ install mechanisms are the same.
      updaters.
 
 * Q: How to load the incoming set of an Atom?
-  One can certainly store the incoming set of an Atom, and the current
-  code does this. But it is impossible to know what the CID of that
-  Atom is, unless one either (a) loads the entire AtomSpace (which makes
-  the load of incoming sets completely pointless) or (b) performs an
-  IPNS query for that Atom (which is not only slow, but also klunky
-  per discussion below).
+  Currently, the incoming set of an Atom is stored as part of the
+  mutable version of that Atom, and can therefore be fetched. The
+  IPFS CID of the current mutated Atom is obtained by lookup of the
+  AtomSpace (from the single, large directory file that the AtomSpace
+  is stored in).
 
 * Q: is Pin needed to prevent a published atomspace from disappearing?
   Doesn't seem to be!?
