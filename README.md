@@ -21,8 +21,8 @@ and "active" Atoms.
    It has numerous shortcomings, detailed below.
  * System is feature-complete.  The [basic tutorials](examples) work
    as documented.  So its enough to play around with.
-   One unit test (out of six from the Atomspace-SQL test suite)
-   has been ported, and it currently fails.
+   Four unit tests (out of seven from the Atomspace-SQL test suite)
+   has been ported. Two of them pass.
  * Due to IPFS bugs with the performance of IPNS, its not currently
    usable, and so IPNS is mostly unused in this implementation.
    This means that users need to arrange other channels of
