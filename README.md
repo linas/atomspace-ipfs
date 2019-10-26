@@ -15,6 +15,7 @@ in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
 ## Beta version 0.1.1
+Developed and tested with IPFS version `0.4.22-`.
 
 **Status**: In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
@@ -219,8 +220,7 @@ updates, file-size issues. etc.
 
 ## Prereqs
 
-* Clone and build the atomspace.
-* Install IPFS
+ * Clone and build the atomspace.
  * Install IPFS Core
    ```
    curl https://get.siderus.io/key.public.asc | sudo apt-key add -
@@ -239,18 +239,20 @@ updates, file-size issues. etc.
  * Install the IPFS C++ client library
 
    `https://github.com/vasild/cpp-ipfs-api`
-   Uh, no, you need the enhancements in
-   `https://linas.com/vasild/cpp-ipfs-api`
-   and then
-   `git checkout master-linas`
+   Uh, no, actually, you need the extended, updated version, here:
+   [`https://github.com/linas/cpp-ipfs-api`](https://github.com/linas/cpp-ipfs-api)
+   and and so then
+   `git cline https://github.com/linas/cpp-ipfs-api` and
+   `git checkout master-linas` and
+   `mkdir build; cd build; cmake ..; make -j; sudo make install`
 
    This needs the package "JSON for Modern C++"
    `sudo apt install nlohmann-json3-dev`
 
    API documentation is here:
-   `https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`
+   [`https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`](https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC).
    and here:
-   `https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`
+   [`https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`](https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html).
 
 ## Building
 After installing the pre-reqs, do this:
