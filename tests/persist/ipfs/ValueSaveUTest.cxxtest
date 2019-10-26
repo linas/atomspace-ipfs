@@ -1,31 +1,13 @@
 /*
- * tests/persist/sql/multi-driver/ValueSaveUTest.cxxtest
+ * tests/persist/ipfs/ValueSaveUTest.cxxtest
  *
  * Test of save and restore of generic values.
+ * Ported from tests/persist/sql/multi-driver/ValueSaveUTest.cxxtest
  *
- * If this test is failing for you, then be sure to read the README in
- * this directory, and also ../../opencong/persist/README, and then
- * create and configure the SQL database as described there. Next,
- * edit ../../lib/test-opencog.conf to add the database credentials
- * (the username and passwd).
+ * Copyright (C) 2008, 2009, 2017, 2019 Linas Vepstas <linasvepstas@gmail.com>
  *
- * Copyright (C) 2008, 2009, 2017 Linas Vepstas <linasvepstas@gmail.com>
- * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 #include <cstdio>
 
@@ -42,12 +24,9 @@
 
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/ipfs/IPFSAtomStorage.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
-
-#include "mkuri.h"
 
 using namespace opencog;
 
@@ -55,36 +34,14 @@ class ValueSaveUTest :  public CxxTest::TestSuite
 {
     private:
         std::string uri;
-        const char * dbname;
-        const char * username;
-        const char * passwd;
 
     public:
 
         ValueSaveUTest(void)
         {
-            try
-            {
-                config().load("atomspace-test.conf");
-            }
-            catch (RuntimeException &e)
-            {
-                std::cerr << e.get_message() << std::endl;
-            }
-
+            uri = "ipfs:///atomspace-ipfs-test";
             logger().set_level(Logger::DEBUG);
             logger().set_print_to_stdout_flag(true);
-
-            try {
-                // Get the database logins & etc from the config file.
-                dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-                username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-                passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-            }
-            catch (InvalidParamException &e)
-            {
-                friendlyFailMessage(false);
-            }
         }
 
         ~ValueSaveUTest()
@@ -97,54 +54,13 @@ class ValueSaveUTest :  public CxxTest::TestSuite
         void setUp(void);
         void tearDown(void);
 
-        void friendlyFailMessage(bool ts)
-        {
-            const char * fail = "The ValueSaveUTest failed.\n"
-                "This is probably because you do not have SQL installed\n"
-                "or configured the way that OpenCog expects.\n\n"
-                "SQL persistance is optional for OpenCog, so if you don't\n"
-                "want it or need it, just ignore this test failure.\n"
-                "Otherwise, please be sure to read opencong/persist/sql/README,\n"
-                "and create/configure the SQL database as described there.\n"
-                "Next, edit lib/atomspace-test.conf appropriately, so as\n"
-                "to indicate the location of your database. If this is\n"
-                "done correctly, then this test will pass.\n";
-
-            if (ts)
-                TS_FAIL(fail);
-            else
-                fprintf(stderr, "%s", fail);
-            exit(1);
-        }
-
-        void do_test_single_atom_save();
-        void do_test_save_restore(bool);
+        void test_single_atom_save();
+        void test_save_restore(bool);
         void check_one(ValuePtr, bool);
-        void do_test_load_by_type();
-        void do_test_link_by_type();
-        void do_test_incoming();
-        void do_test_load_by_key(bool);
-
-        void test_odbc_single_atom_save();
-        void test_pq_single_atom_save();
-
-        void test_odbc_save_restore();
-        void test_pq_save_restore();
-
-        void test_odbc_load_by_type();
-        void test_pq_load_by_type();
-
-        void test_odbc_link_by_type();
-        void test_pq_link_by_type();
-
-        void test_odbc_incoming();
-        void test_pq_incoming();
-
-        void test_odbc_load_by_key();
-        void test_pq_load_by_key();
-
-        void test_odbc_load_all_key();
-        void test_pq_load_all_key();
+        void test_load_by_type();
+        void test_link_by_type();
+        void test_incoming();
+        void test_load_by_key(bool);
 };
 
 /*
@@ -154,157 +70,15 @@ void ValueSaveUTest::setUp(void) {}
 
 void ValueSaveUTest::tearDown(void) {}
 
-void ValueSaveUTest::test_odbc_single_atom_save(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_single_atom_save();
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_single_atom_save(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_single_atom_save();
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_save_restore(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_save_restore(true);
-	do_test_save_restore(false);
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_save_restore(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_save_restore(true);
-	do_test_save_restore(false);
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_load_by_type(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_load_by_type();
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_load_by_type(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_load_by_type();
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_link_by_type(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_link_by_type();
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_link_by_type(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_link_by_type();
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_incoming(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_incoming();
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_incoming(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_incoming();
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_load_by_key(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_load_by_key(false);
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_load_by_key(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_load_by_key(false);
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_odbc_load_all_key(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_ODBC_STORAGE
-	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_load_by_key(true);
-#endif
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ValueSaveUTest::test_pq_load_all_key(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-#if HAVE_PGSQL_STORAGE
-	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_load_by_key(true);
-#endif // HAVE_PGSQL_STORAGE
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
 // ============================================================
 /**
  * A simple test case that tests the saving of various values.
  * Test passes if the save succeeds; the accuracy of the save
  * is not tested (i.e. there's no restore; that's in the next test.
  */
-void ValueSaveUTest::do_test_single_atom_save()
+void ValueSaveUTest::test_single_atom_save()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -375,7 +149,7 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// ------
 	// First, save the value
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	AtomSpace* as = new AtomSpace();
@@ -398,7 +172,7 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// ---------------------------------
 	// Now, fetch the value and compare.
-	store = new SQLAtomStorage(uri);
+	store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -420,9 +194,9 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	delete store;
 }
 
-void ValueSaveUTest::do_test_save_restore(bool fkey)
+void ValueSaveUTest::test_save_restore(bool fkey)
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -477,9 +251,9 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 // Test the fetch_all_atoms_of_type() method in the atomspace.
 // The fetch should restore the truth values, and the other values,
 // as well.  This tests the fetching of nodes.
-void ValueSaveUTest::do_test_load_by_type()
+void ValueSaveUTest::test_load_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -542,7 +316,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -596,9 +370,9 @@ void ValueSaveUTest::do_test_load_by_type()
 // as well.  This tests the fetching of links. This differs from
 // the above, in that the values of the outgoing set should NOT
 // be fetched.
-void ValueSaveUTest::do_test_link_by_type()
+void ValueSaveUTest::test_link_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -689,7 +463,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -803,9 +577,9 @@ void ValueSaveUTest::do_test_link_by_type()
 // Test the fetch_incoming_set() method in the atomspace.
 // The fetch should restore the truth values, and the other values,
 // as well, but only on the incoming set!
-void ValueSaveUTest::do_test_incoming()
+void ValueSaveUTest::test_incoming()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -896,7 +670,7 @@ void ValueSaveUTest::do_test_incoming()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -1013,9 +787,9 @@ void ValueSaveUTest::do_test_incoming()
 // Test the fetch_valuations() method in the atomspace.
 // The fetch should restore only certain values, and NOT the
 // truth values.
-void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
+void ValueSaveUTest::test_load_by_key(bool get_all_values)
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -1078,7 +852,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();

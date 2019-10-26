@@ -7,7 +7,7 @@ LINK_LIBRARIES(
 
 
 ADD_CXXTEST(BasicSaveUTest)
-# ADD_CXXTEST(ValueSaveUTest)
+ADD_CXXTEST(ValueSaveUTest)
 ADD_CXXTEST(PersistUTest)
 # ADD_CXXTEST(DeleteUTest)
 # ADD_CXXTEST(MultiPersistUTest)
