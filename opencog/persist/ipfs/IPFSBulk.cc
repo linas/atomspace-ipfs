@@ -105,45 +105,31 @@ void IPFSAtomStorage::load_as_from_cid(AtomSpace* as, const std::string& cid)
 	as->barrier();
 }
 
+/// A copy of the above.
+/// Stunningly inefficient, but it works.
+///
 void IPFSAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
 	rethrow();
 
-#if 0
-	size_t start_count = _load_count;
+	ipfs::Json dag;
+	ipfs::Client* conn = conn_pool.pop();
+	conn->DagGet(_atomspace_cid, &dag);
+	conn_pool.push(conn);
+	// std::cout << "The atomspace dag is:" << dag.dump(2) << std::endl;
 
-	// Parallelize always.
-	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
-
-	for (int hei=0; hei<=max_height; hei++)
+	auto atom_list = dag["links"];
+	for (auto acid: atom_list)
 	{
-		unsigned long cur = _load_count;
+		// std::cout << "Atom CID is: " << acid["Cid"]["/"] << std::endl;
 
-		OMP_ALGO::for_each(steps.begin(), steps.end(),
-			[&](unsigned long rec)
+		Handle h(fetch_atom(acid["Cid"]["/"]));
+		if (h->get_type() == atom_type)
 		{
-			Response rp(conn_pool);
-			rp.table = &table;
-			rp.store = this;
-			char buff[BUFSZ];
-			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
-			         "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         db_atom_type, hei, rec, rec+stepsize);
-			rp.height = hei;
-			rp.exec(buff);
-			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-		});
-		logger().debug("IPFSAtomStorage::loadType: "
-		               "Loaded %lu atoms of type %d at height %d\n",
-			_load_count - cur, db_atom_type, hei);
+			table.add(h, false);
+			_load_count++;
+		}
 	}
-
-	logger().debug("IPFSAtomStorage::loadType: Finished loading %zu atoms in total\n",
-		_load_count- start_count);
-
-	// Synchronize!
-	as->barrier();
-#endif
 }
 
 /// Store all of the atoms in the atom table.
