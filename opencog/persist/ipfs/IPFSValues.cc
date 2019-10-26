@@ -151,7 +151,18 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 		{
 			pos = stv.find('(', pos);
 			if (std::string::npos == pos) break;
-			size_t epos = stv.find(')', pos+1);
+
+			// Find the next balanced paren, and restart there.
+			// This is not very efficient, but it works.
+			size_t epos = pos;
+			int pcnt = 1;
+			while (0 < pcnt and epos != std::string::npos)
+			{
+				char c = stv[++epos];
+				if ('(' == c) pcnt ++;
+				else if (')' == c) pcnt--;
+			}
+			if (epos == std::string::npos) break;
 			vv.push_back(decodeStrValue(stv.substr(pos, epos-pos+1)));
 			pos = epos+1;
 		}
