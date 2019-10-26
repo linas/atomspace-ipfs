@@ -160,7 +160,7 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 	if (std::string::npos != pos)
 	{
 		size_t epos;
-		pos += strlen("(stv ");
+		pos += strlen("(SimpleTruthValue ");
 		double strength = stod(stv.substr(pos), &epos);
 		pos += epos;
 		double confidence = stod(stv.substr(pos), &epos);
