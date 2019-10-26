@@ -142,10 +142,10 @@ void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 
 ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 {
-	size_t pos = stv.find("(LinkValue ");
+	size_t pos = stv.find("(LinkValue");
 	if (std::string::npos != pos)
 	{
-		pos += strlen("(LinkValue ");
+		pos += strlen("(LinkValue");
 		std::vector<ValuePtr> vv;
 		while (pos != std::string::npos and stv[pos] != ')')
 		{
