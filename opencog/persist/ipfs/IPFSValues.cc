@@ -166,6 +166,21 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 		double confidence = stod(stv.substr(pos), &epos);
 		return ValueCast(createSimpleTruthValue(strength, confidence));
 	}
+
+	pos = stv.find("(StringValue ");
+	if (std::string::npos != pos)
+	{
+		pos += strlen("(StringValue ");
+		std::vector<std::string> sv;
+		while (pos != std::string::npos and stv[pos] != ')')
+		{
+			size_t epos = stv.find(" ");
+			sv.push_back(stv.substr(pos, epos));
+			pos = epos;
+		}
+		return createStringValue(sv);
+	}
+
 	throw SyntaxException(TRACE_INFO, "Unknown Value %s", stv.c_str());
 }
 
