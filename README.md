@@ -24,29 +24,30 @@ and "active" Atoms.
    The [basic tutorials](examples) work as documented.  So its plenty
    enough to play around with (you are very unlikely to hit the bug
    in the one failing unit test!)
- * Due to IPFS bugs with the performance of IPNS, its not currently
-   usable, and so IPNS is mostly unused in this implementation.
-   This means that users need to arrange other channels of
-   communication for find out what the latest AtomSpace is (by sharing
-   the CID in some other way, rather than sharing via IPNS).
+ * Due to IPFS bugs with the performance of IPNS, it is mostly unused
+   in this implementation.  This means that users need to arrange other
+   channels of communication for find out what the latest AtomSpace
+   is (by sharing the CID in some other way, rather than sharing via
+   IPNS).
  * Many or most operations are slow. Like really, really slow.
 	Like, a dozen-atoms-per-second-slow. Which is unusable on a
    production database. In a few cases, performance could be improved
    by better caching.  In most cases, this is a fundamental limitation
    of the current design. If might be a fundamental limitation of IPFS,
-   since IPFS is not optimal for handling very small objects.
+   since IPFS is not optimal for handling very small objects, and
+   Atoms are just tiny.
 
-After much thought: there does not seem to be any way of mapping the
-AtomSpace into the current design of IPFS+IPNS without resorting to
-a single, centralized file listing all of the Atoms in an AtomSpace.
-Implementing a single, centralized file seems like a "really bad idea"
+There does not seem to be any way of mapping the AtomSpace into the
+current design of IPFS+IPNS without resorting to a single, centralized
+directory file listing all of the Atoms in an AtomSpace.  Implementing
+a single, centralized directory file seems like a "really bad idea"
 for all of the usual reasons:
  * When it gets large, it does not scale.
  * Impossible to optimize fetch of atoms-by-type.
  * Hard to optimize fetch of incoming set.
  * Unresolvable update conflicts (race conditions) when there
-   are multiple writers (i.e. which of the published AtomSpace
-   versions really are the "latest"?)
+   are multiple writers (i.e. with multiple writers, it's unclear
+   which of the published AtomSpace versions are authoritative.)
  * Performance bottlenecks when there are multiple writers.
 
 Despite this, a bad, hacky implementation, with the above obvious
@@ -69,10 +70,11 @@ Details are described below.
 ### Known Bugs
 There are several bugs that are known, but are problematic to fix:
  * Excess debug printfs still in the code. (convert to logger().debug())
- * Centralized design, as noted above.
- * Race conditions if Multiple usersame AtomSpace at the same time.
-   These race conditions will result in lost data (lost Atom inserts,
-   deletes, or changes of TruthValues or other Values.)
+ * Centralized directory, as noted above.
+ * Race conditions if multiple users update the same AtomSpace at
+   the same time.  These race conditions will result in lost data
+   (lost Atom inserts, deletes, or lost changes of TruthValues or
+   other Values.)
  * Unsafe access to _atomspace_cid from multiple threads.
  * Potential crashes if user manipulates non-existant Atoms.(?)
  * Atom removal is a particularly heavy-weight operation, due
