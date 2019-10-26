@@ -81,9 +81,6 @@ void ValueSaveUTest::test_single_atom_save()
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
-	// Clear out left-over junk, just in case.
-	store->kill_data();
-
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
 
@@ -129,9 +126,6 @@ void ValueSaveUTest::test_single_atom_save()
 	atom->setValue(key, pvl2);
 	as->store_atom(atom);
 	as->barrier();
-
-	// --------------------
-	store->kill_data();
 
 	delete as;
 	delete store;
@@ -199,9 +193,6 @@ void ValueSaveUTest::test_save_restore(bool fkey)
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
-	// Clear out left-over junk, just in case.
-	store->kill_data();
-
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
 
@@ -240,8 +231,6 @@ void ValueSaveUTest::test_save_restore(bool fkey)
 
 	check_one(pvl2, fkey);
 
-	// --------------------
-	store->kill_data();
 	delete as;
 	delete store;
 }
@@ -255,9 +244,6 @@ void ValueSaveUTest::test_load_by_type()
 {
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
-
-	// Clear out left-over junk, just in case.
-	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
@@ -309,6 +295,7 @@ void ValueSaveUTest::test_load_by_type()
 	as->store_atom(al);
 	as->store_atom(av);
 	as->barrier();
+	std::string final_atomspace_cid = store->get_ipfs_cid();
 
 	delete as;
 	delete store;
@@ -316,7 +303,7 @@ void ValueSaveUTest::test_load_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new IPFSAtomStorage(uri);
+	store = new IPFSAtomStorage("ipfs:///ipfs/" + final_atomspace_cid);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -358,7 +345,6 @@ void ValueSaveUTest::test_load_by_type()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
 	delete as;
 	delete store;
 }
@@ -374,9 +360,6 @@ void ValueSaveUTest::test_link_by_type()
 {
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
-
-	// Clear out left-over junk, just in case.
-	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
@@ -456,6 +439,7 @@ void ValueSaveUTest::test_link_by_type()
 	as->store_atom(cl);
 	as->store_atom(cv);
 	as->barrier();
+	std::string final_atomspace_cid = store->get_ipfs_cid();
 
 	delete as;
 	delete store;
@@ -463,7 +447,7 @@ void ValueSaveUTest::test_link_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new IPFSAtomStorage(uri);
+	store = new IPFSAtomStorage("ipfs:///ipfs/" + final_atomspace_cid);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -567,7 +551,6 @@ void ValueSaveUTest::test_link_by_type()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
 	delete as;
 	delete store;
 }
@@ -581,9 +564,6 @@ void ValueSaveUTest::test_incoming()
 {
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
-
-	// Clear out left-over junk, just in case.
-	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
@@ -663,6 +643,7 @@ void ValueSaveUTest::test_incoming()
 	as->store_atom(cl);
 	as->store_atom(cv);
 	as->barrier();
+	std::string final_atomspace_cid = store->get_ipfs_cid();
 
 	delete as;
 	delete store;
@@ -670,7 +651,7 @@ void ValueSaveUTest::test_incoming()
 	// --------------------
 	// Start it up again.
 
-	store = new IPFSAtomStorage(uri);
+	store = new IPFSAtomStorage("ipfs:///ipfs/" + final_atomspace_cid);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -777,7 +758,6 @@ void ValueSaveUTest::test_incoming()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
 	delete as;
 	delete store;
 }
@@ -791,9 +771,6 @@ void ValueSaveUTest::test_load_by_key(bool get_all_values)
 {
 	IPFSAtomStorage *store = new IPFSAtomStorage(uri);
 	TS_ASSERT(store->connected())
-
-	// Clear out left-over junk, just in case.
-	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
@@ -845,6 +822,7 @@ void ValueSaveUTest::test_load_by_key(bool get_all_values)
 	as->store_atom(al);
 	as->store_atom(av);
 	as->barrier();
+	std::string final_atomspace_cid = store->get_ipfs_cid();
 
 	delete as;
 	delete store;
@@ -852,7 +830,7 @@ void ValueSaveUTest::test_load_by_key(bool get_all_values)
 	// --------------------
 	// Start it up again.
 
-	store = new IPFSAtomStorage(uri);
+	store = new IPFSAtomStorage("ipfs:///ipfs/" + final_atomspace_cid);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -915,7 +893,6 @@ void ValueSaveUTest::test_load_by_key(bool get_all_values)
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
 	delete as;
 	delete store;
 }
