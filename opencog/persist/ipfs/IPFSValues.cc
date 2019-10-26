@@ -172,11 +172,13 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 	{
 		pos += strlen("(StringValue ");
 		std::vector<std::string> sv;
-		while (pos != std::string::npos and stv[pos] != ')')
+		while (true)
 		{
-			size_t epos = stv.find(" ");
-			sv.push_back(stv.substr(pos, epos));
-			pos = epos;
+			pos = stv.find('\"', pos);
+			if (std::string::npos == pos) break;
+			size_t epos = stv.find('\"', pos+1);
+			sv.push_back(stv.substr(pos, epos-pos+1));
+			pos = epos+1;
 		}
 		return createStringValue(sv);
 	}
