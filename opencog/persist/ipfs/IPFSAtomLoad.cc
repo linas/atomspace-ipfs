@@ -161,6 +161,14 @@ Handle IPFSAtomStorage::decodeStrAtom(const std::string& satom)
 /// Convert value (or Atom) into a string.
 std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 {
+	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
+	{
+		// The FloatValue to_string() print prints out a high-precision
+		// form of the value, as compared to SimpleTruthValue, which
+		// only prints 6 digits and breaks the unit tests.
+		FloatValuePtr fv(FloatValueCast(v));
+		return fv->FloatValue::to_string();
+	}
 	return v->to_short_string();
 }
 
