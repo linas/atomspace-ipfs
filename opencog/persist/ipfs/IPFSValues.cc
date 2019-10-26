@@ -55,7 +55,9 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 
 	// Build a JSON representation of the Atom.
 	ipfs::Json jatom = encodeAtomToJSON(atom);
-	jatom["values"] = encodeValuesToJSON(atom);
+	ipfs::Json jvals = encodeValuesToJSON(atom);
+	if (0 < jvals.size())
+		jatom["values"] = jvals;
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -154,7 +156,7 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 		return createFloatValue(fv);
 	}
 
-	pos = stv.find("(stv ");
+	pos = stv.find("(SimpleTruthValue ");
 	if (std::string::npos != pos)
 	{
 		size_t epos;

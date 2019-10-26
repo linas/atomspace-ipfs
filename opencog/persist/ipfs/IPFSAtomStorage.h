@@ -95,7 +95,7 @@ class IPFSAtomStorage : public BackingStore
 
 		std::string encodeValueToStr(const ValuePtr&);
 		std::string encodeAtomToStr(const Handle& h) {
-			return encodeValueToStr(h); }
+			return h->to_short_string(); }
 		ipfs::Json encodeAtomToJSON(const Handle&);
 
 		std::mutex _guid_mutex;
