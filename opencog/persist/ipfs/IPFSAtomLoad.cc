@@ -42,7 +42,7 @@ ipfs::Json IPFSAtomStorage::fetch_atom_dag(const std::string& cid)
 /* ================================================================ */
 
 /// Fetch the indicated atom from the IPFS CID.
-/// This will also grab and decode values. if present.
+/// This will also grab and decode values, if present.
 Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 {
 	ipfs::Json dag(fetch_atom_dag(cid));

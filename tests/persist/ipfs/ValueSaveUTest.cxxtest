@@ -715,8 +715,6 @@ void ValueSaveUTest::test_incoming()
 	gtl = gcl->getTruthValue();
 	gtv = gcv->getTruthValue();
 
-printf("duuude gtf=%s tf=%s\n", gtf->to_string().c_str(),
-tf->to_string().c_str());
 	TS_ASSERT(*gtf == *tf);
 	TS_ASSERT(*gtt == *tt);
 	TS_ASSERT(*gtl == *tl);
