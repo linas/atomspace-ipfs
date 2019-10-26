@@ -296,7 +296,7 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	if (nullptr == _as) return;
 	std::lock_guard<std::mutex> lck(_json_mutex);
 	Handle has(_as->get_atom(h));
-	_json_map.insert({has, jatom});
+	_json_map[has] = jatom;
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
