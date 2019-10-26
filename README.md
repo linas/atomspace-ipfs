@@ -246,7 +246,8 @@ updates, file-size issues. etc.
    `git checkout master-linas` and
    `mkdir build; cd build; cmake ..; make -j; sudo make install`
 
-   This needs the package "JSON for Modern C++"
+   This needs the package
+   ["JSON for Modern C++"](https://github.com/nlohmann/json):
    `sudo apt install nlohmann-json3-dev`
 
    API documentation is here:
