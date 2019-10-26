@@ -339,8 +339,8 @@ void ValueSaveUTest::test_load_by_type()
 	ValuePtr gpl = gal->getValue(gkey);
 	ValuePtr gpv = gav->getValue(gkey);
 
-printf("duuude gpt=%s pvt=%s\n", pvt->to_string().c_str(),
-tf->to_string().c_str());
+printf("duuude gpl=%s pvl=%s\n", gpl->to_string().c_str(),
+pvl->to_string().c_str());
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
 	TS_ASSERT(*gpl == *pvl);
