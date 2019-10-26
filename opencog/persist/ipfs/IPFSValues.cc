@@ -55,7 +55,9 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 
 	// Build a JSON representation of the Atom.
 	ipfs::Json jatom = encodeAtomToJSON(atom);
-	jatom["values"] = encodeValuesToJSON(atom);
+	ipfs::Json jvals = encodeValuesToJSON(atom);
+	if (0 < jvals.size())
+		jatom["values"] = jvals;
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -140,7 +142,34 @@ void IPFSAtomStorage::get_atom_values(Handle& atom, const ipfs::Json& jatom)
 
 ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 {
-	size_t pos = stv.find("(FloatValue ");
+	size_t pos = stv.find("(LinkValue");
+	if (std::string::npos != pos)
+	{
+		pos += strlen("(LinkValue");
+		std::vector<ValuePtr> vv;
+		while (pos != std::string::npos and stv[pos] != ')')
+		{
+			pos = stv.find('(', pos);
+			if (std::string::npos == pos) break;
+
+			// Find the next balanced paren, and restart there.
+			// This is not very efficient, but it works.
+			size_t epos = pos;
+			int pcnt = 1;
+			while (0 < pcnt and epos != std::string::npos)
+			{
+				char c = stv[++epos];
+				if ('(' == c) pcnt ++;
+				else if (')' == c) pcnt--;
+			}
+			if (epos == std::string::npos) break;
+			vv.push_back(decodeStrValue(stv.substr(pos, epos-pos+1)));
+			pos = epos+1;
+		}
+		return createLinkValue(vv);
+	}
+
+	pos = stv.find("(FloatValue ");
 	if (std::string::npos != pos)
 	{
 		pos += strlen("(FloatValue ");
@@ -154,16 +183,33 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 		return createFloatValue(fv);
 	}
 
-	pos = stv.find("(stv ");
+	pos = stv.find("(SimpleTruthValue ");
 	if (std::string::npos != pos)
 	{
 		size_t epos;
-		pos += strlen("(stv ");
+		pos += strlen("(SimpleTruthValue ");
 		double strength = stod(stv.substr(pos), &epos);
 		pos += epos;
 		double confidence = stod(stv.substr(pos), &epos);
 		return ValueCast(createSimpleTruthValue(strength, confidence));
 	}
+
+	pos = stv.find("(StringValue ");
+	if (std::string::npos != pos)
+	{
+		pos += strlen("(StringValue ");
+		std::vector<std::string> sv;
+		while (true)
+		{
+			pos = stv.find('\"', pos);
+			if (std::string::npos == pos) break;
+			size_t epos = stv.find('\"', pos+1);
+			sv.push_back(stv.substr(pos+1, epos-pos-1));
+			pos = epos+1;
+		}
+		return createStringValue(sv);
+	}
+
 	throw SyntaxException(TRACE_INFO, "Unknown Value %s", stv.c_str());
 }
 

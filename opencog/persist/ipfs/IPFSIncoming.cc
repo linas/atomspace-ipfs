@@ -127,19 +127,15 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 /* ================================================================ */
 /**
  * Retreive the entire incoming set of the indicated atom.
- * This fetches only teh Atoms in the incoming set, and not
- * the Values associated with them!  XXX FIXME Double check,
- * I think the intent is to also get the attached values,
- * but I'm not sure, because the spec is ill-defined on this
- * and I'm not sure what postgres is going, here.  All backends
- * should be compatible on this.
+ * This fetches the Atoms in the incoming set; the ValueSaveUTest
+ * expects the associated Values to be fetched also.
  */
 void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	rethrow();
 
+	// Get the incoming set of the atom.
 	std::string path = _atomspace_cid + "/" + h->to_short_string();
-
 	ipfs::Json dag;
 	ipfs::Client* conn = conn_pool.pop();
 	conn->DagGet(path, &dag);
@@ -150,7 +146,10 @@ void IPFSAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 	for (auto acid: iset)
 	{
 		// std::cout << "The incoming is:" << acid.dump(2) << std::endl;
-		table.add(fetch_atom(acid), false);
+		// Fetch once, to get it's type & name/outgoing
+		// Fetch a second time to get the current values.
+		Handle h(fetch_atom(acid));
+		table.add(do_fetch_atom(h), false);
 	}
 
 	_num_get_insets++;

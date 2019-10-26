@@ -14,19 +14,26 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Beta version 0.1.0
+## Beta version 0.1.1
 
 **Status**: In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
    It has numerous shortcomings, detailed below.
- * Everything works(?) Might be buggy? Only shallow testing done.
+ * System is feature-complete.  The [basic tutorials](examples) work
+   as documented.  So its enough to play around with.
+   Four unit tests (out of seven from the Atomspace-SQL test suite)
+   has been ported. Three of them pass.
  * Due to IPFS bugs with the performance of IPNS, its not currently
    usable, and so IPNS is mostly unused in this implementation.
    This means that users need to arrange other channels of
    communication for find out what the latest AtomSpace is (by sharing
    the CID in some other way, rather than sharing via IPNS).
- * Many or most operations are slow. Some could be improved
-   by better caching.  Others might need a major design overhaul.
+ * Many or most operations are slow. Like really, really slow.
+	Like, a dozen-atoms-per-second-slow. Which is unusable on a
+   production database. In a few cases, performance could be improved
+   by better caching.  In most cases, this is a fundamental limitation
+   of the current design. If might be a fundamental limitation of IPFS,
+   since IPFS is not optimal for handling very small objects.
 
 After much thought: there does not seem to be any way of mapping the
 AtomSpace into the current design of IPFS+IPNS without resorting to
