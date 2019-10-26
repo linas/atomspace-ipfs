@@ -177,7 +177,7 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 			pos = stv.find('\"', pos);
 			if (std::string::npos == pos) break;
 			size_t epos = stv.find('\"', pos+1);
-			sv.push_back(stv.substr(pos+1, epos-pos));
+			sv.push_back(stv.substr(pos+1, epos-pos-1));
 			pos = epos+1;
 		}
 		return createStringValue(sv);
