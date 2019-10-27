@@ -224,6 +224,13 @@ std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
 /**
  * Return the IPFS json of this Atom, including the current state
  * for Values and for the incoming set.
+ *
+ * XXX FIXME. This ios broken/racey. Two different threads could
+ * ask for the json, and then edit it, and then update the _json_map
+ * with the edited version, thus clobbering one-another, as the second
+ * writer wins.  We really need an atomic get-and-update for the
+ * _json_map contents.  This is (I think) the reason why DeleteUTest
+ * fails -- atom values and incoming are clobbering one-another.
  */
 ipfs::Json IPFSAtomStorage::get_atom_json(const Handle& atom)
 {
