@@ -81,6 +81,7 @@ class IPFSAtomStorage : public BackingStore
 		                              const ipfs::Json&);
 		std::mutex _json_mutex;
 		std::map<Handle, ipfs::Json> _json_map;
+		ipfs::Json get_atom_json(const Handle&);
 
 		// ---------------------------------------------
 		// Fetching of atoms.

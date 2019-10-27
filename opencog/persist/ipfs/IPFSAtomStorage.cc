@@ -222,6 +222,33 @@ std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
 }
 
 /**
+ * Return the IPFS json of this Atom, including the current state
+ * for Values and for the incoming set.
+ *
+ * XXX FIXME. This ios broken/racey. Two different threads could
+ * ask for the json, and then edit it, and then update the _json_map
+ * with the edited version, thus clobbering one-another, as the second
+ * writer wins.  We really need an atomic get-and-update for the
+ * _json_map contents.  This is (I think) the reason why DeleteUTest
+ * fails -- atom values and incoming are clobbering one-another.
+ */
+ipfs::Json IPFSAtomStorage::get_atom_json(const Handle& atom)
+{
+	// First, see if we have a cache of it.
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		auto pj = _json_map.find(atom);
+		if (_json_map.end() != pj) return pj->second;
+	}
+
+	// Not found in the cache. Build it from thin air.
+	// XXX FIXME In a proper decentralized system, we'd ask IPFS for it,
+	// because some other peer may have put it in IPFS. But we're
+	// centralized, right now, so just create it.
+	return encodeAtomToJSON(atom);
+}
+
+/**
  * Publish the AtomSpace CID to IPNS.
  *
  * We run IPNS publication in it's own thread, because it's so
@@ -292,8 +319,20 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	conn_pool.push(conn);
 
 	// Also track the current version of the json representation
-	std::lock_guard<std::mutex> lck(_json_mutex);
-	_json_map[h] = jatom;
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		_json_map[h] = jatom;
+	}
+	{
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map[h] = cid;
+	}
+#if LATER_NOT_USED_NOW
+	{
+		std::lock_guard<std::mutex> lck(_inv_mutex);
+		_ipfs_inv_map[cid] = h;
+	}
+#endif
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.

@@ -5,11 +5,7 @@
  * Copyright (c) 2008,2009,2013,2017,2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -54,7 +50,7 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	if (0 == _keyname.size()) return;
 
 	// Build a JSON representation of the Atom.
-	ipfs::Json jatom = encodeAtomToJSON(atom);
+	ipfs::Json jatom = get_atom_json(atom);
 	ipfs::Json jvals = encodeValuesToJSON(atom);
 	if (0 < jvals.size())
 		jatom["values"] = jvals;

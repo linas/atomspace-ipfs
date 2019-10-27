@@ -23,6 +23,8 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	if (0 == _keyname.size()) return;
 
 	// Obtain the JSON representation of the Atom.
+	// We could use get_atom_json() here, except the json should
+	// already be in the map, by now, right?
 	ipfs::Json jatom;
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
@@ -63,47 +65,30 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
                                          const std::string& holder)
 {
 	// std::cout << "Remove from " << atom->to_short_string()
-	//           << " inCID " << holder << std::endl;
+	//           << " in CID " << holder << std::endl;
 
-	// XXX FIXME. This is wildly, insanely inefficient. First,
-	// We get a list of all the Atoms in the current AtomSpace.
-	// We need this, because we need to find the CID of the
-	// Atom passed in.
-	std::string path = _atomspace_cid;
-	ipfs::Json lsres;
-	ipfs::Client* conn = conn_pool.pop();
-	conn->DagGet(path, &lsres);
-	conn_pool.push(conn);
-	// std::cout << "Ls Result " << lsres.dump(2) << std::endl;
-
-	// Now look for the CID of Atom
-	std::string cid_of_atom;
-	std::string name = atom->to_short_string();
-	for (const auto& item : lsres["links"])
-	{
-		// std::cout << "Item " << item.dump(2) << std::endl;
-		if (0 == name.compare(item["Name"]))
-		{
-			cid_of_atom = item["Cid"]["/"];
-			break;
-		}
-	}
-	// std::cout << "Found current Atom: " << cid_of_atom << std::endl;
-
-	if (0 == cid_of_atom.size())
-		throw RuntimeException(TRACE_INFO,
-			"Error: remove_incoming_of(): cannot find %s\n", name.c_str());
-
-	// Now that we have the cid, get the Atom, so that we can
-	// remove holder from it's incoming set.
+	// Twiddle the incoming set of atom.
 	ipfs::Json jatom;
-	conn = conn_pool.pop();
-	conn->DagGet(cid_of_atom, &jatom);
-	conn_pool.push(conn);
-	// std::cout << "The Atom:" << jatom.dump(2) << std::endl;
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		auto patom = _json_map.find(atom);
+
+		// XXX FIXME, we might not havethe json in hand, if
+		// we've never touched this atom before... in this case
+		// we need to look it up...
+		if (_json_map.end() == patom)
+			throw RuntimeException(TRACE_INFO,
+				"Error: Can't find json for %s", atom->to_string().c_str());
+		jatom = patom->second; // jatom = _json_map[atom];
+	}
 
 	// Remove the holder from the incoming set ...
-	std::set<std::string> inco = jatom["incoming"];
+	auto pinco = jatom.find("incoming");
+	if (jatom.end() == pinco)
+		throw RuntimeException(TRACE_INFO,
+			"Error: Atom is missing incoming set! WTF!?\n");
+
+	std::set<std::string> inco = *pinco; // inco = jatom["incoming"];
 	inco.erase(holder);
 	if (0 < inco.size())
 		jatom["incoming"] = inco;
@@ -113,15 +98,13 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 
 	// Store the edited Atom back into IPFS...
 	ipfs::Json result;
-	conn = conn_pool.pop();
+	ipfs::Client* conn = conn_pool.pop();
 	conn->DagPut(jatom, &result);
 	conn_pool.push(conn);
 
 	// Finally, update the Atomspace with this revised Atom.
 	std::string atoid = result["Cid"]["/"];
 	update_atom_in_atomspace(atom, atoid, jatom);
-
-	// Phew. Done.
 }
 
 /* ================================================================ */

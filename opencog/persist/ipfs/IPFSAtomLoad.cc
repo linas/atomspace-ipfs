@@ -182,7 +182,18 @@ Handle IPFSAtomStorage::do_fetch_atom(Handle &h)
 	// std::cout << "Query path = " << path << std::endl;
 	ipfs::Json dag;
 	ipfs::Client* conn = conn_pool.pop();
-	conn->DagGet(path, &dag);
+	try
+	{
+		conn->DagGet(path, &dag);
+	}
+	catch (const std::exception& ex)
+	{
+		// If we are here, its because there was no such Atom
+		// recorded in IPFS. That's a normal situation, just
+		// ignore the error.
+		conn_pool.push(conn);
+		return Handle();
+	}
 	conn_pool.push(conn);
 
 	// std::cout << "The dag is:" << dag.dump(2) << std::endl;
