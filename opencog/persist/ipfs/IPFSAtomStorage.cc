@@ -292,8 +292,20 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	conn_pool.push(conn);
 
 	// Also track the current version of the json representation
-	std::lock_guard<std::mutex> lck(_json_mutex);
-	_json_map[h] = jatom;
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		_json_map[h] = jatom;
+	}
+	{
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map[h] = cid;
+	}
+#if LATER_NOT_USED_NOW
+	{
+		std::lock_guard<std::mutex> lck(_inv_mutex);
+		_ipfs_inv_map[cid] = h;
+	}
+#endif
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.

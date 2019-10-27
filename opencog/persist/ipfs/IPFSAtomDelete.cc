@@ -24,6 +24,11 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.
+	// XXX FIXME -- we actually want to pause the queue, until this is
+	// done, in order to make sure that the operations here are fully
+	// serialized with atom stores. Perhaps the easiest way is to grab
+	// some lock...Hmmm ... which lock? a recursive lock on
+	// _atomspace_cid_mutex seems like it should do the trick...
 	flushStoreQueue();
 
 	// First, look it up.
@@ -54,11 +59,18 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 	{
 		Handle hin(fetch_atom(acid));
 		removeAtom(hin, true);
-		for (const Handle& hoth: hin->getOutgoingSet())
+	}
+
+	// Remove this atom from the incoming sets of those that
+	// it contains.
+	for (const Handle& hoth: h->getOutgoingSet())
+	{
+		std::string acid;
 		{
-			// if (*hoth != *h)
-			remove_incoming_of(hoth, acid);
+			std::lock_guard<std::mutex> lck(_guid_mutex);
+			acid = _guid_map[hoth];
 		}
+		remove_incoming_of(hoth, acid);
 	}
 
 	// Now actually remove.
