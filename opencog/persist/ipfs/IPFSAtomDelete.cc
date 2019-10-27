@@ -99,6 +99,16 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 		}
 	}
 
+	// Drop the atom from out caches
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		_json_map.erase(h);
+	}
+	{
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map.erase(h);
+	}
+
 	// Now actually remove.
 	std::string new_as_id;
 	ipfs::Client* conn = conn_pool.pop();
