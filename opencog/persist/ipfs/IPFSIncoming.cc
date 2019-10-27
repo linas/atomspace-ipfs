@@ -23,6 +23,8 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	if (0 == _keyname.size()) return;
 
 	// Obtain the JSON representation of the Atom.
+	// We could use get_atom_json() here, except the json should
+	// already be in the map, by now, right?
 	ipfs::Json jatom;
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);

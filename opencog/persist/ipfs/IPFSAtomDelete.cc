@@ -92,8 +92,7 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 			auto pcid = _guid_map.find(h);
 			if (_guid_map.end() == pcid)
 				throw RuntimeException(TRACE_INFO,
-					"Error: missing CID for %s",
-					h->to_string().c_str());
+					"Error: missing CID for %s", h->to_string().c_str());
 			acid = pcid->second; // acid = _guid_map[h];
 		}
 		for (const Handle& hoth: h->getOutgoingSet())
