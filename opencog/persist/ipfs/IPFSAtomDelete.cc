@@ -86,17 +86,18 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 	// it contains.
 	if (h->is_link())
 	{
-		for (const Handle& hoth: h->getOutgoingSet())
+		std::string acid;
 		{
-			std::string acid;
-			{
-				std::lock_guard<std::mutex> lck(_guid_mutex);
-				acid = _guid_map[hoth];
-			}
-			//if (0 == acid.size())
-			//	throw RuntimeException(TRACE_INFO, "Error: missing CID for
-			remove_incoming_of(hoth, acid);
+			std::lock_guard<std::mutex> lck(_guid_mutex);
+			auto pcid = _guid_map.find(h);
+			if (_guid_map.end() == pcid)
+				throw RuntimeException(TRACE_INFO,
+					"Error: missing CID for %s",
+					h->to_string().c_str());
+			acid = pcid->second; // acid = _guid_map[h];
 		}
+		for (const Handle& hoth: h->getOutgoingSet())
+			remove_incoming_of(hoth, acid);
 	}
 
 	// Drop the atom from out caches
