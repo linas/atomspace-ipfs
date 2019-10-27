@@ -80,6 +80,7 @@ DeleteUTest:: DeleteUTest(void)
     uri = "ipfs:///atomspace-ipfs-test";
     logger().set_level(Logger::DEBUG);
     logger().set_print_to_stdout_flag(true);
+    logger().set_sync_flag(true);
 }
 
 /*
@@ -134,14 +135,15 @@ void DeleteUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
         TSM_ASSERT("Missing truth value", tb);
         if (ta and tb)
         {
-            TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
-
             if (not ((*ta) == (*tb)))
             {
-                fprintf(stderr, "Error, truth value miscompare, "
-                    "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
+                printf("Error, truth value miscompare on %s\n"
+                    "\tma=%f mb=%f ca=%f cb=%f\n",
+                    where.c_str(),
+                    ta->get_mean(), tb->get_mean(),
+                    ta->get_confidence(), tb->get_confidence());
             }
+            TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
         }
     }
 }
@@ -155,11 +157,11 @@ void DeleteUTest::tvMiscompare(AtomPtr a, AtomPtr b, std::string where)
     TruthValuePtr tb = b->getTruthValue();
     if (ta and tb)
     {
-        TSM_ASSERT("Truth value should not match!", (*ta)!=(*tb));
+        TSM_ASSERT("Truth value should not match! " + where, (*ta)!=(*tb));
     }
     if (nullptr==ta and nullptr==tb)
     {
-        TSM_ASSERT("Truth value null!!", false);
+        TSM_ASSERT("Truth value null!! " + where, false);
     }
 }
 
@@ -255,6 +257,7 @@ void DeleteUTest::fetch_space(int idx, AtomSpace *space)
 
 void DeleteUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 {
+    dbgmsg += "-idx=" + std::to_string(idx);
     Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
     atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
 
@@ -342,7 +345,8 @@ void DeleteUTest::extract_links(int idx, AtomSpace *as)
 	as->extract_atom(hl[idx]);
 }
 
-// This should delete all the links from the database.
+// This should delete all the links from the database (and also
+// the AtomSpace)
 void DeleteUTest::delete_links(int idx, AtomSpace *as)
 {
 	as->remove_atom(hl3[idx]);
