@@ -114,14 +114,26 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 	ipfs::Client* conn = conn_pool.pop();
 	{
 		std::string name = h->to_short_string();
-		// Update the cid under a lock, as atomspace modifications
-		// can occur from multiple threads.  It's not actually the
-		// cid that matters, its the patch itself.
-		std::lock_guard<std::mutex> lck(_atomspace_cid_mutex);
-		conn->ObjectPatchRmLink(_atomspace_cid, name, &new_as_id);
-		_atomspace_cid = new_as_id;
-		std::cout << "Atomspace after removal of " << name
-		          << " is " << _atomspace_cid << std::endl;
+		try
+		{
+			// Update the cid under a lock, as atomspace modifications
+			// can occur from multiple threads.  It's not actually the
+			// cid that matters, its the patch itself.
+			std::lock_guard<std::mutex> lck(_atomspace_cid_mutex);
+			conn->ObjectPatchRmLink(_atomspace_cid, name, &new_as_id);
+			_atomspace_cid = new_as_id;
+			std::cout << "Atomspace after removal of " << name
+			          << " is " << _atomspace_cid << std::endl;
+		}
+		catch (const std::exception& ex)
+		{
+			std::cout << "Error: Atomspace " << _atomspace_cid
+			          << " does not contain " << name << std::endl;
+
+			conn_pool.push(conn);
+			throw RuntimeException(TRACE_INFO,
+				"Error: Atomsapce did not contain atom; how did that happen?\n");
+		}
 	}
 	conn_pool.push(conn);
 
