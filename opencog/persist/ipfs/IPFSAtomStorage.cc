@@ -222,6 +222,26 @@ std::string IPFSAtomStorage::get_atom_guid(const Handle& h)
 }
 
 /**
+ * Return the IPFS json of this Atom, including the current state
+ * for Values and for the incoming set.
+ */
+ipfs::Json IPFSAtomStorage::get_atom_json(const Handle& atom)
+{
+	// First, see if we have a cache of it.
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		auto pj = _json_map.find(atom);
+		if (_json_map.end() != pj) return pj->second;
+	}
+
+	// Not found in the cache. Build it from thin air.
+	// XXX FIXME In a proper decentralized system, we'd ask IPFS for it,
+	// because some other peer may have put it in IPFS. But we're
+	// centralized, right now, so just create it.
+	return encodeAtomToJSON(atom);
+}
+
+/**
  * Publish the AtomSpace CID to IPNS.
  *
  * We run IPNS publication in it's own thread, because it's so
