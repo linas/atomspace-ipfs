@@ -63,14 +63,17 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 
 	// Remove this atom from the incoming sets of those that
 	// it contains.
-	for (const Handle& hoth: h->getOutgoingSet())
+	if (h->is_link())
 	{
-		std::string acid;
+		for (const Handle& hoth: h->getOutgoingSet())
 		{
-			std::lock_guard<std::mutex> lck(_guid_mutex);
-			acid = _guid_map[hoth];
+			std::string acid;
+			{
+				std::lock_guard<std::mutex> lck(_guid_mutex);
+				acid = _guid_map[hoth];
+			}
+			remove_incoming_of(hoth, acid);
 		}
-		remove_incoming_of(hoth, acid);
 	}
 
 	// Now actually remove.
