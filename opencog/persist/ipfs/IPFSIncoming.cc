@@ -69,11 +69,24 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 	ipfs::Json jatom;
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
-		jatom = _json_map[atom];
+		auto patom = _json_map.find(atom);
+
+		// XXX FIXME, we might not havethe json in hand, if
+		// we've never touched this atom before... in this case
+		// we need to look it up...
+		if (_json_map.end() == patom)
+			throw RuntimeException(TRACE_INFO,
+				"Error: Can't find json for %s", atom->to_string().c_str());
+		jatom = patom->second; // jatom = _json_map[atom];
 	}
 
 	// Remove the holder from the incoming set ...
-	std::set<std::string> inco = jatom["incoming"];
+	auto pinco = jatom.find("incoming");
+	if (jatom.end() == pinco)
+		throw RuntimeException(TRACE_INFO,
+			"Error: Atom is missing incoming set! WTF!?\n");
+
+	std::set<std::string> inco = *pinco; // inco = jatom["incoming"];
 	inco.erase(holder);
 	if (0 < inco.size())
 		jatom["incoming"] = inco;
