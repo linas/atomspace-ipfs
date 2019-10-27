@@ -122,8 +122,6 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 			std::lock_guard<std::mutex> lck(_atomspace_cid_mutex);
 			conn->ObjectPatchRmLink(_atomspace_cid, name, &new_as_id);
 			_atomspace_cid = new_as_id;
-			std::cout << "Atomspace after removal of " << name
-			          << " is " << _atomspace_cid << std::endl;
 		}
 		catch (const std::exception& ex)
 		{
@@ -132,8 +130,10 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 
 			conn_pool.push(conn);
 			throw RuntimeException(TRACE_INFO,
-				"Error: Atomsapce did not contain atom; how did that happen?\n");
+				"Error: Atomspace did not contain atom; how did that happen?\n");
 		}
+		std::cout << "Atomspace after removal of " << name
+		          << " is " << _atomspace_cid << std::endl;
 	}
 	conn_pool.push(conn);
 
