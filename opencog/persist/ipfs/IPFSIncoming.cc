@@ -73,7 +73,7 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		auto patom = _json_map.find(atom);
 
-		// XXX FIXME, we might not havethe json in hand, if
+		// XXX FIXME, we might not have the json in hand, if
 		// we've never touched this atom before... in this case
 		// we need to look it up...
 		if (_json_map.end() == patom)
