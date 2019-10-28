@@ -114,8 +114,19 @@ void IPFSAtomStorage::init(const char * uri)
 	_publish_keep_going = false;
 	if (0 < _keyname.size())
 	{
+		// Brute force search for keys.
+		ipfs::Json key_list;
 		ipfs::Client clnt(_hostname, _port);
-		clnt.KeyFind(_keyname, &_key_cid);
+		clnt.KeyList(&key_list);
+		for (const auto& item : key_list)
+		{
+			std::string kame = item["Name"];
+			if (0 == kame.compare(_keyname))
+			{
+				_key_cid = item["Id"];
+				break;
+			}
+		}
 		if (0 < _key_cid.size())
 		{
 			std::cout << "Found existing AtomSpace key: /ipns/"
@@ -124,7 +135,7 @@ void IPFSAtomStorage::init(const char * uri)
 		else
 		{
 			// Not found; make a new one, by default.
-			clnt.KeyNew(_keyname, &_key_cid);
+			clnt.KeyGen(_keyname, "rsa", 2048, &_key_cid);
 			std::cout << "Generated AtomSpace key: /ipns/"
 			          << _key_cid << std::endl;
 		}
@@ -282,8 +293,9 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 		try
 		{
 			std::string name;
+			ipfs::Json options = {{"lifetime", "4h"}, {"ttl", "4h"}};
 			clnt.NamePublish(self->_atomspace_cid,
-			                 self->_keyname, &name, "4h", "30s");
+			                 self->_keyname, options, &name);
 			std::cout << "Published AtomSpace: " << name << std::endl;
 		}
 		catch (const std::exception& ex)

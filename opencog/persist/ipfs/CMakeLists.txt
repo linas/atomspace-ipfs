@@ -13,7 +13,7 @@ ADD_LIBRARY (persist-ipfs SHARED
 
 TARGET_LINK_LIBRARIES(persist-ipfs
 	smob
-	ipfs-api
+	ipfs-http-client
 	curl
 )
 
