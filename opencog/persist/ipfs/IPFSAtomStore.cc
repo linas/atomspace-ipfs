@@ -152,12 +152,6 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 
 	std::string id = result["Cid"]["/"];
 
-	{
-		// This is multi-threaded; update the table under a lock.
-		std::lock_guard<std::mutex> lck(_guid_mutex);
-		_guid_map.insert({h, id});
-	}
-
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
 	update_atom_in_atomspace(h, id, jatom);
 
