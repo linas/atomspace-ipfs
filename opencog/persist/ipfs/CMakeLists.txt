@@ -14,7 +14,6 @@ ADD_LIBRARY (persist-ipfs SHARED
 TARGET_LINK_LIBRARIES(persist-ipfs
 	smob
 	ipfs-http-client
-	curl
 )
 
 ADD_GUILE_EXTENSION(SCM_CONFIG persist-ipfs "opencog-ext-path-persist-ipfs")
