@@ -80,7 +80,22 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 		// We're recursive; so recurse.
 		for (auto acid: iset)
 		{
-			Handle hin(fetch_atom(acid));
+			// Given only the CID of the atom, get the handle.
+			// Use the cache, if possible.
+			Handle hin;
+			{
+				std::lock_guard<std::mutex> lck(_inv_mutex);
+				auto inp = _ipfs_inv_map.find(acid);
+				if (_ipfs_inv_map.end() == inp)
+				{
+std::cout << "Quasi-error: expected to find atom but did not!" << std::endl;
+					hin = fetch_atom(acid);
+				}
+				else
+				{
+					hin = inp->second;
+				}
+			}
 			removeAtom(hin, true);
 		}
 	}
