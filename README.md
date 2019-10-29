@@ -14,17 +14,16 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Beta version 0.1.1
+## Beta version 0.1.2
 Developed and tested with IPFS version `0.4.22-`.
 
 **Status**: In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
    It has numerous shortcomings, detailed below.
  * System is feature-complete. Four unit tests (out of seven from
-   the Atomspace-SQL test suite) has been ported. Three of them pass.
+   the Atomspace-SQL test suite) has been ported. All four of them pass.
    The [basic tutorials](examples) work as documented.  So its plenty
-   enough to play around with (you are very unlikely to hit the bug
-   in the one failing unit test!)
+   enough to play around with.
  * Due to IPFS bugs with the performance of IPNS, it is mostly unused
    in this implementation.  This means that users need to arrange other
    channels of communication for find out what the latest AtomSpace
