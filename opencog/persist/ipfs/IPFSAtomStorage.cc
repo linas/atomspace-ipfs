@@ -97,6 +97,18 @@ void IPFSAtomStorage::init(const char * uri)
 		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
 	}
 
+	// Trim trailing whitespace.  This can happen if we get the
+	// key from SchemeEval::eval() which has a bad habit of
+	// appending newline chars.
+	const std::string WHITESPACE = " \n\r\t\f\v";
+	size_t end = _atomspace_cid.find_last_not_of(WHITESPACE);
+	if (std::string::npos != end)
+		_atomspace_cid.resize(end+1);
+
+	end = _key_cid.find_last_not_of(WHITESPACE);
+	if (std::string::npos != end)
+		_key_cid.resize(end+1);
+
 	// Create pool of IPFS server connections.
 	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
@@ -211,7 +223,9 @@ void IPFSAtomStorage::resolve_atomspace(void)
 	if (0 == _key_cid.size()) return;
 
 	// Caution: as of this writing, name resolution takes
-	// exactly 60 seconds.
+	// exactly 60 seconds. This is a bug; see
+	// https://github.com/ipfs/go-ipfs/issues/3860
+	// for details.
 	std::string ipfs_path;
 	ipfs::Client* conn = conn_pool.pop();
 	conn->NameResolve(_key_cid, &ipfs_path);
@@ -259,15 +273,16 @@ ipfs::Json IPFSAtomStorage::get_atom_json(const Handle& atom)
 }
 
 /**
- * Publish the AtomSpace CID to IPNS.
+ * Use IPNS to publish the latest IPFS cid for this AtomSpace.
  *
  * We run IPNS publication in it's own thread, because it's so
  * horridly slow.  As of this writing, either 60 sec or 90 sec.
  * This is a well-known problem, see
  * https://github.com/ipfs/go-ipfs/issues/3860
  */
-void IPFSAtomStorage::publish(void)
+void IPFSAtomStorage::publish_atomspace(void)
 {
+	if (0 == _key_cid.size()) return;
 	_publish_cv.notify_one();
 }
 
@@ -386,7 +401,7 @@ void IPFSAtomStorage::flushStoreQueue()
 void IPFSAtomStorage::barrier()
 {
 	flushStoreQueue();
-	publish();
+	// publish();
 }
 
 /* ================================================================ */
@@ -436,7 +451,6 @@ void IPFSAtomStorage::kill_data(void)
 
 	// Special case for TruthValues - must always have this atom.
 	do_store_single_atom(tvpred);
-	publish();
 }
 
 /* ================================================================ */

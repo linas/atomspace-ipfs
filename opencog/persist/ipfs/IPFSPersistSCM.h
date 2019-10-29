@@ -45,6 +45,7 @@ public:
 	void do_load_atomspace(const std::string&);
 	std::string do_ipfs_atomspace(void);
 	std::string do_ipns_atomspace(void);
+	void do_publish_atomspace(void);
 	void do_resolve_atomspace(void);
 
 	void do_stats(void);

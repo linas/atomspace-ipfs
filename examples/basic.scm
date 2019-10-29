@@ -78,9 +78,15 @@
 ;     https://explore.ipld.io/#/explore/
 (ipfs-atom-cid c)
 
-; Publish it to IPNS. The new AtomSpace doesn't become visible until
-; it is published via IPNS.
-(barrier)
+; Publish it to IPNS. There are two ways to tell other users about the
+; current AtomSpace:
+; 1) Tell them, through a side channel, what the current AtomSpace CID
+;    is, and then tell them again whenever the AtomSpace changes, or
+; 2) Tell them once what the IPNS is, and then publish to IPNS. They
+;    can then resolve the IPNS entry to get the latest AtomSpace.
+; (Caution: as before, a publish can take 90 seconds; again, this is
+; a "well-known" IPNS bug that is waiting to be fixed.)
+(ipfs-publish-atomspace)
 
 ; Try again, with something more complex
 (define e
@@ -89,7 +95,7 @@
 		(List (Concept "foo") (Concept "bar"))))
 
 (store-atom e)
-(barrier)
+(ipfs-publish-atomspace)
 
 ; Likewise, view the CID for the EvaluationLink:
 (ipfs-atom-cid e)

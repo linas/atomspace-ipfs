@@ -20,8 +20,8 @@ Developed and tested with IPFS version `0.4.22-`.
 **Status**: In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
    It has numerous shortcomings, detailed below.
- * System is feature-complete. Four unit tests (out of seven from
-   the Atomspace-SQL test suite) has been ported. All four of them pass.
+ * System is feature-complete. Five unit tests (out of seven from
+   the Atomspace-SQL test suite) has been ported. All five of them pass.
    The [basic tutorials](examples) work as documented.  So its plenty
    enough to play around with.
  * Due to IPFS bugs with the performance of IPNS, it is mostly unused

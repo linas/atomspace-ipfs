@@ -13,7 +13,8 @@
 
 (export ipfs-clear-stats ipfs-close ipfs-open ipfs-stats
 	ipfs-atom-cid ipfs-fetch-atom ipfs-load-atomspace
-	ipfs-atomspace-cid ipns-atomspace-cid ipfs-resolve-atomspace)
+	ipfs-atomspace-cid ipns-atomspace-cid
+	ipfs-publish-atomspace ipfs-resolve-atomspace)
 
 (set-procedure-property! ipfs-clear-stats 'documentation
 "
@@ -125,12 +126,28 @@
      scheme command `(ipfs-atomspace-cid)` is returning.
 ")
 
+(set-procedure-property! ipfs-publish-atomspace 'documentation
+"
+ ipfs-publish-atomspace - Publish the current AtomSpace to IPNS.
+     This allows other users to discover the current AtomSpace CID
+     by performing an IPNS resolution. Use the
+     `(ipfs-resolve-atomspace)` to perform this resolution.
+
+     Caution: In the current version of IPFS, publishing can take
+     90 seconds or more. This is a well-known IPFS bug; see
+     https://github.com/ipfs/go-ipfs/issues/3860
+     for current status.
+")
+
 (set-procedure-property! ipfs-resolve-atomspace 'documentation
 "
  ipfs-resolve-atomspace - Perform IPNS resolution to get the
-     current CID of the current AtomSpace. Once resolved, Atoms
-     in that AtomSpace can be directly accessed.
+     current CID of the current AtomSpace. The IPNS name must
+     have been previously published by using the
+     `(ipfs-publish-atomspace)` function.
 
      Caution: In the current version of IPFS, resolution can take
-     60 seconds of more. This is a well-known IPFS bug.
+     60 seconds or more. This is a well-known IPFS bug; see
+     https://github.com/ipfs/go-ipfs/issues/3860
+     for current status.
 ")
