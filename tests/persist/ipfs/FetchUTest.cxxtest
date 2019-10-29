@@ -141,7 +141,8 @@ void FetchUTest::test_stuff(void)
 	delete _as;
 	_as = new AtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
-	eval->eval("(ipfs-open \"ipfs://" + final_atomspace_cid + "\")");
+	eval->eval(ipfs_open);
+	eval->eval("(ipfs-resolve-atomspace)");
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
 
 	// The above should NOT update the TV of (Concept "AAA")
