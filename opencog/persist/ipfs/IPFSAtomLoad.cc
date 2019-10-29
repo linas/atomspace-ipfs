@@ -59,7 +59,6 @@ Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 	// XXX FIXME well, we *should* do this here, except that we
 	// don't have the AtomSpace version of the handle yet.
 	// We want to use that. So maybe later...
-	// update_atom_in_atomspace(h, cid, dag);
 
 	return h;
 }

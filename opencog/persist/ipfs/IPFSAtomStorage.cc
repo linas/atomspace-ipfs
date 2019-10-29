@@ -95,6 +95,8 @@ void IPFSAtomStorage::init(const char * uri)
 		_key_cid = &_keyname[sizeof("ipns/")];
 		_keyname.clear();
 		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
+		// Well, we can't, or don't want to, because IPNS is too
+		// slow. Let the user decide when to resolve.
 	}
 
 	// Trim trailing whitespace.  This can happen if we get the
@@ -347,11 +349,16 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 		// Store the current cid for this atom; this is the cid
 		// of the atom that has values attached to it.
 		std::lock_guard<std::mutex> lck(_atom_cid_mutex);
+
+		auto old_cid = _atom_cid_map.find(h);
 		_atom_cid_map[h] = cid;
-	}
-	{
-		// XXX FIXME remove the old cid first...
-		std::lock_guard<std::mutex> lck(_inv_mutex);
+
+		std::lock_guard<std::mutex> ilck(_inv_mutex);
+
+		// Erase the old cid, sso that it doesn't eat up space.
+		if (_atom_cid_map.end() != old_cid)
+			_ipfs_inv_map.erase(old_cid->second);
+
 		_ipfs_inv_map[cid] = h;
 	}
 }
