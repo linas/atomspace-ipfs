@@ -5,15 +5,13 @@ LINK_LIBRARIES(
     atomspace
 )
 
-
+# The seven unit tests, ported over from the
+# atomspace/persist/sql/multi-driver unit tests.
 ADD_CXXTEST(BasicSaveUTest)
 ADD_CXXTEST(ValueSaveUTest)
 ADD_CXXTEST(PersistUTest)
 ADD_CXXTEST(DeleteUTest)
 ADD_CXXTEST(MultiPersistUTest)
-
-# The below still need to be ported from atomspace/sql
-# ADD_CXXTEST(MultiUserUTest)
-
+ADD_CXXTEST(MultiUserUTest)
 ADD_CXXTEST(FetchUTest)
 TARGET_LINK_LIBRARIES(FetchUTest execution)
