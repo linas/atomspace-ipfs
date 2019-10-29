@@ -2,6 +2,8 @@
  * tests/persist/ipfs/FetchUTest.cxxtest
  *
  * Test atom fetch semantics.  Assumes PersistUTest is passing.
+ * Ported over from original unit test at
+ * tests/persist/sql/multi-driver/FetchUTest.cxxtest
  *
  * Copyright (C) 2017,2019 Linas Vepstas <linasvepstas@gmail.com>
  * SPDX-License-Identifier: AGPL-3.0-or-later

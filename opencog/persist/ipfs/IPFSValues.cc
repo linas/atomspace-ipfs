@@ -49,6 +49,8 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	// No publication of Values, if there's no AtomSpace key.
 	if (0 == _keyname.size()) return;
 
+	bool have_values = false;
+
 	// Atomic update of cached json
 	ipfs::Json jatom;
 	{
@@ -61,9 +63,29 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 
 		ipfs::Json jvals = encodeValuesToJSON(atom);
 		if (0 < jvals.size())
-			jatom["values"] = jvals;
-		_json_map[atom] = jatom;
+		{
+			have_values = true;
+
+			// If there aren't pre-existing values, then just
+			// publish the new ones. Else patch them into place.
+			auto pvals = jatom.find("values");
+			if (jatom.end() == pvals)
+			{
+				jatom["values"] = jvals;
+			}
+			else
+			{
+				ipfs::Json new_vals = *pvals;
+				for (const auto& [jkey, jvalue]: jvals.items())
+					new_vals[jkey] = jvalue;
+
+				jatom["values"] = new_vals;
+			}
+			_json_map[atom] = jatom;
+		}
 	}
+
+	if (not have_values) return;
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -72,8 +94,8 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	conn_pool.push(conn);
 
 	std::string atoid = result["Cid"]["/"];
-	std::cout << "Valued Atom: " << encodeAtomToStr(atom)
-	          << " CID: " << atoid << std::endl;
+	// std::cout << "Valued Atom: " << encodeAtomToStr(atom)
+	//          << " CID: " << atoid << std::endl;
 
    // Update the atomspace, so that it holds the new value.
    update_atom_in_atomspace(atom, atoid);

@@ -57,8 +57,8 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	conn_pool.push(conn);
 
 	std::string atoid = result["Cid"]["/"];
-	std::cout << "Incoming Atom: " << encodeAtomToStr(atom)
-	          << " CID: " << atoid << std::endl;
+	// std::cout << "Incoming Atom: " << encodeAtomToStr(atom)
+	//          << " CID: " << atoid << std::endl;
 
 	update_atom_in_atomspace(atom, atoid);
 }
