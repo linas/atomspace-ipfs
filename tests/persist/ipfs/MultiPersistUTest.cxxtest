@@ -207,6 +207,13 @@ void MultiPersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     h4[idx]->setTruthValue(stv4);
     n4[idx] = NodeCast(h4[idx]);
 
+    // We need to store these, as we will test the fetch of thier
+    // values just a little while later.
+    as->store_atom(h1[idx]);
+    as->store_atom(h2[idx]);
+    as->store_atom(h3[idx]);
+    as->store_atom(h4[idx]);
+
     HandleSeq hvec;
     hvec.push_back(h1[idx]);
     hvec.push_back(h2[idx]);
@@ -365,7 +372,7 @@ void MultiPersistUTest::test_atomspace(void)
 
     TSM_ASSERT("Persist Module not loaded", _pm);
 
-    printf("Start creating %d theads\n", n_threads);
+    printf("Start creating %d threads\n", n_threads);
 
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
