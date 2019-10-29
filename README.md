@@ -294,7 +294,7 @@ updates, file-size issues. etc.
    API documentation is here:
    [`https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`](https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC)
    and here:
-   [`https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`](https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html).
+   [`https://vasild.github.io/cpp-ipfs-http-client/classipfs_1_1Client.html`](https://vasild.github.io/cpp-ipfs-http-client/classipfs_1_1Client.html).
 
 ## Building
 Building is just like that for any other OpenCog component.
