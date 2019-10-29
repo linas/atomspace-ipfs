@@ -53,8 +53,8 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 			Handle hin;
 			{
 				std::lock_guard<std::mutex> lck(_inv_mutex);
-				auto inp = _ipfs_inv_map.find(guid);
-				if (_ipfs_inv_map.end() == inp)
+				auto inp = _guid_inv_map.find(guid);
+				if (_guid_inv_map.end() == inp)
 				{
 std::cout << "Quasi-error: expected to find atom but did not!" << std::endl;
 					hin = fetch_atom(guid);

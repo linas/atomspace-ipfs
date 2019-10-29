@@ -85,14 +85,14 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 	{
 		// This is multi-threaded; access under a lock
 		std::unique_lock<std::mutex> lck(_inv_mutex);
-		auto hiter = _ipfs_inv_map.find(guid);
+		auto hiter = _guid_inv_map.find(guid);
 		lck.unlock();
-		if (_ipfs_inv_map.end() == hiter)
+		if (_guid_inv_map.end() == hiter)
 		{
 			Handle hout(fetch_atom(guid));
 			oset.push_back(hout);
 			std::lock_guard<std::mutex> lck(_inv_mutex);
-			_ipfs_inv_map.insert({guid, hout});
+			_guid_inv_map.insert({guid, hout});
 		}
 		else
 			oset.push_back(hiter->second);

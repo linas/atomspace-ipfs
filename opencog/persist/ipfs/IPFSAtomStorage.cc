@@ -432,7 +432,7 @@ void IPFSAtomStorage::kill_data(void)
 
 	_guid_map.clear();
 	_atom_cid_map.clear();
-	_ipfs_inv_map.clear();
+	_guid_inv_map.clear();
 	_json_map.clear();
 
 	std::string text = "AtomSpace " + _uri;
