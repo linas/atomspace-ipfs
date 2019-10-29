@@ -30,6 +30,7 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	// duration of the json edit.
 	ipfs::Json jatom;
 	{
+		std::string holder_guid = get_atom_guid(holder);
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		jatom = _json_map.find(atom)->second;
 
@@ -39,12 +40,12 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 		{
 			// Is the atom already a part of the incoming set?
 			// If so, then there's nothing to do.
-			auto havit = incli->find(get_atom_guid(holder));
+			auto havit = incli->find(holder_guid);
 			if (incli->end() != havit) return;
 			jinco = *incli;
 		}
 
-		jinco.push_back(get_atom_guid(holder));
+		jinco.push_back(holder_guid);
 		jatom["incoming"] = jinco;
 		_json_map[atom] = jatom;
 	}
