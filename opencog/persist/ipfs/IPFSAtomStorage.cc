@@ -311,8 +311,7 @@ void IPFSAtomStorage::publish_thread(IPFSAtomStorage* self)
 }
 
 void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
-                                               const std::string& cid,
-                                               const ipfs::Json& jatom)
+                                               const std::string& cid)
 {
 	std::string label(encodeAtomToStr(h));
 
@@ -330,11 +329,6 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	}
 	conn_pool.push(conn);
 
-	// Also track the current version of the json representation
-	{
-		std::lock_guard<std::mutex> lck(_json_mutex);
-		_json_map[h] = jatom;
-	}
 	{
 		std::lock_guard<std::mutex> lck(_guid_mutex);
 		_guid_map[h] = cid;

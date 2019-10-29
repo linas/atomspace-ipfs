@@ -49,11 +49,21 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	// No publication of Values, if there's no AtomSpace key.
 	if (0 == _keyname.size()) return;
 
-	// Build a JSON representation of the Atom.
-	ipfs::Json jatom = get_atom_json(atom);
-	ipfs::Json jvals = encodeValuesToJSON(atom);
-	if (0 < jvals.size())
-		jatom["values"] = jvals;
+	// Atomic update of cached json
+	ipfs::Json jatom;
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		const auto& pj = _json_map.find(atom);
+		if (_json_map.end() == pj)
+			jatom = get_atom_json(atom);
+		else
+			jatom = pj->second;
+
+		ipfs::Json jvals = encodeValuesToJSON(atom);
+		if (0 < jvals.size())
+			jatom["values"] = jvals;
+		_json_map[atom] = jatom;
+	}
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -64,6 +74,9 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 	std::string atoid = result["Cid"]["/"];
 	std::cout << "Valued Atom: " << encodeAtomToStr(atom)
 	          << " CID: " << atoid << std::endl;
+
+   // Update the atomspace, so that it holds the new value.
+   update_atom_in_atomspace(atom, atoid);
 
 	// The code below is ifdefed out. In a better world, we would
 	// publish just the IPNS name of where to find the atom values,
@@ -109,10 +122,6 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		          << ex.what() << std::endl;
 	}
 	conn_pool.push(conn);
-#else // LATER_WHEN_IPNS_WORKS
-
-   // Update the atomspace, so that it holds the new value.
-   update_atom_in_atomspace(atom, atoid, jatom);
 #endif // LATER_WHEN_IPNS_WORKS
 }
 /* ================================================================== */

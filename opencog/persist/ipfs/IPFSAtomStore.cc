@@ -101,7 +101,10 @@ bool IPFSAtomStorage::guid_not_yet_stored(const Handle& h)
 
 /* ================================================================ */
 
-/// Convert a single C++ Atom into a Json expression.
+/// Convert a single C++ Atom into a json expression.
+/// But only the minimalist Atom itself, and not any Values,
+/// nor any of it's incoming set. So the resulting Json is
+/// globally-unique.
 ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 {
 	// The minimalist Atom definition, as json.
@@ -135,6 +138,7 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 /**
  * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
+ * Values attached to the Atom are not stored!
  * The store is performed synchronously (in the calling thread).
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
@@ -153,7 +157,14 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	std::string id = result["Cid"]["/"];
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	update_atom_in_atomspace(h, id, jatom);
+	update_atom_in_atomspace(h, id);
+
+	// Cache the json, but only if we don't already have a version of it.
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		if (_json_map.end() == _json_map.find(h))
+			_json_map[h] = jatom;
+	}
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
 
