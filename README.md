@@ -28,9 +28,9 @@ Developed and tested with IPFS version `0.4.22-`.
    everything works, as long as only one user at a time is modifying
    the AtomSpace contents. Multiple users *could* edit the same
    AtomSpace, *if* they were careful to exchange with each-other what
-   thier latest CID was. Otherwise, each user ends up forking the
+   their latest CID was. Otherwise, each user ends up forking the
    AtomSpace, and the forks never get merged back together again.
-   This is a design flaw: the AtomSpce is not actually "decentralized"
+   This is a design flaw: the AtomSpace is not actually "decentralized"
    in the current design, and thus can be forked. See comments below.
  * Due to IPFS bugs with the performance of IPNS, it is mostly unused
    in this implementation.  This means that users need to arrange other
@@ -88,7 +88,7 @@ There are several bugs that are known, but are problematic to fix:
    (lost Atom inserts, deletes, or lost changes of TruthValues or
    other Values.)
  * Unsafe access to _atomspace_cid from multiple threads.
- * Potential crashes if user manipulates non-existant Atoms.(?)
+ * Potential crashes if user manipulates non-existent Atoms.(?)
  * Atom removal is a particularly heavy-weight operation, due
    to heavy interaction with incoming sets.
 
@@ -128,7 +128,7 @@ install mechanisms are the same.
 * The first two bullets are satisfied by writing the Atom type and
   it's name (if its a Node) as text into a file. For Links, the
   outgoing set can be placed in the links[] json member. These will
-  be automatically hashed by the IPFS subsystem, deliviering a true
+  be automatically hashed by the IPFS subsystem, delivering a true
   globally unique ID (the CID) for the Atom.
 
 * Each read-only AtomSpace corresponds to a directory, so that each
@@ -253,7 +253,7 @@ updates, file-size issues. etc.
    Uh, no, actually, you need the extended, updated version, here:
    [`https://github.com/linas/cpp-ipfs-api`](https://github.com/linas/cpp-ipfs-api)
    and and so then
-   `git cline https://github.com/linas/cpp-ipfs-api` and
+   `git clone https://github.com/linas/cpp-ipfs-api` and
    `git checkout master-linas` and
    `mkdir build; cd build; cmake ..; make -j; sudo make install`
 
