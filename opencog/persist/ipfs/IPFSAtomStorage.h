@@ -66,7 +66,6 @@ class IPFSAtomStorage : public BackingStore
 		std::condition_variable _publish_cv;
 		bool _publish_keep_going;
 		static void publish_thread(IPFSAtomStorage*);
-		void publish(void);
 
 		// The Main IPNS key under which to publish the AtomSpace.
 		std::string _keyname;
