@@ -65,7 +65,22 @@ void IPFSAtomStorage::store_atom_values(const Handle& atom)
 		if (0 < jvals.size())
 		{
 			have_values = true;
-			jatom["values"] = jvals;
+
+			// If there aren't pre-existing values, then just
+			// publish the new ones. Else patch them into place.
+			auto pvals = jatom.find("values");
+			if (jatom.end() == pvals)
+			{
+				jatom["values"] = jvals;
+			}
+			else
+			{
+				ipfs::Json new_vals = *pvals;
+				for (const auto& [jkey, jvalue]: jvals.items())
+					new_vals[jkey] = jvalue;
+
+				jatom["values"] = new_vals;
+			}
 			_json_map[atom] = jatom;
 		}
 	}
