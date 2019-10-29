@@ -1,8 +1,8 @@
 # atomspace-ipfs
-IPFS backend to the AtomSpace.
-https://github.com/opencog/atomspace
+[IPFS](https://ipfs.io/) backend to the [AtomSpace](https://github.com/opencog/atomspace).
 
-The goal is to be able to share AtomSpace contents via the IPFS network.
+The goal is to be able to share AtomSpace contents via the
+InterPlanetary File System (IPFS) network.
 
 ## The AtomSpace
 The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
