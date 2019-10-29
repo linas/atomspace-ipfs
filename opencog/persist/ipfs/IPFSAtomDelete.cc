@@ -24,40 +24,9 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.
-	// XXX FIXME -- we actually want to pause the queue, until this is
-	// done, in order to make sure that the operations here are fully
-	// serialized with atom stores. Perhaps the easiest way is to grab
-	// some lock...Hmmm ... which lock? a recursive lock on
-	// _atomspace_cid_mutex seems like it should do the trick...
 	flushStoreQueue();
 
 	ipfs::Json jatom;
-#if DONT_CACHE_INSTEAD_GET_IT_FROM_IPFS
-	// The code ifdefed here works, when it was last tested ...
-	// but it is faster if we look up the atom in our own cache.
-	// So the ifdef just uses the local cache.
-	// First, look it up.
-	std::string name = h->to_short_string();
-	std::string path = _atomspace_cid + "/" + name;
-	ipfs::Client* conn = conn_pool.pop();
-
-	// Delete can fail if Atom is not in the AtomSpace.
-	// In this case, there's nothing to be done.
-	try
-	{
-		conn->DagGet(path, &jatom);
-	}
-	catch (const std::exception &ex)
-	{
-		conn_pool.push(conn);
-		return;
-	}
-	conn_pool.push(conn);
-
-	// The jatom should be identical to what is in _json_map,
-	// if our code is actually correct. We could test this here,
-	// if we wanted to...
-#else // DONT_CACHE_INSTEAD_GET_IT_FROM_IPFS
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		const auto& ptr = _json_map.find(h);
@@ -67,7 +36,6 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 
 		jatom = ptr->second;
 	}
-#endif // DONT_CACHE_INSTEAD_GET_IT_FROM_IPFS
 
 	auto pinc = jatom.find("incoming");
 	if (jatom.end() != pinc)
