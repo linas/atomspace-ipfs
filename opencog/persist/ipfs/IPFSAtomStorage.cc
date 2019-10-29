@@ -97,6 +97,18 @@ void IPFSAtomStorage::init(const char * uri)
 		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
 	}
 
+	// Trim trailing whitespace.  This can happen if we get the
+	// key from SchemeEval::eval() which has a bad habit of
+	// appending newline chars.
+	const std::string WHITESPACE = " \n\r\t\f\v";
+	size_t end = _atomspace_cid.find_last_not_of(WHITESPACE);
+	if (std::string::npos != end)
+		_atomspace_cid.resize(end+1);
+
+	end = _key_cid.find_last_not_of(WHITESPACE);
+	if (std::string::npos != end)
+		_key_cid.resize(end+1);
+
 	// Create pool of IPFS server connections.
 	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
