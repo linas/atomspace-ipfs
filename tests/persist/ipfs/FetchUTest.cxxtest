@@ -134,6 +134,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
 	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
 	eval->eval("(store-atomspace)");
+	eval->eval("(ipfs-publish-atomspace)");
 	std::string final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
 	printf("Final atomspace CID=>>%s<<\n", final_atomspace_cid.c_str());
 	eval->eval("(ipfs-close)");
@@ -166,6 +167,7 @@ void FetchUTest::test_stuff(void)
 	// Saving everything should not crash.  It should, however,
 	// change the TV on (Concept "BBB") back to DEFAULT_TV.
 	eval->eval("(store-atomspace)");
+	eval->eval("(ipfs-publish-atomspace)");
 	final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
 	eval->eval("(ipfs-close)");
 
