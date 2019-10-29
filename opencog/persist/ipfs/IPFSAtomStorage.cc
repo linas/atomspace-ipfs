@@ -95,6 +95,8 @@ void IPFSAtomStorage::init(const char * uri)
 		_key_cid = &_keyname[sizeof("ipns/")];
 		_keyname.clear();
 		// XXX TODO Maybe we should IPNS resolve the atomspace now!?
+		// Well, we can't, or don't want to, because IPNS is too
+		// slow. Let the user decide when to resolve.
 	}
 
 	// Trim trailing whitespace.  This can happen if we get the
@@ -349,11 +351,6 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 		std::lock_guard<std::mutex> lck(_atom_cid_mutex);
 		_atom_cid_map[h] = cid;
 	}
-	{
-		// XXX FIXME remove the old cid first...
-		std::lock_guard<std::mutex> lck(_inv_mutex);
-		_ipfs_inv_map[cid] = h;
-	}
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.
@@ -435,7 +432,7 @@ void IPFSAtomStorage::kill_data(void)
 
 	_guid_map.clear();
 	_atom_cid_map.clear();
-	_ipfs_inv_map.clear();
+	_guid_inv_map.clear();
 	_json_map.clear();
 
 	std::string text = "AtomSpace " + _uri;

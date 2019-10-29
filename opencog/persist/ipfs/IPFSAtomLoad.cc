@@ -49,17 +49,10 @@ Handle IPFSAtomStorage::fetch_atom(const std::string& cid)
 	Handle h(decodeJSONAtom(dag));
 	get_atom_values(h, dag);
 
-	// Cache it ... so that outgoing-set fetches run faster.
-	{
-		std::lock_guard<std::mutex> lck(_inv_mutex);
-		_ipfs_inv_map.insert({cid, h});
-	}
-
-	// Update the local json cache too.
+	// Update the local json cache.
 	// XXX FIXME well, we *should* do this here, except that we
 	// don't have the AtomSpace version of the handle yet.
 	// We want to use that. So maybe later...
-	// update_atom_in_atomspace(h, cid, dag);
 
 	return h;
 }
@@ -84,15 +77,23 @@ Handle IPFSAtomStorage::decodeJSONAtom(const ipfs::Json& atom)
 	if (not nameserver().isLink(t))
 		throw RuntimeException(TRACE_INFO, "Bad Atom JSON! %s\n", atom.dump(2));
 
+	// The json representation for outgoing always holds guid
+	// for the atom (i.e. the atom without values on it) and
+	// never the CID (the atom with values on it).
 	HandleSeq oset;
-	for (const std::string& cid: atom["outgoing"])
+	for (const std::string& guid: atom["outgoing"])
 	{
 		// This is multi-threaded; access under a lock
 		std::unique_lock<std::mutex> lck(_inv_mutex);
-		auto hiter = _ipfs_inv_map.find(cid);
+		auto hiter = _guid_inv_map.find(guid);
 		lck.unlock();
-		if (_ipfs_inv_map.end() == hiter)
-			oset.push_back(fetch_atom(cid));
+		if (_guid_inv_map.end() == hiter)
+		{
+			Handle hout(fetch_atom(guid));
+			oset.push_back(hout);
+			std::lock_guard<std::mutex> lck(_inv_mutex);
+			_guid_inv_map.insert({guid, hout});
+		}
 		else
 			oset.push_back(hiter->second);
 	}
