@@ -209,6 +209,16 @@ and install mechanisms are the same.
       scalable. There's conflict resolution issues if there are multiple
       updaters.
 
+    Status:
+    - The above was NOT followed, in that IPNS was avoided. Instead,
+      there is a master AtomSpace file containing only IPFS CID's for
+      Valuations.
+
+* Design Alternative B: Perhaps it is possible to store mutable values
+  using the DHT API directly?  This would also allow alpha-conversion
+  issues to be handled (as we'd alpha-convert to a unique combinator
+  form, and hash only that.)
+
 * Q: How to load the incoming set of an Atom?
   Currently, the incoming set of an Atom is stored as part of the
   mutable version of that Atom, and can therefore be fetched. The
@@ -226,7 +236,8 @@ and install mechanisms are the same.
   usual alpha-renaming techniques. But in a multi-user setup, this will
   surely lead to distinct-but-alpha-equivalent Atoms. The core problem
   is that we cannot tell IPFS to skip certain parts of the file, when
-  computing the content hash.
+  computing the content hash. Maybe this is possible with direct DHT
+  access?
 
 ## IPNS++
 It currently appears to be impossible to map the AtomSpace into IPFS
