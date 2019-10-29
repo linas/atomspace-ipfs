@@ -161,6 +161,10 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 		std::lock_guard<std::mutex> lck(_guid_mutex);
 		_guid_map[h] = guid;
 	}
+	{
+		std::lock_guard<std::mutex> lck(_inv_mutex);
+		_ipfs_inv_map[guid] = h;
+	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
 	update_atom_in_atomspace(h, guid);
