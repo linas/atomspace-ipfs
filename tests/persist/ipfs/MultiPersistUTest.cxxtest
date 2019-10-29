@@ -374,8 +374,6 @@ void MultiPersistUTest::test_atomspace(void)
 
     for (std::thread& t : thread_pool) t.join();
     printf("Done joining threads\n");
-    printf("AtomSpace CID is %s\n", _pm->do_ipfs_atomspace().c_str());
-    printf("===============================================\n");
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the IPFS storage, though; to do that, they must be deleted, not
@@ -384,6 +382,9 @@ void MultiPersistUTest::test_atomspace(void)
     _as->barrier();
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+
+    printf("AtomSpace CID is %s\n", _pm->do_ipfs_atomspace().c_str());
+    printf("===============================================\n");
 
     int i, off;
 #define NATS 8
