@@ -1,11 +1,12 @@
 # atomspace-ipfs
-[IPFS](https://ipfs.io/) backend to the [AtomSpace](https://github.com/opencog/atomspace).
+[IPFS](https://ipfs.io/) driver backend to the
+[AtomSpace](https://github.com/opencog/atomspace).
 
 The code here is a backend driver to the AtomSpace graph database,
 enabling AtomSpace contents to be shared via the InterPlanetary
 File System (IPFS) network.
 
-#### The AtomSpace
+### The AtomSpace
 The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
 (hyper-)graph database whose nodes and links are called
 ["Atoms"](https://wiki.opencog.org/w/Atom). Each (immutable) Atom has
@@ -15,7 +16,7 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-#### IPFS
+### IPFS
 IPFS, the InterPlanetary File System, is an internet-wide
 globally-accesible file system, built on top of a distributed hash
 table for addressing files by content, wherever they may be located
@@ -135,16 +136,16 @@ and install mechanisms are the same.
 
 * The first two bullets are satisfied by writing the Atom type and
   it's name (if its a Node) as text into a file. For Links, the
-  outgoing set can be placed in the IPLD links[] json element. These
+  outgoing set can be placed in the IPLD `links[]` json element. These
   will be automatically hashed by the IPFS subsystem, delivering a true
   globally unique ID (the CID) for the Atom, exactly as desired.
 
 * Each read-only AtomSpace corresponds to a directory, so that each
-  Atom appears in the links[] json member of the directory.  Updated
+  Atom appears in the `links[]` json member of the directory.  Updated
   AtomSpaces are published on IPNS, so that a read-write AtomSpace
   corresponds to a unique key (the key used to generate the IPNS name).
   That is, when an Atom is added to/removed from the Atomspace, the
-  links[] list is modified to add/remove that Atom, thus creating a
+  `links[]` list is modified to add/remove that Atom, thus creating a
   new IPFS CID. Then IPNS is updated to point at this new AtomSpace
   CID.  The good news: one knows *exactly* which version of an AtomSpace
   one is working with (this is very unlike the current AtomSpace!)
@@ -155,41 +156,41 @@ and install mechanisms are the same.
   the most-recently-resolved values.
 
 * Design alternative A:
-    -- Every Atom has a corresponding PKI key. So, millions of keys.
-       The key name is globally unique: it is just the name of the
-       AtomSpace, followed by the scheme string of the Atom.
-    -- The private part of the PKI key is held by the key-creator.
-       It stays private, unless shared.
-    -- The AtomSpace is a single file, listing all of the Atoms in it,
-       together with all of the public keys for each Atom. This means
-       that the AtomSpace is centralized.
-    -- If a user wants to find the current Valuation of an Atom,
-       they must:
-       ++ obtain the AtomSpace file somehow.
-       ++ Look up the Atom in that file, if present.
-       ++ Examine the public key of that Atom.
-       ++ Perform the IPNS lookup for that key.
-       ++ Fetch the file corresponding to the CID that IPNS returned.
-       ++ Parse the file, extract the desired Value.
-    -- Incoming sets are stored along with the Valuation file.
-       (Except that this is pointless, because there is no way of
-       knowing the CID of this file, unless one first loads all of
-       the AtomSpace, in which case the loading of the incoming set is
-       pointless...)
-    -- If a user wants to change (update) the Valuation of a Atom,
-       they must:
-       ++ Obtain the private key for that Atom/Atomspace combination,
-          by asking someone for it.
-       ++ Update the Valuation file.
-       ++ IPNS publish the new file.
-       Note that the updates to the IncomingSet are conflict-prone. So
-       a CRDT format for IncomingSets is required.
+    - Every Atom has a corresponding PKI key. So, millions of keys.
+      The key name is globally unique: it is just the name of the
+      AtomSpace, followed by the scheme string of the Atom.
+    - The private part of the PKI key is held by the key-creator.
+      It stays private, unless shared.
+    - The AtomSpace is a single file, listing all of the Atoms in it,
+      together with all of the public keys for each Atom. This means
+      that the AtomSpace is centralized.
+    - If a user wants to find the current Valuation of an Atom,
+      they must:
+      + obtain the AtomSpace file somehow.
+      + Look up the Atom in that file, if present.
+      + Examine the public key of that Atom.
+      + Perform the IPNS lookup for that key.
+      + Fetch the file corresponding to the CID that IPNS returned.
+      + Parse the file, extract the desired Value.
+    - Incoming sets are stored along with the Valuation file.
+      (Except that this is pointless, because there is no way of
+      knowing the CID of this file, unless one first loads all of
+      the AtomSpace, in which case the loading of the incoming set is
+      pointless...)
+    - If a user wants to change (update) the Valuation of a Atom,
+      they must:
+      + Obtain the private key for that Atom/Atomspace combination,
+         by asking someone for it.
+      + Update the Valuation file.
+      + IPNS publish the new file.
+      Note that the updates to the IncomingSet are conflict-prone. So
+      a CRDT format for IncomingSets is required.
 
     Issues:
-    -- Publishing a single large AtomSpace file is ugly; it prevents
-       simultaneous, high-speed updates. It's centralized and not
-       scalable. There's conflict resolution issues if there are multiple
-       updaters.
+    - Publishing a single large AtomSpace file is ugly; it prevents
+      simultaneous, high-speed updates. It's centralized and not
+      scalable. There's conflict resolution issues if there are multiple
+      updaters.
 
 * Q: How to load the incoming set of an Atom?
   Currently, the incoming set of an Atom is stored as part of the
