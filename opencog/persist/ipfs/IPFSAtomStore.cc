@@ -165,14 +165,14 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
 	update_atom_in_atomspace(h, guid);
 
-	// Cache the json, but only if we don't already have a version of it.
-	// Hmm, we should always be starting out clean here...
+	// Cache the json, but only if we don't already have a version
+	// of it. I guess that there is a very slight chance that some
+	// other thread is racing, and maybe its twiddling the json
+	// also. We don't want to clobber that with this earlier version.
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		if (_json_map.end() == _json_map.find(h))
 			_json_map[h] = jatom;
-		else
-			throw RuntimeException(TRACE_INFO, "Unexpected existing json!");
 	}
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
