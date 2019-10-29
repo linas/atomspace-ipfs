@@ -330,10 +330,13 @@ void IPFSAtomStorage::update_atom_in_atomspace(const Handle& h,
 	conn_pool.push(conn);
 
 	{
-		std::lock_guard<std::mutex> lck(_guid_mutex);
-		_guid_map[h] = cid;
+		// Store the current cid for this atom; this is the cid
+		// of the atom that has values attached to it.
+		std::lock_guard<std::mutex> lck(_atom_cid_mutex);
+		_atom_cid_map[h] = cid;
 	}
 	{
+		// XXX FIXME remove the old cid first...
 		std::lock_guard<std::mutex> lck(_inv_mutex);
 		_ipfs_inv_map[cid] = h;
 	}
@@ -417,6 +420,8 @@ void IPFSAtomStorage::kill_data(void)
 	rethrow();
 
 	_guid_map.clear();
+	_atom_cid_map.clear();
+	_ipfs_inv_map.clear();
 
 	std::string text = "AtomSpace " + _uri;
 	ipfs::Json result;

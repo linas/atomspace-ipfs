@@ -100,6 +100,9 @@ class IPFSAtomStorage : public BackingStore
 		std::mutex _guid_mutex;
 		std::map<Handle, std::string> _guid_map;
 
+		std::mutex _atom_cid_mutex;
+		std::map<Handle, std::string> _atom_cid_map;
+
 		// The inverted map.
 		std::mutex _inv_mutex;
 		std::map<std::string, Handle> _ipfs_inv_map;

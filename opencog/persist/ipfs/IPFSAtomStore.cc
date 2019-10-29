@@ -154,16 +154,25 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	conn->DagPut(jatom, &result);
 	conn_pool.push(conn);
 
-	std::string id = result["Cid"]["/"];
+	std::string guid = result["Cid"]["/"];
+
+	// Record the guid once and forevermore.
+	{
+		std::lock_guard<std::mutex> lck(_guid_mutex);
+		_guid_map[h] = guid;
+	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	update_atom_in_atomspace(h, id);
+	update_atom_in_atomspace(h, guid);
 
 	// Cache the json, but only if we don't already have a version of it.
+	// Hmm, we should always be starting out clean here...
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		if (_json_map.end() == _json_map.find(h))
 			_json_map[h] = jatom;
+		else
+			throw RuntimeException(TRACE_INFO, "Unexpected existing json!");
 	}
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
