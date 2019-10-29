@@ -134,12 +134,14 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
 	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
 	eval->eval("(store-atomspace)");
+	std::string final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
+	printf("Final atomspace CID=%s\n", final_atomspace_cid.c_str());
 	eval->eval("(ipfs-close)");
 
 	delete _as;
 	_as = new AtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
-	eval->eval(ipfs_open);
+	eval->eval("(ipfs-open \"ipfs://" + final_atomspace_cid + "\")");
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
 
 	// The above should NOT update the TV of (Concept "AAA")
@@ -163,12 +165,13 @@ void FetchUTest::test_stuff(void)
 	// Saving everything should not crash.  It should, however,
 	// change the TV on (Concept "BBB") back to DEFAULT_TV.
 	eval->eval("(store-atomspace)");
+	final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
 	eval->eval("(ipfs-close)");
 
 	delete _as;
 	_as = new AtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
-	eval->eval(ipfs_open);
+	eval->eval("(ipfs-open \"ipfs://" + final_atomspace_cid + "\")");
 
 	// AAA should have been updated, as above.
 	eval->eval(R"((fetch-atom (Concept "AAA")))");
