@@ -101,7 +101,10 @@ bool IPFSAtomStorage::guid_not_yet_stored(const Handle& h)
 
 /* ================================================================ */
 
-/// Convert a single C++ Atom into a Json expression.
+/// Convert a single C++ Atom into a json expression.
+/// But only the minimalist Atom itself, and not any Values,
+/// nor any of it's incoming set. So the resulting Json is
+/// globally-unique.
 ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 {
 	// The minimalist Atom definition, as json.
@@ -135,6 +138,7 @@ ipfs::Json IPFSAtomStorage::encodeAtomToJSON(const Handle& h)
 /**
  * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
+ * Values attached to the Atom are not stored!
  * The store is performed synchronously (in the calling thread).
  */
 void IPFSAtomStorage::do_store_single_atom(const Handle& h)
@@ -150,16 +154,26 @@ void IPFSAtomStorage::do_store_single_atom(const Handle& h)
 	conn->DagPut(jatom, &result);
 	conn_pool.push(conn);
 
-	std::string id = result["Cid"]["/"];
+	std::string guid = result["Cid"]["/"];
 
+	// Record the guid once and forevermore.
 	{
-		// This is multi-threaded; update the table under a lock.
 		std::lock_guard<std::mutex> lck(_guid_mutex);
-		_guid_map.insert({h, id});
+		_guid_map[h] = guid;
 	}
 
 	// OK, the atom itself is in IPFS; add it to the atomspace, too.
-	update_atom_in_atomspace(h, id, jatom);
+	update_atom_in_atomspace(h, guid);
+
+	// Cache the json, but only if we don't already have a version
+	// of it. I guess that there is a very slight chance that some
+	// other thread is racing, and maybe its twiddling the json
+	// also. We don't want to clobber that with this earlier version.
+	{
+		std::lock_guard<std::mutex> lck(_json_mutex);
+		if (_json_map.end() == _json_map.find(h))
+			_json_map[h] = jatom;
+	}
 
 	// std::cout << "addAtom: " << name << " id: " << id << std::endl;
 

@@ -23,27 +23,32 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	if (0 == _keyname.size()) return;
 
 	// Obtain the JSON representation of the Atom.
-	// We could use get_atom_json() here, except the json should
-	// already be in the map, by now, right?
+	// We cn either ask IPFS for the current json (using get_atom_json())
+	// or we can work out of the cache. Seems faster to work out of the
+	// cache.  Oh, and we need to do this atomically, because other
+	// threads might be writing. So lock must hold for the entire
+	// duration of the json edit.
 	ipfs::Json jatom;
 	{
+		std::string holder_guid = get_atom_guid(holder);
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		jatom = _json_map.find(atom)->second;
-	}
 
-	ipfs::Json jinco;
-	auto incli = jatom.find("incoming");
-	if (jatom.end() != incli)
-	{
-		// Is the atom already a part of the incoming set?
-		// If so, then there's nothing to do.
-		auto havit = incli->find(get_atom_guid(holder));
-		if (incli->end() != havit) return;
-		jinco = *incli;
-	}
+		ipfs::Json jinco;
+		auto incli = jatom.find("incoming");
+		if (jatom.end() != incli)
+		{
+			// Is the atom already a part of the incoming set?
+			// If so, then there's nothing to do.
+			auto havit = incli->find(holder_guid);
+			if (incli->end() != havit) return;
+			jinco = *incli;
+		}
 
-	jinco.push_back(get_atom_guid(holder));
-	jatom["incoming"] = jinco;
+		jinco.push_back(holder_guid);
+		jatom["incoming"] = jinco;
+		_json_map[atom] = jatom;
+	}
 
 	// Store the thing in IPFS
 	ipfs::Json result;
@@ -55,7 +60,7 @@ void IPFSAtomStorage::store_incoming_of(const Handle& atom,
 	std::cout << "Incoming Atom: " << encodeAtomToStr(atom)
 	          << " CID: " << atoid << std::endl;
 
-	update_atom_in_atomspace(atom, atoid, jatom);
+	update_atom_in_atomspace(atom, atoid);
 }
 
 /* ================================================================== */
@@ -67,34 +72,35 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 	// std::cout << "Remove from " << atom->to_short_string()
 	//           << " in CID " << holder << std::endl;
 
-	// Twiddle the incoming set of atom.
+	// Twiddle the incoming set of atom. As before, we can either
+	// ask IPFS for the current json, or we can work out of what we
+	// have in the cache. Use the cache for speed. All edits to the
+	// json must be don atomically, since there may be other threads
+	// racing with us.
 	ipfs::Json jatom;
 	{
 		std::lock_guard<std::mutex> lck(_json_mutex);
 		auto patom = _json_map.find(atom);
-
-		// XXX FIXME, we might not havethe json in hand, if
-		// we've never touched this atom before... in this case
-		// we need to look it up...
 		if (_json_map.end() == patom)
+			jatom = get_atom_json(atom);
+		else
+			jatom = patom->second; // jatom = _json_map[atom];
+
+		// Remove the holder from the incoming set ...
+		auto pinco = jatom.find("incoming");
+		if (jatom.end() == pinco)
 			throw RuntimeException(TRACE_INFO,
-				"Error: Can't find json for %s", atom->to_string().c_str());
-		jatom = patom->second; // jatom = _json_map[atom];
+				"Error: Atom is missing incoming set! WTF!?\n");
+
+		std::set<std::string> inco = *pinco; // inco = jatom["incoming"];
+		inco.erase(holder);
+		if (0 < inco.size())
+			jatom["incoming"] = inco;
+		else
+			jatom.erase("incoming");
+		// std::cout << "Atom after erasure: " << jatom.dump(2) << std::endl;
+		_json_map[atom] = jatom;
 	}
-
-	// Remove the holder from the incoming set ...
-	auto pinco = jatom.find("incoming");
-	if (jatom.end() == pinco)
-		throw RuntimeException(TRACE_INFO,
-			"Error: Atom is missing incoming set! WTF!?\n");
-
-	std::set<std::string> inco = *pinco; // inco = jatom["incoming"];
-	inco.erase(holder);
-	if (0 < inco.size())
-		jatom["incoming"] = inco;
-	else
-		jatom.erase("incoming");
-	// std::cout << "Atom after erasure: " << jatom.dump(2) << std::endl;
 
 	// Store the edited Atom back into IPFS...
 	ipfs::Json result;
@@ -104,7 +110,7 @@ void IPFSAtomStorage::remove_incoming_of(const Handle& atom,
 
 	// Finally, update the Atomspace with this revised Atom.
 	std::string atoid = result["Cid"]["/"];
-	update_atom_in_atomspace(atom, atoid, jatom);
+	update_atom_in_atomspace(atom, atoid);
 }
 
 /* ================================================================ */

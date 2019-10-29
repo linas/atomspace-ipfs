@@ -33,6 +33,9 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 
 	ipfs::Json jatom;
 #if DONT_CACHE_INSTEAD_GET_IT_FROM_IPFS
+	// The code ifdefed here works, when it was last tested ...
+	// but it is faster if we look up the atom in our own cache.
+	// So the ifdef just uses the local cache.
 	// First, look it up.
 	std::string name = h->to_short_string();
 	std::string path = _atomspace_cid + "/" + name;
@@ -77,7 +80,22 @@ void IPFSAtomStorage::removeAtom(const Handle& h, bool recursive)
 		// We're recursive; so recurse.
 		for (auto acid: iset)
 		{
-			Handle hin(fetch_atom(acid));
+			// Given only the CID of the atom, get the handle.
+			// Use the cache, if possible.
+			Handle hin;
+			{
+				std::lock_guard<std::mutex> lck(_inv_mutex);
+				auto inp = _ipfs_inv_map.find(acid);
+				if (_ipfs_inv_map.end() == inp)
+				{
+std::cout << "Quasi-error: expected to find atom but did not!" << std::endl;
+					hin = fetch_atom(acid);
+				}
+				else
+				{
+					hin = inp->second;
+				}
+			}
 			removeAtom(hin, true);
 		}
 	}

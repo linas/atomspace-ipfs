@@ -176,25 +176,15 @@ std::string IPFSAtomStorage::encodeValueToStr(const ValuePtr& v)
 
 Handle IPFSAtomStorage::do_fetch_atom(Handle &h)
 {
-	// Build the name
-	std::string path = _atomspace_cid + "/" + h->to_short_string();
+	ipfs::Json dag = get_atom_json(h);
 
-	// std::cout << "Query path = " << path << std::endl;
-	ipfs::Json dag;
-	ipfs::Client* conn = conn_pool.pop();
-	try
-	{
-		conn->DagGet(path, &dag);
-	}
-	catch (const std::exception& ex)
+	if (0 == dag.size())
 	{
 		// If we are here, its because there was no such Atom
 		// recorded in IPFS. That's a normal situation, just
 		// ignore the error.
-		conn_pool.push(conn);
 		return Handle();
 	}
-	conn_pool.push(conn);
 
 	// std::cout << "The dag is:" << dag.dump(2) << std::endl;
 	get_atom_values(h, dag);

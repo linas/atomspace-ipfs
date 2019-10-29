@@ -77,8 +77,7 @@ class IPFSAtomStorage : public BackingStore
 		std::mutex _atomspace_cid_mutex;
 		std::string _atomspace_cid;
 		void update_atom_in_atomspace(const Handle&,
-		                              const std::string&,
-		                              const ipfs::Json&);
+		                              const std::string&);
 		std::mutex _json_mutex;
 		std::map<Handle, ipfs::Json> _json_map;
 		ipfs::Json get_atom_json(const Handle&);
@@ -100,6 +99,9 @@ class IPFSAtomStorage : public BackingStore
 
 		std::mutex _guid_mutex;
 		std::map<Handle, std::string> _guid_map;
+
+		std::mutex _atom_cid_mutex;
+		std::map<Handle, std::string> _atom_cid_map;
 
 		// The inverted map.
 		std::mutex _inv_mutex;
