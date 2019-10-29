@@ -10,9 +10,9 @@ ADD_CXXTEST(BasicSaveUTest)
 ADD_CXXTEST(ValueSaveUTest)
 ADD_CXXTEST(PersistUTest)
 ADD_CXXTEST(DeleteUTest)
+ADD_CXXTEST(MultiPersistUTest)
 
 # The below still need to be ported from atomspace/sql
-# ADD_CXXTEST(MultiPersistUTest)
 # ADD_CXXTEST(MultiUserUTest)
 
 ADD_CXXTEST(FetchUTest)

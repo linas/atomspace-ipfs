@@ -1,31 +1,12 @@
 /*
- * tests/persist/sql/multi-driver/MultiPersistUTest.cxxtest
+ * tests/persist/ipfs/MultiPersistUTest.cxxtest
  *
  * Test multi-threaded persistance.  Assumes PersistUTest is passing.
+ * Ported over from original unit test at
+ * tests/persist/sql/multi-driver/MultiPersistUTest.cxxtest
  *
- * If this test is failing for you, then be sure to read the README in
- * this directory, and also ../../opencong/persist/README, and then
- * create and configure the SQL database as described there. Next,
- * edit ../../lib/test-opencog.conf to add the database credentials
- * (the username and passwd).
- *
- * Copyright (C) 2008, 2009, 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
- * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * Copyright (C) 2008, 2009, 2013, 2017, 2019 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <atomic>
@@ -36,14 +17,11 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
+#include <opencog/persist/ipfs/IPFSAtomStorage.h>
+#include <opencog/persist/ipfs/IPFSPersistSCM.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
-
-#include "mkuri.h"
 
 using namespace opencog;
 
@@ -51,11 +29,8 @@ class MultiPersistUTest :  public CxxTest::TestSuite
 {
     private:
         AtomSpace *_as;
-        SQLPersistSCM *_pm;
+        IPFSPersistSCM *_pm;
         std::string uri;
-        const char * dbname;
-        const char * username;
-        const char * passwd;
 
 #define NTHREADS 6
 #define NHACK 10
@@ -90,22 +65,6 @@ class MultiPersistUTest :  public CxxTest::TestSuite
 
         void setUp(void);
         void tearDown(void);
-        void kill_data(void);
-
-        void friendlyFailMessage()
-        {
-            TS_FAIL("The MultiPersistUTest failed.\n"
-                "This is probably because you do not have SQL installed\n"
-                "or configured the way that OpenCog expects.\n\n"
-                "SQL persistance is optional for OpenCog, so if you don't\n"
-                "want it or need it, just ignore this test failure.\n"
-                "Otherwise, please be sure to read opencong/persist/sql/README,\n"
-                "and create/configure the SQL database as described there.\n"
-                "Next, edit lib/atomspace-test.conf appropriately, so as\n"
-                "to indicate the location of your database. If this is\n"
-                "done correctly, then this test will pass.\n");
-            exit(1);
-        }
 
         void add_to_space(int, AtomSpace *, std::string id);
         void fetch_space(int, AtomSpace *);
@@ -120,14 +79,6 @@ class MultiPersistUTest :  public CxxTest::TestSuite
 
 MultiPersistUTest:: MultiPersistUTest(void)
 {
-    try
-    {
-        config().load("atomspace-test.conf");
-    }
-    catch (RuntimeException &e)
-    {
-        std::cerr << e.get_message() << std::endl;
-    }
     logger().set_level(Logger::DEBUG);
     logger().set_print_to_stdout_flag(true);
 
@@ -148,25 +99,7 @@ MultiPersistUTest:: MultiPersistUTest(void)
     hl2 = new Handle[NATOMS];
     hl3 = new Handle[NATOMS];
 
-    try
-    {
-        // Get the database logins & etc from the config file.
-        dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-        username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-        passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-    }
-    catch (InvalidParamException &e)
-    {
-        friendlyFailMessage();
-    }
-
-    // use postgres preferentially, unless its missing.
-#ifdef HAVE_ODBC_STORAGE
-    uri = mkuri("odbc", dbname, username, passwd);
-#endif
-#ifdef HAVE_PGSQL_STORAGE
-    uri = mkuri("postgres", dbname, username, passwd);
-#endif
+    uri = "ipfs:///atomspace-ipfs-test";
 }
 
 /*
@@ -175,19 +108,8 @@ MultiPersistUTest:: MultiPersistUTest(void)
 void MultiPersistUTest::setUp(void)
 {
     _as = new AtomSpace();
-    _pm = new SQLPersistSCM(_as);
-
-    try {
-        _pm->do_open(uri);
-    }
-    catch (RuntimeException &e)
-    {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
-        friendlyFailMessage();
-        exit(1);
-    };
-
-    kill_data();
+    _pm = new IPFSPersistSCM(_as);
+    _pm->do_open(uri);
 }
 
 void MultiPersistUTest::tearDown(void)
@@ -197,28 +119,6 @@ void MultiPersistUTest::tearDown(void)
 
     delete _pm;
     delete _as;
-
-    kill_data();
-}
-
-// ============================================================
-
-void MultiPersistUTest::kill_data(void)
-{
-    SQLAtomStorage* astore = new SQLAtomStorage(uri);
-    if (!astore->connected())
-    {
-        logger().info("setUp: SQLAtomStorage cannot connect to database");
-        friendlyFailMessage();
-        exit(1);
-    }
-    logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
-
-    // Trash the contents of the database.
-    astore->kill_data();
-
-    // Destructor also logs out of database (avoid warning in DB log file)
-    delete astore;
 }
 
 // ============================================================
@@ -474,7 +374,7 @@ void MultiPersistUTest::test_atomspace(void)
     printf("Done joining threads\n");
 
     /* Extract atoms from the AtomSpace. This does not delete them from
-     * the SQL storage, though; to do that, they must be deleted, not
+     * the IPFS storage, though; to do that, they must be deleted, not
      * extracted.
      */
     _as->barrier();
@@ -504,7 +404,6 @@ void MultiPersistUTest::test_atomspace(void)
     /* Kill data for good */
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-    kill_data();
 
     /* Verify that the atoms are no longer being found. */
     for (off=0; off<n_threads; off++)
