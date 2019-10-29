@@ -208,15 +208,19 @@ void FetchUTest::test_readonly(void)
 	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
 	eval->eval(R"((List (Concept "AAA") (Concept "BBB")))");
 	eval->eval("(store-atomspace)");
+	eval->eval("(ipfs-publish-atomspace)");
+	std::string final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
 	eval->eval("(ipfs-close)");
 
 	delete _as;
 	_as = new AtomSpace();
 	_as->set_read_only();
 	eval = SchemeEval::get_evaluator(_as);
+	// eval->eval("(ipfs-open \"ipfs://" + final_atomspace_cid + "\")");
 	eval->eval(ipfs_open);
+	eval->eval("(ipfs-resolve-atomspace)");
 
-	// Despite the atomsspace being eadonly, we should still be
+	// Despite the AtomSpace being readonly, we should still be
 	// able to load atoms from the database.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
 	std::string prt = eval->eval("(cog-prt-atomspace)");
