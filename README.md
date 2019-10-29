@@ -166,23 +166,22 @@ and install mechanisms are the same.
       that the AtomSpace is centralized.
     - If a user wants to find the current Valuation of an Atom,
       they must:
-      + obtain the AtomSpace file somehow.
+      + Obtain the AtomSpace file somehow (either someone gives the
+        user the CID of the current AtomSpace, or the user obtains the
+        CID from an IPNS lookup.)
       + Look up the Atom in that file, if present.
       + Examine the public key of that Atom.
       + Perform the IPNS lookup for that key.
       + Fetch the file corresponding to the CID that IPNS returned.
       + Parse the file, extract the desired Value.
     - Incoming sets are stored along with the Valuation file.
-      (Except that this is pointless, because there is no way of
-      knowing the CID of this file, unless one first loads all of
-      the AtomSpace, in which case the loading of the incoming set is
-      pointless...)
     - If a user wants to change (update) the Valuation of a Atom,
       they must:
       + Obtain the private key for that Atom/Atomspace combination,
-         by asking someone for it.
+        by asking someone for it.
       + Update the Valuation file.
       + IPNS publish the new file.
+
       Note that the updates to the IncomingSet are conflict-prone. So
       a CRDT format for IncomingSets is required.
 
@@ -200,12 +199,16 @@ and install mechanisms are the same.
   is stored in).
 
 * Q: is Pin needed to prevent a published atomspace from disappearing?
-  Doesn't seem to be!?
+  Doesn't seem to be!? (Yet. As long as my IPFS daemon stays up...)
 
-* Use pubsub to publish value updates.
+* Idea: Use pubsub to publish value updates.
 
-* The current encoding is gonna do alpha-equivalence all wrong. This is
-  an implementation bug.
+* The current encoding is gonna do alpha-equivalence all wrong. As long
+  as there is a single writer, then the AtomSpace can hide this via the
+  usual alpha-renaming techniques. But in a multi-user setup, this will
+  surely lead to distinct-but-alpha-equivalent Atoms. The core problem
+  is that we cannot tell IPFS to skip certain parts of the file, when
+  computing the content hash.
 
 ## IPNS++
 It currently appears to be impossible to map the AtomSpace into IPFS
@@ -238,17 +241,17 @@ suffers from all the typical problems of centralization: the
 multiple-writers problem, problems with being a bottleneck for
 updates, file-size issues. etc.
 
-## Prereqs
+## Build Prereqs
 
- * Clone and build the atomspace.
- * Install IPFS Core
+ * Clone and build the [AtomSpace](https://github.com/opencog/atomspace).
+ * Install IPFS Core. On Debian/Ubuntu:
    ```
    curl https://get.siderus.io/key.public.asc | sudo apt-key add -
    echo "deb https://get.siderus.io/ apt/" | sudo tee -a /etc/apt/sources.list.d/siderus.list
    sudo apt update
    sudo apt install ipfs
    ```
-   Some useful commands:
+ * Get familiar with IPFS. Some useful commands:
    ```
    ipfs init
    ipfs daemon
@@ -271,7 +274,7 @@ updates, file-size issues. etc.
    `sudo apt install nlohmann-json3-dev`
 
    API documentation is here:
-   [`https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`](https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC).
+   [`https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC`](https://github.com/ipfs/interface-js-ipfs-core/tree/master/SPEC)
    and here:
    [`https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`](https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html).
 
