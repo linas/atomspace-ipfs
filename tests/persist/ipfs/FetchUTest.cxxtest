@@ -135,7 +135,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
 	eval->eval("(store-atomspace)");
 	std::string final_atomspace_cid = eval->eval("(ipfs-atomspace-cid)");
-	printf("Final atomspace CID=%s\n", final_atomspace_cid.c_str());
+	printf("Final atomspace CID=>>%s<<\n", final_atomspace_cid.c_str());
 	eval->eval("(ipfs-close)");
 
 	delete _as;
