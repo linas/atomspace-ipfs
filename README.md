@@ -25,7 +25,7 @@ on the network.  It provides decentralized file storage.
 ## Beta version 0.2.0
 The driver here was developed and tested with IPFS version `0.4.22-`.
 
-###Status
+### Status
 In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
    It has numerous shortcomings, detailed below.
@@ -139,6 +139,24 @@ and install mechanisms are the same.
   outgoing set can be placed in the IPLD `links[]` json element. These
   will be automatically hashed by the IPFS subsystem, delivering a true
   globally unique ID (the CID) for the Atom, exactly as desired.
+
+* We distinguish between the GUID of the Atom, and the CID of the
+  Valuation. The GUID of the Atom is it's IPFS CID, when considering
+  only the Atom itself, and not it's values or incoming set. Thus,
+  it really is globally unique and non-varying.  By contrast, the
+  file containing the Valuations will change whenever the Values
+  change, and so the CID attached to an Atom will be changing.
+  The tricky part of the design is to associate this immutable
+  GUID, with the current CID for that Atom.
+
+* Conceptually, the AtomSpace is nothing more than a set of (GUID, CID)
+  pairs, such that there can only ever be just one CID per GUID.
+  That is, the AtomSpace is a time-varying map from GUID to CID.
+  This automaticaly enforces the other requirements:
+   - If a GUID is not a part of the AtomSpace, then that Atom is not
+     in the AtomSpace.
+   - The Atom can have other Values in other AtomSpaces, but it can
+     have only one Valuation in this AtomSpace.
 
 * Each read-only AtomSpace corresponds to a directory, so that each
   Atom appears in the `links[]` json member of the directory.  Updated
@@ -279,6 +297,7 @@ updates, file-size issues. etc.
    [`https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html`](https://vasild.github.io/cpp-ipfs-api/classipfs_1_1Client.html).
 
 ## Building
+Building is just like that for any other OpenCog component.
 After installing the pre-reqs, do this:
 ```
    mkdir build
