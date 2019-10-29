@@ -14,17 +14,24 @@ The Atomspace has a variety of advanced features not normally found
 in ordinary graph databases, including an advanced query language
 and "active" Atoms.
 
-## Beta version 0.1.2
+## Beta version 0.2.0
 Developed and tested with IPFS version `0.4.22-`.
 
 **Status**: In the current implementation:
  * A design for representing the AtomSpace in IPFS has been chosen.
    It has numerous shortcomings, detailed below.
  * System is feature-complete. All seven unit tests from the original
-   Atomspace-SQL test suite has been ported. Currently, five of the
-   seven pass -- all the basic tests pass, the multi-user ones do not.
-   The [basic tutorials](examples) work as documented.  So its plenty
-   enough to play around with.
+   Atomspace-SQL test suite has been ported. Six of the seven pass --
+   the seventh one is a multi-user test, and we know the multi-user
+   design used here is fundamentally broken. See further comments below.
+   The [basic tutorials](examples) work as documented.  So basically,
+   everything works, as long as only one user at a time is modifying
+   the AtomSpace contents. Multiple users *could* edit the same
+   AtomSpace, *if* they were careful to exchange with each-other what
+   thier latest CID was. Otherwise, each user ends up forking the
+   AtomSpace, and the forks never get merged back together again.
+   This is a design flaw: the AtomSpce is not actually "decentralized"
+   in the current design, and thus can be forked. See comments below.
  * Due to IPFS bugs with the performance of IPNS, it is mostly unused
    in this implementation.  This means that users need to arrange other
    channels of communication for find out what the latest AtomSpace
@@ -48,13 +55,17 @@ for all of the usual reasons:
  * Hard to optimize fetch of incoming set.
  * Unresolvable update conflicts (race conditions) when there
    are multiple writers (i.e. with multiple writers, it's unclear
-   which of the published AtomSpace versions are authoritative.)
+   which of the published AtomSpace versions are authoritative.
+   As a result, each writer effectively creates a forked version
+   of the AtomSpace, and there's no particular way to merge the forks
+   back together again. See `MultiUserUTest` for a failing example
+   of the resulting badness.)
  * Performance bottlenecks when there are multiple writers.
 
-Despite this, a bad, hacky implementation, with the above obvious
-failures, is created anyway.  But we need a better design, and that
+Despite these design flaws, I went ahead and wrote the code anyway.
+It helped clarify the issues.  A better design is needed, but that
 better design seems to be blocked without core changes to the IPFS
-core system.
+core system. Decentralized updates are sorely needed.
 
 A suitable decentralized design *would* be possible, if IPNS was
 extended with one additional feature (or if some other system was
