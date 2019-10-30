@@ -357,7 +357,7 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("IPFS Backend" "Sample backend code" HAVE_ATOMSPACE)
+SUMMARY_ADD("IPFS Backend" "IPFS backend driver code" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 
