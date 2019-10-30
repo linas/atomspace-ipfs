@@ -83,7 +83,7 @@ void IPFSPersistSCM::do_open(const std::string& uri)
     if (_as->isAttachedToBackingStore())
         throw RuntimeException(TRACE_INFO,
              "ipfs-open: Error: Atomspace connected to another storage backend!");
-    // Use the postgres driver.
+    // Use the IPFS driver.
     IPFSAtomStorage *store = new IPFSAtomStorage(uri);
     if (!store)
         throw RuntimeException(TRACE_INFO,

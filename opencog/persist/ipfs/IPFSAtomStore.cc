@@ -27,7 +27,7 @@ using namespace opencog;
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is performed in this thread, and it is
- * completed (sent to the Postgres server) before this method returns.
+ * completed (sent to the IPFS daemon) before this method returns.
  */
 void IPFSAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {

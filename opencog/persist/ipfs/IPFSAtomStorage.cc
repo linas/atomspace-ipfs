@@ -1,14 +1,14 @@
 /*
  * IPFSAtomStorage.cc
- * Persistent Atom storage, IPFS-backed.
+ * IPFS backend driver for persistent AtomSpace storage.
  *
- * Atoms and Values are saved to, and restored from, an IPFS DB using
- * one of the available database drivers. Currently, the postgres
- * native libpq-dev API and the ODBC API are supported. Note that
- * libpq-dev is about three times faster than ODBC.
- *
- * Atoms are identified by means of unique ID's (UUID's), which are
- * correlated with specific in-RAM atoms via the TLB.
+ * Atoms and Values are saved to and restored from the IPFS IPLD
+ * system.  Atoms are identified by means of unique ID's (GUID's),
+ * which are cryptographic hashes of the unique Atom names. The
+ * Values attached to Atoms are identified with IPLD CID's (content
+ * ID's) that vary over time as the Values change.  The AtomSpace is
+ * conceptually a map of (GUID, AtomSpace-ID) -> CID, so that, given
+ * an Atom and an AtomSpace, one can find the Values attached to it.
  *
  * Copyright (c) 2008,2009,2013,2015,2017 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
