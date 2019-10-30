@@ -1,6 +1,6 @@
 # atomspace-ipfs
 [IPFS](https://ipfs.io/) driver backend to the
-[AtomSpace](https://github.com/opencog/atomspace).
+[AtomSpace](https://github.com/opencog/atomspace) (hyper-)graph database.
 
 The code here is a backend driver to the AtomSpace graph database,
 enabling AtomSpace contents to be shared via the InterPlanetary
