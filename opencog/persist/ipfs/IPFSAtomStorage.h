@@ -43,7 +43,7 @@ namespace opencog
  *  @{
  */
 
-// Number of threads do use ofr IPFS I/O.
+// Number of threads do use for IPFS I/O.
 #define NUM_OMP_THREADS 8
 
 class IPFSAtomStorage : public BackingStore
