@@ -45,7 +45,7 @@ In the current implementation:
    Since it's just a file, it can be forked. See comments below.
  * Due to IPFS bugs with the performance of IPNS, IPNS is mostly unused
    in this implementation.  This means that users need to arrange other
-   channels of communication for find out what the latest AtomSpace
+   channels of communication to find out what the latest AtomSpace
    is (by sharing the AtomSpace CID in some other way, rather than
    sharing via IPNS).
  * Many or most operations are slow. Like really, really slow.
