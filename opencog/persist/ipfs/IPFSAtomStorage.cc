@@ -20,7 +20,6 @@
 #include <thread>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
 
 #include "IPFSAtomStorage.h"
 
