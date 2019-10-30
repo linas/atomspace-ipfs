@@ -570,11 +570,6 @@ void IPFSAtomStorage::print_stats(void)
 	printf("current conn_pool free=%u of %d\n", conn_pool.size(),
 	       _initial_conn_pool_size);
 
-	// Some basic TLB statistics; could be improved;
-	// The TLB remapping theory needs some work...
-	// size_t noh = 0;
-	// size_t remap = 0;
-
 	printf("\n");
 }
 
