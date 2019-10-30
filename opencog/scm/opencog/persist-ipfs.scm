@@ -1,5 +1,5 @@
 ;
-; OpenCog SQL Persistance module
+; OpenCog IPFS Persistence module
 ;
 
 (define-module (opencog persist-ipfs))
@@ -20,14 +20,14 @@
 "
  ipfs-clear-stats - reset the performance statistics counters.
     This will zero out the various counters used to track the
-    performance of the SQL backend.  Statistics will continue to
+    performance of the IPFS backend.  Statistics will continue to
     be accumulated.
 ")
 
 (set-procedure-property! ipfs-close 'documentation
 "
- ipfs-close - close the currently open SQL backend.
-    Close open connections to the currently-open backend, afterflushing
+ ipfs-close - close the currently open IPFS backend.
+    Close open connections to the currently-open backend, after flushing
     any pending writes in the write queues. After the close, atoms can
     no longer be stored to or fetched from the database.
 ")
