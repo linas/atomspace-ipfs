@@ -19,8 +19,6 @@
 
 using namespace opencog;
 
-#define BUFSZ 250
-
 /* ================================================================ */
 
 /// Fetch the indicated atom from the IPFS CID.
