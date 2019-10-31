@@ -22,19 +22,25 @@ globally-accesible file system, built on top of a distributed hash
 table for addressing files by content, wherever they may be located
 on the network.  It provides decentralized file storage.
 
-## Beta version 0.2.0
-The driver here was developed and tested with IPFS version `0.4.22-`.
-
-### Important Notice !!
+## Important Notice !!
 ___There are fundamental design issues with this implementation that
 appear to be unresolvable with the current API's offered by IPFS. All
 potential users and developers are strongly urged to make use of the
-[OpenDHT-based AtomSpace backed](https://github.com/opencog/atomspace-dht)
+[OpenDHT-based AtomSpace backend](https://github.com/opencog/atomspace-dht)
 instead!___
 
 ___It appears that the OpenDHT API is an excellent fit for the
 AtomSpace, providing exactly those kinds of features that the AtomSpace
 needs!! Woo Hoo!!___
+
+___Because of this situation, it seems unlikely that the development
+of the IPFS driver will continue beyond the current version. Again,
+please use the
+[OpenDHT-based backend driver](https://github.com/opencog/atomspace-dht)
+instead!___
+
+## Beta version 0.2.0
+The driver here was developed and tested with IPFS version `0.4.22-`.
 
 ### Status
 In the current implementation:
