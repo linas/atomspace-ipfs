@@ -240,17 +240,4 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 	throw SyntaxException(TRACE_INFO, "Unknown Value %s", stv.c_str());
 }
 
-/* ================================================================ */
-
-/// Get all atoms having indicated key on them.
-/// It appears that there are zero users of this thing, because the
-/// guile API for this was never created.  Should probably get rid
-/// of this.
-void IPFSAtomStorage::getValuations(AtomTable& table,
-                                   const Handle& key, bool get_all_values)
-{
-	rethrow();
-	throw SyntaxException(TRACE_INFO, "Not Implemented!");
-}
-
 /* ============================= END OF FILE ================= */
