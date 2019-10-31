@@ -243,7 +243,7 @@ ValuePtr IPFSAtomStorage::decodeStrValue(const std::string& stv)
 /* ================================================================ */
 
 /// Get all atoms having indicated key on them.
-/// It appears that there are zero users of thi thing, because the
+/// It appears that there are zero users of this thing, because the
 /// guile API for this was never created.  Should probably get rid
 /// of this.
 void IPFSAtomStorage::getValuations(AtomTable& table,
