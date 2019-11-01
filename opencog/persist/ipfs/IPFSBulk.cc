@@ -1,6 +1,6 @@
 /*
  * IPFSBulk.cc
- * Bulk save & restore of Atoms.
+ * Bulk save & restore of entire AtomSpaces.
  *
  * Copyright (c) 2008,2009,2013,2017,2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
