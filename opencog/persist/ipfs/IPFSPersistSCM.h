@@ -39,7 +39,6 @@ public:
 	void do_open(const std::string&);
 	void do_close(void);
 	void do_load(void);
-	void do_store(void);
 	std::string do_atom_cid(const Handle&);
 	Handle do_fetch_atom(const std::string&);
 	void do_load_atomspace(const std::string&);

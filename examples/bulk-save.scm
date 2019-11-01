@@ -19,7 +19,7 @@
 	(List (Concept "foo") (Concept "bar")))
 
 ; Bulk-save of the entire AtomSpace
-(ipfs-store)
+(store-atomspace)
 
 ; Review the stats
 (ipfs-stats)
