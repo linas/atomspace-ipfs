@@ -9,9 +9,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/oc_omp.h>
-
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
