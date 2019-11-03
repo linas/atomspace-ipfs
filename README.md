@@ -4,7 +4,9 @@
 
 The code here is a backend driver to the AtomSpace graph database,
 enabling AtomSpace contents to be shared via the InterPlanetary
-File System (IPFS) network.
+File System (IPFS) network. The goal is to allow efficient decentralized,
+distributed operation over the global internet, allowing many
+AtomSpace processes to access and perform updates to large datasets.
 
 ### The AtomSpace
 The [AtomSpace](https://wiki.opencog.org/w/AtomSpace) is a
